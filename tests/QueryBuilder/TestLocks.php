@@ -1,0 +1,269 @@
+<?php
+
+namespace Tests\Unit;
+
+// use Tests\Support\;
+use Sharksmedia\QueryBuilder\QueryBuilder;
+use Sharksmedia\QueryBuilder\Client\MySQL;
+use Sharksmedia\QueryBuilder\Config;
+
+use Sharksmedia\QueryBuilder\QueryCompiler;
+use Sharksmedia\QueryBuilder\Statement\Raw;
+
+class TestLocks extends \Codeception\Test\Unit
+{
+    public static function getClient()
+    {// 2023-05-16
+        $iConfig = new Config('mysql');
+        $iClient = new MySQL($iConfig);
+
+        return $iClient;
+    }
+
+    public static function raw(string $query, ...$bindings)
+    {
+        $iClient = self::getClient();
+
+        $iRaw = new Raw($iClient);
+        $iRaw->set($query, $bindings);
+
+        return $iRaw;
+    }
+
+    private static function qb(): QueryBuilder
+    {// 2023-05-16
+        $iClient = self::getClient();
+
+        return new QueryBuilder($iClient, 'my_schema');
+    }
+
+    public function caseProvider()
+    {// 2023-05-16
+        $cases = [];
+
+        $cases['lock for update'] = function()
+        {
+            $case =
+            [
+                self::qb()
+                    ->select('*')
+                    ->from('foo')
+                    ->where('bar', '=', 'baz')
+                    ->forUpdate(),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
+                        'bindings'=>['baz']
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
+        $cases['lock in share mode'] = function()
+        {
+            $case =
+            [
+                self::qb()
+                    ->select('*')
+                    ->from('foo')
+                    ->where('bar', '=', 'baz')
+                    ->forShare(),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT * FROM `foo` WHERE `bar` = ? LOCK IN SHARE MODE',
+                        'bindings'=>['baz']
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
+        // $cases['lock for no key update'] = function()
+        // {
+        //     $case =
+        //     [
+        //         self::qb()
+        //             ->select('*')
+        //             ->from('my_table'),
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'SELECT * FROM `my_schema`.`my_table`',
+        //                 'bindings'=>[]
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
+        //
+        // $cases['lock for key share'] = function()
+        // {
+        //     $case =
+        //     [
+        //         self::qb()
+        //             ->select('*')
+        //             ->from('my_table'),
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'SELECT * FROM `my_schema`.`my_table`',
+        //                 'bindings'=>[]
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
+
+        $cases['should allow lock (such as forUpdate) outside of a transaction'] = function()
+        {
+            $case =
+            [
+                self::qb()
+                    ->select('*')
+                    ->from('foo')
+                    ->where('bar', '=', 'baz')
+                    ->forUpdate(),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
+                        'bindings'=>['baz']
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
+        $cases['lock only some tables for update'] = function()
+        {
+            $case =
+            [
+                self::qb()
+                    ->select('*')
+                    ->from('foo')
+                    ->where('bar', '=', 'baz')
+                    ->forUpdate('lo', 'rem'),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
+                        'bindings'=>['baz']
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
+        $cases['lock only some tables for update (with array #4878)'] = function()
+        {
+            $case =
+            [
+                self::qb()
+                    ->select('*')
+                    ->from('foo')
+                    ->where('bar', '=', 'baz')
+                    ->forUpdate(['lo', 'rem']),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
+                        'bindings'=>['baz']
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
+        $cases['lock for update with skip locked #1937'] = function()
+        {
+            $case =
+            [
+                self::qb()
+                    ->select('*')
+                    ->from('foo')
+                    ->first()
+                    ->forUpdate()
+                    ->skipLocked(),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT * FROM `foo` LIMIT ? FOR UPDATE SKIP LOCKED',
+                        'bindings'=>[1]
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
+        $cases['lock for update with nowait #1937'] = function()
+        {
+            $case =
+            [
+                self::qb()
+                    ->select('*')
+                    ->from('foo')
+                    ->first()
+                    ->forUpdate()
+                    ->noWait(),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT * FROM `foo` LIMIT ? FOR UPDATE NOWAIT',
+                        'bindings'=>[1]
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
+        // $cases['noWait and skipLocked require a lock mode to be set'] = function()
+        // {
+
+        //   it('noWait and skipLocked require a lock mode to be set', () => {
+        //     expect(() => {
+        //       qb().select('*').noWait().toString();
+        //     }).to.throw(
+        //       '.noWait() can only be used after a call to .forShare() or .forUpdate()!'
+        //     );
+        //     expect(() => {
+        //       qb().select('*').skipLocked().toString();
+        //     }).to.throw(
+        //       '.skipLocked() can only be used after a call to .forShare() or .forUpdate()!'
+        //     );
+        //   });
+        // };
+
+        // $cases['skipLocked conflicts with noWait and vice-versa'] = function()
+        // {
+        //
+        //   it('skipLocked conflicts with noWait and vice-versa', () => {
+        //     expect(() => {
+        //       qb().select('*').forUpdate().noWait().skipLocked().toString();
+        //     }).to.throw('.skipLocked() cannot be used together with .noWait()!');
+        //     expect(() => {
+        //       qb().select('*').forUpdate().skipLocked().noWait().toString();
+        //     }).to.throw('.noWait() cannot be used together with .skipLocked()!');
+        //   });
+        // };
+
+        foreach($cases as $name=>$caseFn)
+        {
+            $cases[$name] = $caseFn();
+        }
+
+        return $cases;
+    }
+}
+

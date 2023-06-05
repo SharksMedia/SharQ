@@ -1,0 +1,24 @@
+{
+    "name": "sharksmedia/query-builder",
+    "description": "A query builder for PHP",
+    "type": "library",
+    "license": "MIT",
+    "scripts": {
+        "test": "php index.php"
+    },
+    "authors": [
+        {
+            "name": "Magnus S. Rasmussen",
+            "email": "magnus@sharksmedia.dk"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Sharksmedia\\QueryBuilder\\": "src/"
+        }
+    },
+    "require-dev": {
+        "codeception/codeception": "^5.0",
+        "codeception/module-asserts": "*"
+    }
+}
