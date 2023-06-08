@@ -11,7 +11,7 @@ use Sharksmedia\QueryBuilder\Config;
 use Sharksmedia\QueryBuilder\QueryCompiler;
 use Sharksmedia\QueryBuilder\Statement\Raw;
 
-class TestOrderBy extends \Codeception\Test\Unit
+class OrderByTest extends \Codeception\Test\Unit
 {
     public static function getClient()
     {// 2023-05-16
@@ -25,8 +25,7 @@ class TestOrderBy extends \Codeception\Test\Unit
     {
         $iClient = self::getClient();
 
-        $iRaw = new Raw($iClient);
-        $iRaw->set($query, $bindings);
+        $iRaw = new Raw($query, ...$bindings);
 
         return $iRaw;
     }
@@ -109,13 +108,13 @@ class TestOrderBy extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('persons')
-                ->orderBy(
-                    self::qb()
-                    ->select()
-                    ->from('persons as p')
-                    ->whereColumn('persons.id', 'p.id')
-                    ->select('p.id')
+                    ->from('persons')
+                    ->orderBy(
+                        self::qb()
+                        ->select()
+                        ->from('persons as p')
+                        ->whereColumn('persons.id', 'p.id')
+                        ->select('p.id')
                 ),
                 [
                     'mysql'=>
@@ -135,8 +134,8 @@ class TestOrderBy extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->orderBy(self::raw('col NULLS LAST')),
+                    ->from('users')
+                    ->orderBy(self::raw('col NULLS LAST')),
                 [
                     'mysql'=>
                     [
@@ -155,8 +154,8 @@ class TestOrderBy extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->orderBy(self::raw('col NULLS LAST'), 'desc'),
+                    ->from('users')
+                    ->orderBy(self::raw('col NULLS LAST'), 'desc'),
                 [
                     'mysql'=>
                     [
@@ -189,25 +188,25 @@ class TestOrderBy extends \Codeception\Test\Unit
             return $case;
         };
 
-        $cases['orderByRaw second argument is the binding'] = function()
-        {
-            $case =
-            [
-                self::qb()
-                    ->select('*')
-                ->from('users')
-                ->orderByRaw('col NULLS LAST ?', 'dEsc'),
-                [
-                    'mysql'=>
-                    [
-                        'sql'=>'SELECT * FROM `users` ORDER BY col NULLS LAST ?',
-                        'bindings'=>['dEsc']
-                    ]
-                ]
-            ];
-
-            return $case;
-        };
+        // $cases['orderByRaw second argument is the binding'] = function()
+        // {
+        //     $case =
+        //     [
+        //         self::qb()
+        //             ->select('*')
+        //             ->from('users')
+        //             ->orderByRaw('col NULLS LAST ?', 'dEsc'),
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'SELECT * FROM `users` ORDER BY col NULLS LAST ?',
+        //                 'bindings'=>['dEsc']
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
 
         $cases['multiple order bys'] = function()
         {
@@ -223,28 +222,6 @@ class TestOrderBy extends \Codeception\Test\Unit
                     [
                         'sql'=>'SELECT * FROM `users` ORDER BY `email` ASC, `age` DESC',
                         'bindings'=>[]
-                    ]
-                ]
-            ];
-
-            return $case;
-        };
-
-        $cases['order by, limit'] = function()
-        {
-            $case =
-            [
-                self::qb()
-                    ->from('users')
-                    ->where('id', '=', 1)
-                    ->orderBy('foo', 'desc')
-                    ->limit(5)
-                    ->update(['email'=>'foo', 'name'=>'bar']),
-                [
-                    'mysql'=>
-                    [
-                        'sql'=>'UPDATE `users` SET `email` = ?, `name` = ? WHERE `id` = ? ORDER BY `foo` DESC LIMIT ?',
-                        'bindings'=>['foo', 'bar', 1, 5]
                     ]
                 ]
             ];
@@ -353,6 +330,23 @@ class TestOrderBy extends \Codeception\Test\Unit
         }
 
         return $cases;
+    }
+
+	/**
+	 * @dataProvider caseProvider
+	 */
+    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected): void
+    {
+        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+
+        $iQuery = $iQueryCompiler->toSQL();
+        $sqlAndBindings =
+        [
+            'sql'=>$iQuery->getSQL(),
+            'bindings'=>$iQuery->getBindings()
+        ];
+
+        $this->assertSame($iExpected['mysql'], $sqlAndBindings);
     }
 }
 

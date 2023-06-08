@@ -10,7 +10,7 @@ use Sharksmedia\QueryBuilder\Config;
 use Sharksmedia\QueryBuilder\QueryCompiler;
 use Sharksmedia\QueryBuilder\Statement\Raw;
 
-class TestLocks extends \Codeception\Test\Unit
+class LocksTest extends \Codeception\Test\Unit
 {
     public static function getClient()
     {// 2023-05-16
@@ -24,8 +24,7 @@ class TestLocks extends \Codeception\Test\Unit
     {
         $iClient = self::getClient();
 
-        $iRaw = new Raw($iClient);
-        $iRaw->set($query, $bindings);
+        $iRaw = new Raw($query, ...$bindings);
 
         return $iRaw;
     }
@@ -82,44 +81,6 @@ class TestLocks extends \Codeception\Test\Unit
 
             return $case;
         };
-
-        // $cases['lock for no key update'] = function()
-        // {
-        //     $case =
-        //     [
-        //         self::qb()
-        //             ->select('*')
-        //             ->from('my_table'),
-        //         [
-        //             'mysql'=>
-        //             [
-        //                 'sql'=>'SELECT * FROM `my_schema`.`my_table`',
-        //                 'bindings'=>[]
-        //             ]
-        //         ]
-        //     ];
-        //
-        //     return $case;
-        // };
-        //
-        // $cases['lock for key share'] = function()
-        // {
-        //     $case =
-        //     [
-        //         self::qb()
-        //             ->select('*')
-        //             ->from('my_table'),
-        //         [
-        //             'mysql'=>
-        //             [
-        //                 'sql'=>'SELECT * FROM `my_schema`.`my_table`',
-        //                 'bindings'=>[]
-        //             ]
-        //         ]
-        //     ];
-        //
-        //     return $case;
-        // };
 
         $cases['should allow lock (such as forUpdate) outside of a transaction'] = function()
         {
@@ -264,6 +225,23 @@ class TestLocks extends \Codeception\Test\Unit
         }
 
         return $cases;
+    }
+
+	/**
+	 * @dataProvider caseProvider
+	 */
+    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    {
+        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+
+        $iQuery = $iQueryCompiler->toSQL();
+        $sqlAndBindings =
+        [
+            'sql'=>$iQuery->getSQL(),
+            'bindings'=>$iQuery->getBindings()
+        ];
+
+        $this->assertSame($iExpected['mysql'], $sqlAndBindings);
     }
 }
 

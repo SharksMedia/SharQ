@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 2023-05-08
+ * 2023-06-07
  * @author Magnus Schmidt Rasmussen <magnus@sharksmedia.dk>
  */
 
@@ -15,28 +15,28 @@ use Sharksmedia\QueryBuilder\Statement\IStatement;
  * 2023-05-08
  * @property array<int,string> $hintComments
  */
-class HintComments implements IStatement
+class Comments implements IStatement
 {
-    public const TYPE_RAW = 'HINT_COMMENT_RAW';
+    public const TYPE_BASIC = 'BASIC';
 
-    private array $hintComments;
+    private array $comments;
 
     /**
-     * @param array<int,string> $hintComments
+     * @param array<int,string> $comments
      */
-    public function __construct(array $hintComments)
+    public function __construct(array $comments)
     {// 2023-05-08
-        $this->hintComments = $hintComments;
+        $this->comments = $comments;
     }
 
     public function getClass(): string
     {// 2023-05-08
-        return 'HintComments';
+        return 'Comments';
     }
 
     public function getType(): string
     {// 2023-05-08
-        return 'HintComments';
+        return 'Comments';
     }
 
     /**
@@ -44,6 +44,6 @@ class HintComments implements IStatement
      */
     public function getComments(): array
     {// 2023-05-15
-        return $this->hintComments;
+        return $this->comments;
     }
 }

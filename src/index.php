@@ -22,10 +22,7 @@ $iClient = MySQL::create($iConfig);
 
 function raw(string $query, ...$bindings)
 {
-    global $iClient;
-
-    $iRaw = new Raw($iClient);
-    $iRaw->set($query, $bindings);
+    $iRaw = new Raw($query, ...$bindings);
 
     return $iRaw;
 }
@@ -39,47 +36,63 @@ function query(?string $tableName=null)
     return $iQueryBuilder;
 }
 
-$iQB = query('customers')
-    ->select('id', 'name');
+$languageQuery = query()->select('languages_id')->from('languages_to_stores')->whereColumn('stores_id', '=', 'cda.storeID');
 
-$iQueryBuilder = query()
-    ->column('id', 'customer_id')
-    ->column('name')->as('name_a')
-    ->column(raw('SUM(price)'))->as('name_b')
-    // ->select()
-    ->from('users')
-    ->where('id', '=', 1)
-    ->andWhere(['id'=>2, 'name'=>'bob'])
-    ->orWhere(function($q)
+$q1 = query()
+    ->select(['cda.*', 'name'=>raw('pd.products_name COLLATE utf8mb4_unicode_ci')])
+    ->from(['cda'=>'ContentDrugApprovals'])
+    ->join(raw('products_to_stores AS pts'), function($q)
     {
-        $q->where('id', '=', 3);
-        $q->andWhere('id', '=', 4);
-        // $q->andWhere('id', '=', 4);
+        $q->on('cda.entityID', '=', 'pts.products_id')
+          ->andOn('cda.storeID', '=', 'pts.stores_id');
+        })
+    ->join(raw('products_description AS pd'), function($q) use($languageQuery)
+    {
+        $q->on('cda.entityID', '=', 'pd.products_id')
+          ->andOn('pd.language_id', '=', $languageQuery);
     })
-    ->andWhereNotIn('id', $iQB);
+    ->where('cda.entityType', '=', 'product');
 
-$iQueryCompiler = new QueryCompiler($iClient, $iQueryBuilder, []);
 
-// print $iQueryCompiler->valuesClause([1, 2]).PHP_EOL;
-// print $iQueryCompiler->valuesClause([[1, 2], [3, 4]]).PHP_EOL;
-// print $iQueryCompiler->valuesClause($iQueryBuilder).PHP_EOL;
-// print $iQueryCompiler->valuesClause(raw('SELECT 1, 2')).PHP_EOL;
+$q2 = query()
+    ->select(['cda.*', 'name'=>'al.name'])
+    ->from(['cda'=>'ContentDrugApprovals'])
+    ->join(raw('ArticleLocalizations AS al'), function($q) use($languageQuery)
+    {
+        $q->on('cda.entityID', '=', 'al.articleID')
+          ->andOn('al.languageID', '=', $languageQuery);
+    })
+    ->join(raw('Articles AS a'), 'a.articleID', '=', 'al.articleID')
+    ->join(raw('ContentBlocks AS cb'), function($q)
+    {
+        $q->on('cda.entityID', '=', 'cb.entityID')
+          ->andOn('cb.contentBlockTypeID', '=', query()->select('contentBlockTypeID')->from('ContentBlockTypes')->where('name', '=', 'article'));
+    })
+    ->join(raw('ContentBlockSources AS cbs'), function($q)
+    {
+        $q->on('cb.contentBlockID', '=', 'cbs.contentBlockID')
+          ->andOn('cbs.languageID', '=', 'al.languageID');
+        })
+    ->where('cda.entityType', '=', 'article')
+    ->andWhere('cbs.sourceLongtext', '!=', '')
+    ->andWhere('cbs.sourceLongtext', '!=', '[]')
+    ->andWhere('al.enabled', '=', 1)
+    ->andWhere('a.deleted', '=', 0);
 
-$query = $iQueryCompiler->select();
 
-print $query;
+$query = query()
+    ->select('*')
+    ->from(function($q) use($q1, $q2)
+    {
+        $q->union($q1->as('q1'), $q2->as('q2'))
+          ->as('T');
+    })
+    ->where('approved', '=', 1);
 
-//
-// foreach($iQueryBuilder->getStatements() as $iStatement)
-// {
-//     if($iStatement->getClass() === 'Columns')
-//     {
-//         $bindings = [];
-//         $result = $iQueryCompiler->compileColumns($iStatement, $bindings);
-//
-//         print $result;
-//     }
-// }
-//
-// print_r($iQueryBuilder);
-// print_r($iQueryCompiler);
+
+$iQueryCompiler = new QueryCompiler($iClient, $query, []);
+
+$query = $iQueryCompiler->toSQL();
+
+print $query->getSQL().PHP_EOL;
+print_r($query->getBindings());

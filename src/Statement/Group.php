@@ -13,10 +13,11 @@ use Sharksmedia\QueryBuilder\Statement\IStatement;
 
 class Group implements IStatement
 {
-    public const TYPE_BY_BASIC = 'GROUP_BY_BASIC';
-    public const TYPE_BY_RAW = 'GROUP_BY_RAW';
-    
+    public const TYPE_BASIC = 'GROUP_BY_BASIC';
+    public const TYPE_RAW = 'GROUP_BY_RAW';
+
     private string $type;
+    private        $column;
 
     public function getClass(): string
     {// 2023-05-10
@@ -37,6 +38,17 @@ class Group implements IStatement
         ];
 
         return $types;
+    }
+
+    public function __construct(string $type, $column)
+    {// 2023-05-08
+        $this->type = $type;
+        $this->column = $column;
+    }
+
+    public function getColumn()
+    {// 2023-05-08
+        return $this->column;
     }
 
 }

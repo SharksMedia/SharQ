@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Sharksmedia\QueryBuilder\Statement;
 
+use Sharksmedia\QueryBuilder\QueryBuilder;
 use Sharksmedia\QueryBuilder\Statement\IStatement;
 
 class Having implements IStatement
@@ -22,6 +23,12 @@ class Having implements IStatement
     public const TYPE_RAW = 'HAVING_RAW';
 
     private string $type;
+
+    private         $column;
+    private ?string $operator;
+    private         $value;
+    private string  $boolType;
+    private bool    $isNot;
 
     public function getClass(): string
 	{// 2023-05-10
@@ -47,6 +54,48 @@ class Having implements IStatement
         ];
 
         return $types;
+    }
+
+    /**
+     * @param string|callable|Raw $column
+     * @param string $operator
+     * @param mixed $value
+     * @param string $boolType
+     * @param bool $isNot
+     */
+    public function __construct(string $type, $column, ?string $operator, $value, string $boolType=QueryBuilder::BOOL_TYPE_AND, bool $isNot=false)
+    {// 2023-05-08
+        $this->column   = $column;
+        $this->operator = $operator;
+        $this->value    = $value;
+        $this->boolType = $boolType;
+        $this->isNot    = $isNot;
+        $this->type     = $type;
+    }
+
+    public function getColumn()
+    {// 2023-05-15
+        return $this->column;
+    }
+
+    public function getOperator()
+    {// 2023-05-15
+        return $this->operator;
+    }
+
+    public function getValue()
+    {// 2023-05-15
+        return $this->value;
+    }
+
+    public function isNot(): bool
+    {// 2023-06-01
+        return $this->isNot;
+    }
+
+    public function getBoolType(): string
+    {// 2023-05-15
+        return $this->boolType;
     }
 
 }

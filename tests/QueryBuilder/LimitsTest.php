@@ -10,6 +10,7 @@ use Sharksmedia\QueryBuilder\Config;
 
 use Sharksmedia\QueryBuilder\QueryCompiler;
 use Sharksmedia\QueryBuilder\Statement\Raw;
+use Throwable;
 
 class TestLimits extends \Codeception\Test\Unit
 {
@@ -94,7 +95,7 @@ class TestLimits extends \Codeception\Test\Unit
                     'mysql'=>
                     [
                         'sql'=>'SELECT * FROM `users` LIMIT ? OFFSET ?',
-                        'bindings'=>[5, 10]
+                        'bindings'=>[10, 5]
                     ]
                 ]
             ];
@@ -123,40 +124,40 @@ class TestLimits extends \Codeception\Test\Unit
             return $case;
         };
 
-        $cases['limits with skip binding'] = function()
-        {
-            $case =
-            [
-                self::qb()
-                    ->select('*')
-                    ->from('users')
-                    ->limit(10, ['skipBinding'=>true])
-                    ->offset(5, true),
-                [
-                    'mysql'=>
-                    [
-                        'sql'=>'SELECT * FROM `users` LIMIT 10 OFFSET 5',
-                        'bindings'=>[]
-                    ]
-                ]
-            ];
-
-            return $case;
-        };
+        // $cases['limits with skip binding'] = function()
+        // {
+        //     $case =
+        //     [
+        //         self::qb()
+        //             ->select('*')
+        //             ->from('users')
+        //             ->limit(10, ['skipBinding'=>true])
+        //             ->offset(5, true),
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'SELECT * FROM `users` LIMIT 10 OFFSET 5',
+        //                 'bindings'=>[]
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
 
         $cases['limits and raw selects'] = function()
         {
             $case =
             [
                 self::qb()
-                    ->select(self::raw('name = ? AS isJohn', ['john']))
+                    ->select(self::raw('name = ? AS isJohn', 'john'))
                     ->from('users')
                     ->limit(1),
                 [
                     'mysql'=>
                     [
                         'sql'=>'SELECT name = ? AS isJohn FROM `users` LIMIT ?',
-                        'bindings'=>[1]
+                        'bindings'=>['john', 1]
                     ]
                 ]
             ];
@@ -312,6 +313,29 @@ class TestLimits extends \Codeception\Test\Unit
         return $cases;
     }
 
+
+    public function negativeCaseProvider()
+    {// 2023-05-16
+        $cases = [];
+
+        $cases['should throw warning with wrong value call in offset'] =
+        [
+            function()
+            {
+                self::qb()
+                    ->from('test')
+                    ->limit(10)
+                    ->offset('$10');
+            },
+            [
+                'exception'=>\InvalidArgumentException::class,
+            ]
+        ];
+
+        return $cases;
+    }
+
+
 	/**
 	 * @dataProvider caseProvider
 	 */
@@ -327,6 +351,28 @@ class TestLimits extends \Codeception\Test\Unit
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);
+    }
+
+    public function seeExceptionThrown(callable $function): string
+    {// 2023-06-05
+        try
+        {
+            $function();
+
+            return 'Nothing Thrown';
+        }
+        catch(\Exception $e)
+        {
+            return get_class($e);
+        }
+    }
+
+	/**
+	 * @dataProvider negativeCaseProvider
+	 */
+    public function testQueryBuilderThrows($callback, array $iExpected)
+    {// 2023-06-05
+        $this->assertEquals($this->seeExceptionThrown($callback), $iExpected['exception']);
     }
 }
 

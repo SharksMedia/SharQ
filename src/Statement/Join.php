@@ -34,8 +34,10 @@ class Clause
     public function getOnFunction(): string
     {// 2023-05-31
         if($this->type === Join::ON_TYPE_BASIC) return 'ON';
+        if($this->type === Join::ON_TYPE_VALUE) return 'ON';
         if($this->type === Join::ON_TYPE_USING) return 'USING';
         if($this->type === Join::ON_TYPE_WRAPPED) return 'ON';
+        if($this->type === Join::ON_TYPE_RAW) return 'ON';
 
         throw new \Exception('Unknown on type: ' . $this->type);
     }
@@ -85,6 +87,7 @@ class Join implements IStatement
     public const TYPE_LEFT_OUTER        = 'JOIN_LEFT_OUTER';
     public const TYPE_RIGHT             = 'JOIN_RIGHT';
     public const TYPE_RIGHT_OUTER       = 'JOIN_RIGHT_OUTER';
+    public const TYPE_FULL_OUTER        = 'TYPE_FULL_OUTER';
 
     public const BOOL_AND               = 'AND';
     public const BOOL_OR                = 'OR';
@@ -154,7 +157,7 @@ class Join implements IStatement
         return $types;
     }
 
-    public function getTableName(): string
+    public function getTableName()
     {// 2023-06-01
         return $this->table;
     }
@@ -196,8 +199,12 @@ class Join implements IStatement
      * @param mixed $operator
      * @param mixed $second
      */
-    private function getClauseFromArguments(string $onType, string $boolType, /*string|callable*/ $first=null, $operator=null, $second=null): Clause
+    private function getClauseFromArguments(string $onType, string $boolType, ...$args): Clause
     {// 2023-05-09
+        $first = $args[0] ?? null;
+        $operator = $args[1] ?? null;
+        $second = $args[2] ?? null;
+
         if(is_callable($first))
         {
             $iClause = new Clause();
@@ -208,10 +215,7 @@ class Join implements IStatement
             return $iClause;
         }
 
-        // $argCount = func_num_args();
-
-        $args = array_filter([$onType, $boolType, $first, $operator, $second], fn($value) => $value !== null);
-        $argCount = count($args);
+        $argCount = func_num_args();
 
         if($argCount === 3)
         {
@@ -226,7 +230,7 @@ class Join implements IStatement
         if($argCount === 4)
         {
             $iClause = new Clause();
-            $iClause->type = $onType;
+            $iClause->type = is_numeric($operator) ? self::ON_TYPE_VALUE : $onType;
             $iClause->columnFirst = $first;
             $iClause->operator = '=';
             $iClause->value = $operator;
@@ -236,7 +240,7 @@ class Join implements IStatement
         }
 
         $iClause = new Clause();
-        $iClause->type = $onType;
+        $iClause->type = is_numeric($second) ? self::ON_TYPE_VALUE : $onType;
         $iClause->columnFirst = $first;
         $iClause->operator = $operator;
         $iClause->value = $second;
@@ -261,10 +265,10 @@ class Join implements IStatement
      * @param mixed $operator
      * @param mixed $second
      */
-    public function andOn($first, $operator=null, $second=null): Join
+    public function andOn($first, ...$args): Join
     {// 2023-05-09
         $this->boolType = self::ON_AND;
-        $this->on($first, $operator, $second);
+        $this->on($first, ...$args);
     
         return $this;
     }
@@ -273,20 +277,22 @@ class Join implements IStatement
      * @param mixed $operator
      * @param mixed $second
      */
-    public function orOn($first, $operator=null, $second=null): Join
+    public function orOn($first, ...$args): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
-        $this->on($first, $operator, $second);
+        $this->on($first, ...$args);
     
         return $this;
     }
 
-    public function using(string $column): self
+    public function using($column): self
     {// 2023-05-09
         $iClause = new Clause();
         $iClause->type = self::ON_TYPE_USING;
         $iClause->column = $column;
         $iClause->boolType = $this->boolType;
+
+        $this->iClauses[] = $iClause;
 
         return $this;
     }

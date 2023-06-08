@@ -11,12 +11,24 @@ namespace Sharksmedia\QueryBuilder\Statement;
 
 use Sharksmedia\QueryBuilder\Statement\IStatement;
 
-class With implements IStatement
+class With implements IStatement, IAliasable
 {
     public const TYPE_WRAPPED = 'WITH_WRAPPED';
 
     private string $type;
     private bool   $isReqursive = false;
+
+    private string $alias;
+    private ?array  $columnList;
+    private $value;
+
+    public function __construct(string $alias, ?array $columnList, $value=null)
+    {// 2023-06-07
+        $this->as($alias);
+
+        $this->columnList = $columnList;
+        $this->value      = $value;
+    }
 
     public function getClass(): string
     {// 2023-05-10
@@ -41,5 +53,12 @@ class With implements IStatement
     public function isRecursive(): bool
     {// 2023-05-10
         return $this->isReqursive;
+    }
+
+    public function as(string $alias): IAliasable
+    {// 2023-06-07
+        $this->alias = $alias;
+
+        return $this;
     }
 }

@@ -25,8 +25,7 @@ class JoinsTest extends \Codeception\Test\Unit
     {
         $iClient = self::getClient();
 
-        $iRaw = new Raw();
-        $iRaw->set($query, $bindings);
+        $iRaw = new Raw($query, ...$bindings);
 
         return $iRaw;
     }
@@ -94,7 +93,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` CROSS JOIN `contracts` ON `users`.`contractId` = `contracts`.`id`',
+                        'sql'=>'SELECT * FROM `users` CROSS JOIN `contracts` ON(`users`.`contractId` = `contracts`.`id`)',
                         'bindings'=>[]
                     ]
                 ]
@@ -115,7 +114,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` LEFT JOIN `photos` ON `users`.`id` = `photos`.`id`',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id`) LEFT JOIN `photos` ON(`users`.`id` = `photos`.`id`)',
                         'bindings'=>[]
                     ]
                 ]
@@ -136,7 +135,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` RIGHT JOIN `contacts` ON `users`.`id` = `contacts`.`id` RIGHT OUTER JOIN `photos` ON `users`.`id` = `photos`.`id`',
+                        'sql'=>'SELECT * FROM `users` RIGHT JOIN `contacts` ON(`users`.`id` = `contacts`.`id`) RIGHT OUTER JOIN `photos` ON(`users`.`id` = `photos`.`id`)',
                         'bindings'=>[]
                     ]
                 ]
@@ -160,7 +159,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` OR `users`.`name` = `contacts`.`name`',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` OR `users`.`name` = `contacts`.`name`)',
                         'bindings'=>[]
                     ]
                 ]
@@ -187,7 +186,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON (`users`.`id` = `contacts`.`id` OR `users`.`name` = `contacts`.`name`)',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON((`users`.`id` = `contacts`.`id` OR `users`.`name` = `contacts`.`name`))',
                         'bindings'=>[]
                     ]
                 ]
@@ -211,7 +210,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND 1 = 0',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND 1 = 0)',
                         'bindings'=>[]
                     ]
                 ]
@@ -233,7 +232,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `user`.`id` = 1 LEFT JOIN `photos` ON `photos`.`title` = ?',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`user`.`id` = 1) LEFT JOIN `photos` ON(`photos`.`title` = ?)',
                         'bindings'=>['My Photo']
                     ]
                 ]
@@ -255,7 +254,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `myschema`.`users` INNER JOIN `myschema`.`contacts` ON `user`.`id` = `contacts`.`id` LEFT JOIN `myschema`.`photos` ON `users`.`id` = `photos`.`id`',
+                        'sql'=>'SELECT * FROM `myschema`.`users` INNER JOIN `myschema`.`contacts` ON(`user`.`id` = `contacts`.`id`) LEFT JOIN `myschema`.`photos` ON(`users`.`id` = `photos`.`id`)',
                         'bindings'=>[]
                     ]
                 ]
@@ -279,7 +278,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NULL',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NULL)',
                         'bindings'=>[]
                     ]
                 ]
@@ -304,7 +303,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NULL OR `contacts`.`phone` IS NULL',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NULL OR `contacts`.`phone` IS NULL)',
                         'bindings'=>[]
                     ]
                 ]
@@ -328,7 +327,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NOT NULL',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NOT NULL)',
                         'bindings'=>[]
                     ]
                 ]
@@ -353,7 +352,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NOT NULL OR `contacts`.`phone` IS NOT NULL',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NOT NULL OR `contacts`.`phone` IS NOT NULL)',
                         'bindings'=>[]
                     ]
                 ]
@@ -381,7 +380,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND EXISTS(SELECT * FROM `foo`)',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND EXISTS(SELECT * FROM `foo`))',
                         'bindings'=>[]
                     ]
                 ]
@@ -414,7 +413,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND EXISTS(SELECT * FROM `foo`) OR EXISTS(SELECT * FROM `bar`)',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND EXISTS(SELECT * FROM `foo`) OR EXISTS(SELECT * FROM `bar`))',
                         'bindings'=>[]
                     ]
                 ]
@@ -442,7 +441,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND NOT EXISTS(SELECT * FROM `foo`)',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND NOT EXISTS(SELECT * FROM `foo`))',
                         'bindings'=>[]
                     ]
                 ]
@@ -475,7 +474,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND NOT EXISTS(SELECT * FROM `foo`) OR NOT EXISTS(SELECT * FROM `bar`)',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND NOT EXISTS(SELECT * FROM `foo`) OR NOT EXISTS(SELECT * FROM `bar`))',
                         'bindings'=>[]
                     ]
                 ]
@@ -499,7 +498,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`id` BETWEEN ? AND ?',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` BETWEEN ? AND ?)',
                         'bindings'=>[7, 15]
                     ]
                 ]
@@ -524,7 +523,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`id` BETWEEN ? AND ? OR `users`.`id` BETWEEN ? AND ?',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` BETWEEN ? AND ? OR `users`.`id` BETWEEN ? AND ?)',
                         'bindings'=>[7, 15, 9, 14]
                     ]
                 ]
@@ -548,7 +547,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT BETWEEN ? AND ?',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT BETWEEN ? AND ?)',
                         'bindings'=>[7, 15]
                     ]
                 ]
@@ -573,7 +572,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT BETWEEN ? AND ? OR `users`.`id` NOT BETWEEN ? AND ?',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT BETWEEN ? AND ? OR `users`.`id` NOT BETWEEN ? AND ?)',
                         'bindings'=>[7, 15, 9, 14]
                     ]
                 ]
@@ -597,7 +596,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?)',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?))',
                         'bindings'=>[7, 15, 23, 41]
                     ]
                 ]
@@ -622,7 +621,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?) OR `users`.`id` IN(?, ?)',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?) OR `users`.`id` IN(?, ?))',
                         'bindings'=>[7, 15, 23, 41, 21, 37]
                     ]
                 ]
@@ -652,7 +651,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?) OR `users`.`id` IN(SELECT `id` FROM `users` WHERE `age` > ?)',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?) OR `users`.`id` IN(SELECT `id` FROM `users` WHERE `age` > ?))',
                         'bindings'=>[7, 15, 23, 41, 18]
                     ]
                 ]
@@ -676,7 +675,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT IN(?, ?, ?, ?)',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT IN(?, ?, ?, ?))',
                         'bindings'=>[7, 15, 23, 41]
                     ]
                 ]
@@ -701,7 +700,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON `users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT IN(?, ?, ?, ?) OR `users`.`id` NOT IN(?, ?)',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT IN(?, ?, ?, ?) OR `users`.`id` NOT IN(?, ?))',
                         'bindings'=>[7, 15, 23, 41, 21, 37]
                     ]
                 ]
@@ -725,7 +724,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `student` LEFT OUTER JOIN `student_languages` ON `student`.`id` = `student_languages`.`student_id` AND `student_languages`.`code` = ?',
+                        'sql'=>'SELECT * FROM `student` LEFT OUTER JOIN `student_languages` ON(`student`.`id` = `student_languages`.`student_id` AND `student_languages`.`code` = ?)',
                         'bindings'=>['en_US']
                     ]
                 ]
@@ -765,7 +764,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `accounts` NATURAL FULL JOIN table1 WHERE `id` = ?',
+                        'sql'=>'SELECT * FROM `accounts` natural full join table1 WHERE `id` = ?',
                         'bindings'=>[1]
                     ]
                 ]
@@ -785,7 +784,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `accounts` INNER JOIN `table1` ON ST_Contains(buildings_pluto.geom, ST_Centroid(buildings_building.geom))',
+                        'sql'=>'SELECT * FROM `accounts` INNER JOIN `table1` ON(ST_Contains(buildings_pluto.geom, ST_Centroid(buildings_building.geom)))',
                         'bindings'=>[]
                     ]
                 ]
@@ -808,7 +807,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `accounts` INNER JOIN `table1` USING (`id`)',
+                        'sql'=>'SELECT * FROM `accounts` INNER JOIN `table1` USING(`id`)',
                         'bindings'=>[]
                     ]
                 ]
@@ -831,7 +830,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `accounts` INNER JOIN `table1` USING (`id`, `test`)',
+                        'sql'=>'SELECT * FROM `accounts` INNER JOIN `table1` USING(`id`, `test`)',
                         'bindings'=>[]
                     ]
                 ]
@@ -848,9 +847,7 @@ class JoinsTest extends \Codeception\Test\Unit
                     ->select('A.nid AS id')
                     ->from(self::raw('nidmap2 AS A'))
                     ->innerJoin(
-                        self::raw(
-                            ['SELECT MIN(nid) AS location_id', 'FROM nidmap2'].join(' ')
-                        )->wrap('(', ') AS B'),
+                        self::raw('SELECT MIN(nid) AS location_id FROM nidmap2')->wrap('(', ') AS B'),
                         'A.x',
                         '=',
                         'B.x'
@@ -858,7 +855,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'select `A`.`nid` as `id` from nidmap2 AS A inner join (SELECT MIN(nid) AS location_id FROM nidmap2) AS B on `A`.`x` = `B`.`x`',
+                        'sql'=>'SELECT `A`.`nid` AS `id` FROM nidmap2 AS A INNER JOIN (SELECT MIN(nid) AS location_id FROM nidmap2) AS B ON(`A`.`x` = `B`.`x`)',
                         'bindings'=>[]
                     ]
                 ]
@@ -878,7 +875,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `photos` ON `photos`.`id` = ?',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `photos` ON(`photos`.`id` = ?)',
                         'bindings'=>[0]
                     ]
                 ]
@@ -898,7 +895,7 @@ class JoinsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` INNER JOIN `photos` ON `photos`.`id` > ?',
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `photos` ON(`photos`.`id` > ?)',
                         'bindings'=>[0]
                     ]
                 ]

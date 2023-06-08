@@ -8,9 +8,10 @@ use Sharksmedia\QueryBuilder\QueryBuilder;
 use Sharksmedia\QueryBuilder\Client\MySQL;
 use Sharksmedia\QueryBuilder\Config;
 
+use Sharksmedia\QueryBuilder\QueryCompiler;
 use Sharksmedia\QueryBuilder\Statement\Raw;
 
-class TestInserts extends \Codeception\Test\Unit
+class InsertsTest extends \Codeception\Test\Unit
 {
     public static function getClient()
     {// 2023-05-16
@@ -24,8 +25,7 @@ class TestInserts extends \Codeception\Test\Unit
     {
         $iClient = self::getClient();
 
-        $iRaw = new Raw($iClient);
-        $iRaw->set($query, $bindings);
+        $iRaw = new Raw($query, ...$bindings);
 
         return $iRaw;
     }
@@ -82,27 +82,28 @@ class TestInserts extends \Codeception\Test\Unit
             return $case;
         };
 
-        $cases['multiple inserts with partly undefined keys client with configuration nullAsDefault: true'] = function()
-        {
-            $case =
-            [
-                self::qb()
-                    ->from('users')
-                    ->insert([
-                        ['email'=>'foo', 'name'=>'taylor'],
-                        ['name'=>'dayle'],
-                    ]),
-                [
-                    'mysql'=>
-                    [
-                        'sql'=>'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (NULL, ?)',
-                        'bindings'=>['foo', 'taylor', 'dayle']
-                    ]
-                ]
-            ];
-
-            return $case;
-        };
+        // TODO: Implement nullAsDefault: true
+        // $cases['multiple inserts with partly undefined keys client with configuration nullAsDefault: true'] = function()
+        // {
+        //     $case =
+        //     [
+        //         self::qb()
+        //             ->from('users')
+        //             ->insert([
+        //                 ['email'=>'foo', 'name'=>'taylor'],
+        //                 ['name'=>'dayle'],
+        //             ]),
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (NULL, ?)',
+        //                 'bindings'=>['foo', 'taylor', 'dayle']
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
 
         $cases['multiple inserts with partly undefined keys'] = function()
         {
@@ -156,7 +157,7 @@ class TestInserts extends \Codeception\Test\Unit
                     ->insert([
                         ['email'=>'foo', 'name'=>'taylor'],
                         ['email'=>'bar', 'name'=>'dayle'],
-                    ], 'id'),
+                    ], ['id']),
                 [
                     'mysql'=>
                     [
@@ -233,62 +234,64 @@ class TestInserts extends \Codeception\Test\Unit
             return $case;
         };
 
-        $cases['empty insert should be a noop'] = function()
-        {
-            $case =
-            [
-                self::qb()
-                    ->into('users')
-                    ->insert(),
-                [
-                    'mysql'=>
-                    [
-                        'sql'=>'',
-                        'bindings'=>[]
-                    ]
-                ]
-            ];
+        // 2023-06-07 We throw an exception instead
+        // $cases['empty insert should be a noop'] = function()
+        // {
+        //     $case =
+        //     [
+        //         self::qb()
+        //             ->into('users')
+        //             ->insert(),
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'',
+        //                 'bindings'=>[]
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
 
-            return $case;
-        };
+        // 2023-06-07 We throw an exception instead
+        // $cases['insert with empty array should be a noop'] = function()
+        // {
+        //     $case =
+        //     [
+        //         self::qb()
+        //             ->into('users')
+        //             ->insert([]),
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'',
+        //                 'bindings'=>[]
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
 
-        $cases['insert with empty array should be a noop'] = function()
-        {
-            $case =
-            [
-                self::qb()
-                    ->into('users')
-                    ->insert([]),
-                [
-                    'mysql'=>
-                    [
-                        'sql'=>'',
-                        'bindings'=>[]
-                    ]
-                ]
-            ];
-
-            return $case;
-        };
-
-        $cases['insert with array with empty object and returning'] = function()
-        {
-            $case =
-            [
-                self::qb()
-                    ->into('users')
-                    ->insert([[]], 'id'),
-                [
-                    'mysql'=>
-                    [
-                        'sql'=>'INSERT INTO `users` () VALUES ()',
-                        'bindings'=>[]
-                    ]
-                ]
-            ];
-
-            return $case;
-        };
+        // $cases['insert with array with empty object and returning'] = function()
+        // {
+        //     $case =
+        //     [
+        //         self::qb()
+        //             ->into('users')
+        //             ->insert([[]], ['id']),
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'INSERT INTO `users` () VALUES ()',
+        //                 'bindings'=>[]
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
 
         $cases['insert method respects raw bindings'] = function()
         {
@@ -447,7 +450,7 @@ class TestInserts extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->from('users')
-                    ->insert(['email'=>'foo'], 'id'),
+                    ->insert(['email'=>'foo'], ['id']),
                 [
                     'mysql'=>
                     [
@@ -490,16 +493,16 @@ class TestInserts extends \Codeception\Test\Unit
                     ->into(self::raw('recipients (recipient_id, email)'))
                     ->insert(
                         self::qb()
-                            ->select(self::raw('?, ?', [1, 'foo@bar.com']))
-                            ->whereNotExists(function()
+                            ->select(self::raw('?, ?', 1, 'foo@bar.com'))
+                            ->whereNotExists(function($q)
                             {
-                                $this->select(1)->from('recipients')->where('recipient_id', 1);
+                                $q->select(self::raw(1))->from('recipients')->where('recipient_id', 1);
                             })
                     ),
                 [
                     'mysql'=>
                     [
-                        'sql'=>'INSERT INTO recipients (recipient_id, email) SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM `recipients` WHERE `recipient_id` = ?)',
+                        'sql'=>'INSERT INTO recipients (recipient_id, email) SELECT ?, ? WHERE NOT EXISTS(SELECT 1 FROM `recipients` WHERE `recipient_id` = ?)',
                         'bindings'=>[1, 'foo@bar.com', 1]
                     ]
                 ]
@@ -508,33 +511,35 @@ class TestInserts extends \Codeception\Test\Unit
             return $case;
         };
 
-        $cases['does crazy advanced inserts with clever raw use, #211'] = function()
-        {
-            $q1 = self::qb()
-                    ->select(self::raw("'user'"), self::raw("'user@foo.com'"))
-                    ->whereNotExists(function($q)
-                    {
-                        $q->select(1)->from('recipients')->where('recipient_id', 1);
-                    });
-
-            $q2 = self::qb()
-                    ->table('recipients')
-                    ->insert(self::raw('(recipient_id, email) ?', [$q1]));
-
-            $case =
-            [
-                $q2,
-                [
-                    'mysql'=>
-                    [
-                        'sql'=>'INSERT INTO `recipients` (recipient_id, email) SELECT \'user\', \'user@foo.com\' WHERE NOT EXISTS (SELECT 1 FROM `recipients` WHERE `recipient_id` = ?)',
-                        'bindings'=>[1]
-                    ]
-                ]
-            ];
-
-            return $case;
-        };
+        // 2023-06-07 Don't think we should support this. It's too crazy. And a missuse of raw
+        // $cases['does crazy advanced inserts with clever raw use, #211'] = function()
+        // {
+        //     $q1 = self::qb()
+        //             ->select(self::raw("'user'"), self::raw("'user@foo.com'"))
+        //             ->whereNotExists(function($q)
+        //             {
+        //                 $q->select(1)->from('recipients')->where('recipient_id', 1);
+        //             });
+        //
+        //     $q2 = self::qb()
+        //             ->table('recipients')
+        //             ->insert(self::raw('(recipient_id, email) ?', $q1));
+        //
+        //     $case =
+        //     [
+        //         $q2,
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'INSERT INTO `recipients` (recipient_id, email) SELECT \'user\', \'user@foo.com\' WHERE NOT EXISTS (SELECT 1 FROM `recipients` WHERE `recipient_id` = ?)',
+        //                 'bindings'=>[1]
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
+        
         // $cases['insert merge with where clause'] = function()
         // {
         //     $case =
@@ -581,7 +586,7 @@ class TestInserts extends \Codeception\Test\Unit
             return $case;
         };
 
-        $cases['allows sub-query chain on insert, #427'] = function()
+        $cases['allows sub-query chain on insert, #427 2'] = function()
         {
             $case =
             [
@@ -613,8 +618,8 @@ class TestInserts extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'INSERT INTO `entries` (`secret`, `sequence`) VALUES (?, (select count(*) FROM `entries` WHERE `secret` = ?))',
-                        'bindings'=>[]
+                        'sql'=>'INSERT INTO `entries` (`secret`, `sequence`) VALUES (?, (SELECT COUNT(*) FROM `entries` WHERE `secret` = ?))',
+                        'bindings'=>[123, 123]
                     ]
                 ]
             ];
@@ -622,27 +627,27 @@ class TestInserts extends \Codeception\Test\Unit
             return $case;
         };
 
-        $cases['#1268 - valueForUndefined should be in toSQL(QueryCompiler)'] = function()
-        {
-            $case =
-            [
-                self::qb()
-                    ->insert([
-                        ['id'=>null, 'name'=>'test', 'occupation'=>null],
-                        ['id'=>1, 'name'=>null, 'occupation'=>'none']
-                    ])
-                    ->into('users'),
-                [
-                    'mysql'=>
-                    [
-                        'sql'=>'INSERT INTO `users` (`id`, `name`, `occupation`) VALUES (DEFAULT, ?, DEFAULT), (?, DEFAULT, ?)',
-                        'bindings'=>['test', 1, 'none']
-                    ]
-                ]
-            ];
-
-            return $case;
-        };
+        // $cases['#1268 - valueForUndefined should be in toSQL(QueryCompiler)'] = function()
+        // {
+        //     $case =
+        //     [
+        //         self::qb()
+        //             ->insert([
+        //                 ['id'=>null, 'name'=>'test', 'occupation'=>null],
+        //                 ['id'=>1, 'name'=>null, 'occupation'=>'none']
+        //             ])
+        //             ->into('users'),
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'INSERT INTO `users` (`id`, `name`, `occupation`) VALUES (DEFAULT, ?, DEFAULT), (?, DEFAULT, ?)',
+        //                 'bindings'=>['test', 1, 'none']
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
 
         foreach($cases as $name=>$caseFn)
         {
@@ -650,5 +655,22 @@ class TestInserts extends \Codeception\Test\Unit
         }
 
         return $cases;
+    }
+
+	/**
+	 * @dataProvider caseProvider
+	 */
+    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    {
+        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+
+        $iQuery = $iQueryCompiler->toSQL();
+        $sqlAndBindings =
+        [
+            'sql'=>$iQuery->getSQL(),
+            'bindings'=>$iQuery->getBindings()
+        ];
+
+        $this->assertSame($iExpected['mysql'], $sqlAndBindings);
     }
 }

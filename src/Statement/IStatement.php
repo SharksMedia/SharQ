@@ -60,12 +60,5 @@ interface IStatement
      * @return string
      */
     public function getType(): string;
-
-    /**
-     * 2023-05-08
-     * Returns available types for the statement
-     * @return string[]
-     */
-    public function getTypes(): array;
 }
 

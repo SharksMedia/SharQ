@@ -11,7 +11,7 @@ use Sharksmedia\QueryBuilder\Config;
 use Sharksmedia\QueryBuilder\QueryCompiler;
 use Sharksmedia\QueryBuilder\Statement\Raw;
 
-class TestDeletes extends \Codeception\Test\Unit
+class GroupByTest extends \Codeception\Test\Unit
 {
     public static function getClient()
     {// 2023-05-16
@@ -42,19 +42,19 @@ class TestDeletes extends \Codeception\Test\Unit
     {// 2023-05-16
         $cases = [];
 
-        $cases['delete method'] = function()
+        $cases['group bys'] = function()
         {
             $case =
             [
                 self::qb()
+                    ->select('*')
                     ->from('users')
-                    ->where('email', '=', 'foo')
-                    ->delete(),
+                    ->groupBy('id', 'email'),
                 [
                     'mysql'=>
                     [
-                        'sql'=>'DELETE FROM `users` WHERE `email` = ?',
-                        'bindings'=>['foo']
+                        'sql'=>'SELECT * FROM `users` GROUP BY `id`, `email`',
+                        'bindings'=>[]
                     ]
                 ]
             ];
@@ -62,36 +62,18 @@ class TestDeletes extends \Codeception\Test\Unit
             return $case;
         };
 
-        // $cases['delete only method'] = function()
-        // {
-        //     $case =
-        //     [
-        //         self::qb()
-        //             ->select('*')
-        //             ->from('my_table'),
-        //         [
-        //             'mysql'=>
-        //             [
-        //                 'sql'=>'SELECT * FROM `my_schema`.`my_table`',
-        //                 'bindings'=>[]
-        //             ]
-        //         ]
-        //     ];
-        //
-        //     return $case;
-        // };
-
-        $cases['truncate method'] = function()
+        $cases['raw group bys'] = function()
         {
             $case =
             [
                 self::qb()
-                    ->table('users')
-                    ->truncate(),
+                    ->select('*')
+                    ->from('users')
+                    ->groupByRaw('id', 'email'),
                 [
                     'mysql'=>
                     [
-                        'sql'=>'TRUNCATE `users`',
+                        'sql'=>'SELECT * FROM `users` GROUP BY id, email',
                         'bindings'=>[]
                     ]
                 ]
@@ -107,4 +89,22 @@ class TestDeletes extends \Codeception\Test\Unit
 
         return $cases;
     }
+
+	/**
+	 * @dataProvider caseProvider
+	 */
+    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    {
+        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+
+        $iQuery = $iQueryCompiler->toSQL('select');
+        $sqlAndBindings =
+        [
+            'sql'=>$iQuery->getSQL(),
+            'bindings'=>$iQuery->getBindings()
+        ];
+
+        $this->assertSame($iExpected['mysql'], $sqlAndBindings);
+    }
 }
+

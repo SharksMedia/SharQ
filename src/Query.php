@@ -54,20 +54,25 @@ class Query
         return count($this->aliases) !== 0;
     }
 
-    public function getMethod(): string
+    public function as(string $alias): void
     {// 2023-05-10
-        return '';
+        $this->aliases[] = $alias;
     }
 
-    public function toString(bool $isParameter, QueryBuilder $iQueryBuilder, Client $iClient): string
+    public function getMethod(): string
+    {// 2023-05-10
+        return $this->method;
+    }
+
+    public function toString(bool $isParameter, QueryCompiler $iQueryCompiler): string
     {// 2023-05-15
         $sql = $this->getSQL();
 
-        if(in_array($this->getMethod(), ['select', 'first']) && ($isParameter || $this->hasAs()))
+        if(in_array($this->getMethod(), [QueryBuilder::METHOD_SELECT, QueryBuilder::METHOD_FIRST]) && ($isParameter || $this->hasAs()))
         {
             $sql = "({$sql})";
 
-            if($this->hasAs()) $sql = $sql . ' AS ' . $this->getAs();
+            if($this->hasAs()) $sql = $sql . ' AS ' . $iQueryCompiler->wrap($this->getAs());
         }
 
         return $sql;

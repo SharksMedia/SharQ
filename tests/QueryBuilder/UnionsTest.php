@@ -11,7 +11,7 @@ use Sharksmedia\QueryBuilder\Config;
 use Sharksmedia\QueryBuilder\QueryCompiler;
 use Sharksmedia\QueryBuilder\Statement\Raw;
 
-class TestUnions extends \Codeception\Test\Unit
+class UnionsTest extends \Codeception\Test\Unit
 {
     public static function getClient()
     {// 2023-05-16
@@ -25,8 +25,7 @@ class TestUnions extends \Codeception\Test\Unit
     {
         $iClient = self::getClient();
 
-        $iRaw = new Raw($iClient);
-        $iRaw->set($query, $bindings);
+        $iRaw = new Raw($query, ...$bindings);
 
         return $iRaw;
     }
@@ -154,7 +153,7 @@ class TestUnions extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` WHERE `id` IN ((SELECT MAX(`id`) FROM `users`) UNION (SELECT MIN(`id`) FROM `users`))',
+                        'sql'=>'SELECT * FROM `users` WHERE `id` IN((SELECT MAX(`id`) FROM `users`) UNION (SELECT MIN(`id`) FROM `users`))',
                         'bindings'=>[]
                     ]
                 ]
@@ -249,7 +248,7 @@ class TestUnions extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` WHERE `id` IN ((SELECT MAX(`id`) FROM `users`) UNION ALL (SELECT MIN(`id`) FROM `users`))',
+                        'sql'=>'SELECT * FROM `users` WHERE `id` IN((SELECT MAX(`id`) FROM `users`) UNION ALL (SELECT MIN(`id`) FROM `users`))',
                         'bindings'=>[]
                     ]
                 ]
@@ -374,7 +373,7 @@ class TestUnions extends \Codeception\Test\Unit
                     'mysql'=>
                     [
                         'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ?',
-                        'bindings'=>[1, 2]
+                        'bindings'=>[1, 2, 3]
                     ]
                 ]
             ];
@@ -388,27 +387,27 @@ class TestUnions extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->where(['id'=>1])
-                ->unionAll([
-                    function($q)
-                    {
-                        $q->select('*')
-                          ->from('users')
-                          ->where(['id'=>2]);
-                    },
-                    function($q)
-                    {
-                        $q->select('*')
-                          ->from('users')
-                          ->where(['id'=>3]);
-                    }
-                ]),
+                    ->from('users')
+                    ->where(['id'=>1])
+                    ->unionAll([
+                        function($q)
+                        {
+                            $q->select('*')
+                              ->from('users')
+                              ->where(['id'=>2]);
+                        },
+                        function($q)
+                        {
+                            $q->select('*')
+                              ->from('users')
+                              ->where(['id'=>3]);
+                        }
+                    ]),
                 [
                     'mysql'=>
                     [
                         'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ?',
-                        'bindings'=>[1, 2]
+                        'bindings'=>[1, 2, 3]
                     ]
                 ]
             ];
@@ -439,7 +438,7 @@ class TestUnions extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * From `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ? LIMIT ?',
+                        'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ? LIMIT ?',
                         'bindings'=>[1, 2, 1]
                     ]
                 ]
@@ -454,17 +453,16 @@ class TestUnions extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->where('id', '=', 1)
-                ->groupBy('id')
-                ->unionAll(function($q)
-                {
-                    $q->select('*')
-                      ->from('users')
-                      ->where('id', '=', 2)
-                      ->groupBy('id');
-                })
-                ->first(),
+                    ->from('users')
+                    ->where('id', '=', 1)
+                    ->groupBy('id')
+                    ->unionAll(function($q)
+                    {
+                        $q->select('*')
+                          ->from('users')
+                          ->where('id', '=', 2);
+                    }, true)
+                    ->first(),
                 [
                     'mysql'=>
                     [
@@ -514,12 +512,12 @@ class TestUnions extends \Codeception\Test\Unit
                 ->where(['id'=>1])
                 ->union(
                     self::qb()->select('*')->from('users')->where(['id'=>2]),
-                    self::raw('SELECT * FROM `users` WHERE `id` = ?', [3])
+                    self::raw('SELECT * FROM `users` WHERE `id` = ?', 3)
                 ),
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION SELECT * FROM `users` WHERE `id` = ? UNION SELECT * FROM `users` WHERE id = ?',
+                        'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION SELECT * FROM `users` WHERE `id` = ? UNION SELECT * FROM `users` WHERE `id` = ?',
                         'bindings'=>[1, 2, 3]
                     ]
                 ]
@@ -538,12 +536,12 @@ class TestUnions extends \Codeception\Test\Unit
                 ->where(['id'=>1])
                 ->union([
                     self::qb()->select('*')->from('users')->where(['id'=>2]),
-                    self::raw('SELECT * FROM `users` WHERE `id` = ?', [3])
+                    self::raw('SELECT * FROM `users` WHERE `id` = ?', 3)
                 ]),
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION SELECT * FROM `users` WHERE `id` = ? UNION SELECT * FROM `users` WHERE id = ?',
+                        'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION SELECT * FROM `users` WHERE `id` = ? UNION SELECT * FROM `users` WHERE `id` = ?',
                         'bindings'=>[1, 2, 3]
                     ]
                 ]
@@ -584,12 +582,12 @@ class TestUnions extends \Codeception\Test\Unit
                 ->where(['id'=>1])
                 ->unionAll(
                     self::qb()->select('*')->from('users')->where(['id'=>2]),
-                    self::raw('SELECT * FROM `users` WHERE `id` = ?', [3])
+                    self::raw('SELECT * FROM `users` WHERE `id` = ?', 3)
                 ),
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM users WHERE id = ?',
+                        'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ?',
                         'bindings'=>[1, 2, 3]
                     ]
                 ]
@@ -608,12 +606,12 @@ class TestUnions extends \Codeception\Test\Unit
                 ->where(['id'=>1])
                 ->unionAll([
                     self::qb()->select('*')->from('users')->where(['id'=>2]),
-                    self::raw('SELECT * FROM `users` WHERE `id` = ?', [3])
+                    self::raw('SELECT * FROM `users` WHERE `id` = ?', 3)
                 ]),
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM users WHERE id = ?',
+                        'sql'=>'SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ? UNION ALL SELECT * FROM `users` WHERE `id` = ?',
                         'bindings'=>[1, 2, 3]
                     ]
                 ]
@@ -749,6 +747,23 @@ class TestUnions extends \Codeception\Test\Unit
         }
 
         return $cases;
+    }
+
+	/**
+	 * @dataProvider caseProvider
+	 */
+    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    {
+        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+
+        $iQuery = $iQueryCompiler->toSQL();
+        $sqlAndBindings =
+        [
+            'sql'=>$iQuery->getSQL(),
+            'bindings'=>$iQuery->getBindings()
+        ];
+
+        $this->assertSame($iExpected['mysql'], $sqlAndBindings);
     }
 }
 

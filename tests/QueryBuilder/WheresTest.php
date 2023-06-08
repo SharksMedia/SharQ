@@ -1352,7 +1352,7 @@ class TestWheres extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'DELETE FROM `word` WHERE `page_id` IN (SELECT `id` FROM `page` WHERE `chapter_id` IN (SELECT `id` FROM `chapter` WHERE `book` = ?))',
+                        'sql'=>'DELETE FROM `word` WHERE `page_id` IN(SELECT `id` FROM `page` WHERE `chapter_id` IN(SELECT `id` FROM `chapter` WHERE `book` = ?))',
                         'bindings'=>[1]
                     ]
                 ]
@@ -1369,7 +1369,7 @@ class TestWheres extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'DELETE FROM `page` WHERE `chapter_id` IN (SELECT `id` FROM `chapter` WHERE `book` = ?)',
+                        'sql'=>'DELETE FROM `page` WHERE `chapter_id` IN(SELECT `id` FROM `chapter` WHERE `book` = ?)',
                         'bindings'=>[1]
                     ]
                 ]
@@ -1609,12 +1609,32 @@ class TestWheres extends \Codeception\Test\Unit
                 self::qb()
                     ->select('*')
                     ->from('users')
-                    ->whereIn('id', self::raw('select (:test)', ['test'=>[1, 2, 3]])),
+                    ->whereIn('id', self::raw('select (:test)', ['test'=>1])),
                 [
                     'mysql'=>
                     [
-                        'sql'=>'select * from `users` where `id` in (select (?))',
-                        'bindings'=>[[1, 2, 3]]
+                        'sql'=>'SELECT * FROM `users` WHERE `id` IN(select (?))',
+                        'bindings'=>[1]
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
+        $cases['Multiple named bindings'] = function()
+        {
+            $case =
+            [
+                self::qb()
+                    ->select('*')
+                    ->from('users')
+                    ->whereIn('id', self::raw('select (:test, :test2)', ['test'=>1, 'test2'=>2])),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT * FROM `users` WHERE `id` IN(select (?, ?))',
+                        'bindings'=>[1, 2]
                     ]
                 ]
             ];

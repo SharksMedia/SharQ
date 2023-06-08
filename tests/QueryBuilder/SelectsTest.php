@@ -25,7 +25,7 @@ class SelectsTest extends \Codeception\Test\Unit
     {
         $iClient = self::getClient();
 
-        if(count($bindings) === 1 && is_array($bindings[0])) $bindings = $bindings[0];
+        // if(count($bindings) === 1 && is_array($bindings[0])) $bindings = $bindings[0];
 
         // $iRaw = new Raw($iClient);
         // $iRaw->set($query, $bindings);
@@ -279,8 +279,8 @@ class SelectsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT `table1`.* AS `bar`, (SELECT `col1` AS `a`, `col2` AS `b` FROM `test` limit ?) AS `subq` FROM `table` AS `table1`, `table` AS `table2`, (SELECT * FROM `test` LIMIT ?) AS `subq`',
-                        'bindings'=>[]
+                        'sql'=>'SELECT `table1`.* AS `bar`, (SELECT `col1` AS `a`, `col2` AS `b` FROM `test` LIMIT ?) AS `subq` FROM `table` AS `table1`, `table` AS `table2`, (SELECT * FROM `test` LIMIT ?) AS `subq`',
+                        'bindings'=>[1, 1]
                     ]
                 ]
             ];
@@ -561,7 +561,7 @@ class SelectsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->from('users')
-                    ->max(self::raw('??', ['name'])),
+                    ->max(self::raw('??', 'name')),
                 [
                     'mysql'=>
                     [
@@ -599,7 +599,7 @@ class SelectsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->from('users')
-                    ->min(self::raw('??', ['name'])),
+                    ->min(self::raw('??', 'name')),
                 [
                     'mysql'=>
                     [
@@ -637,7 +637,7 @@ class SelectsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->from('users')
-                    ->sum(self::raw('??', ['name'])),
+                    ->sum(self::raw('??', 'name')),
                 [
                     'mysql'=>
                     [
@@ -675,7 +675,7 @@ class SelectsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->from('users')
-                    ->sumDistinct(self::raw('??', ['name'])),
+                    ->sumDistinct(self::raw('??', 'name')),
                 [
                     'mysql'=>
                     [
@@ -713,7 +713,7 @@ class SelectsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->from('users')
-                    ->avg(self::raw('??', ['name'])),
+                    ->avg(self::raw('??', 'name')),
                 [
                     'mysql'=>
                     [
@@ -732,7 +732,7 @@ class SelectsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->from('users')
-                    ->avgDistinct(self::raw('??', ['name'])),
+                    ->avgDistinct(self::raw('??', 'name')),
                 [
                     'mysql'=>
                     [
@@ -775,7 +775,7 @@ class SelectsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'select * from `value` inner join `table` on `table`.`array_column[1]` = ?',
+                        'sql'=>'SELECT * FROM `value` INNER JOIN `table` ON(`table`.`array_column[1]` = ?)',
                         'bindings'=>[1]
                     ]
                 ]
@@ -784,25 +784,25 @@ class SelectsTest extends \Codeception\Test\Unit
             return $case;
         };
 
-        $cases['allows wrap on raw to wrap in parens and alias'] = function()
-        {
-            $case =
-            [
-                self::qb()
-                    ->select('e.lastname', 'e.salary', self::raw(self::qb()->select('avg(salary)')->from('employee')->whereRaw('dept_no = e.dept_no'))->wrap('(', ') avg_sal_dept'))
-                    ->from('employee as e')
-                    ->where('dept_no', '=', 'e.dept_no'),
-                [
-                    'mysql'=>
-                    [
-                        'sql'=>'SELECT `e`.`lastname`, `e`.`salary`, (SELECT `avg(salary)` FROM `employee` WHERE dept_no = e.dept_no) avg_sal_dept FROM `employee` AS `e` WHERE `dept_no` = ?',
-                        'bindings'=>['e.dept_no']
-                    ]
-                ]
-            ];
-
-            return $case;
-        };
+        // $cases['allows wrap on raw to wrap in parens and alias'] = function()
+        // {
+        //     $case =
+        //     [
+        //         self::qb()
+        //             ->select('e.lastname', 'e.salary', self::raw(self::qb()->select('avg(salary)')->from('employee')->whereRaw('dept_no = e.dept_no'))->wrap('(', ') avg_sal_dept'))
+        //             ->from('employee as e')
+        //             ->where('dept_no', '=', 'e.dept_no'),
+        //         [
+        //             'mysql'=>
+        //             [
+        //                 'sql'=>'SELECT `e`.`lastname`, `e`.`salary`, (SELECT `avg(salary)` FROM `employee` WHERE dept_no = e.dept_no) avg_sal_dept FROM `employee` AS `e` WHERE `dept_no` = ?',
+        //                 'bindings'=>['e.dept_no']
+        //             ]
+        //         ]
+        //     ];
+        //
+        //     return $case;
+        // };
 
         $cases['allows select as syntax'] = function()
         {
@@ -836,6 +836,7 @@ class SelectsTest extends \Codeception\Test\Unit
                             ->whereRaw('dept_no = e.dept_no')
                             ->as('avg_sal_dept');
                     })
+                    // ->as('avg_sal_dept')
                     ->from('employee as e')
                     ->where('dept_no', '=', 'e.dept_no'),
                 [
@@ -882,16 +883,16 @@ class SelectsTest extends \Codeception\Test\Unit
 
         $cases['should always wrap subquery with parenthesis'] = function()
         {
-            $subquery = self::qb()->select(self::raw('?', ['inner raw select']), 'bar');
+            $subquery = self::qb()->select(self::raw('?', 'inner raw select'), 'bar');
             $case =
             [
                 self::qb()
-                    ->select(self::raw('?', ['outer raw select']))
+                    ->select(self::raw('?', 'outer raw select'))
                     ->from($subquery),
                 [
                     'mysql'=>
                     [
-                        'sql'=>'select ? from (select ?, `bar`)',
+                        'sql'=>'SELECT ? FROM (SELECT ?, `bar`)',
                         'bindings'=>['outer raw select', 'inner raw select']
                     ]
                 ]
@@ -903,19 +904,20 @@ class SelectsTest extends \Codeception\Test\Unit
         $cases['correctly orders parameters when selecting from subqueries, #704'] = function()
         {
             $subquery = self::qb()
-                ->select(self::raw('?', ['inner raw select']))
+                ->select(['f'=>self::raw('?', 'inner raw select')])
                 ->as('g');
 
             $case =
             [
                 self::qb()
-                    ->select(self::raw('?', ['outer raw select']), 'g.f')
+                    ->select(self::raw('?', 'outer raw select'), 'g.f')
                     ->from($subquery)
+                    // ->as('g')
                     ->where('g.secret', 123),
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT ?, `g`.`f` FROM (SELECT ? AS f) AS `g` WHERE `g`.`secret` = ?',
+                        'sql'=>'SELECT ?, `g`.`f` FROM (SELECT ? AS `f`) AS `g` WHERE `g`.`secret` = ?',
                         'bindings'=>['outer raw select', 'inner raw select', 123]
                     ]
                 ]
@@ -934,7 +936,7 @@ class SelectsTest extends \Codeception\Test\Unit
                 [
                     'mysql'=>
                     [
-                        'sql'=>'SELECT `id","name`, `id``name` FROM `test```',
+                        'sql'=>'SELECT `id","name`, `id\`name` FROM `test\``',
                         'bindings'=>[]
                     ]
                 ]

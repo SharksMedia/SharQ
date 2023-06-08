@@ -29,9 +29,17 @@ class Raw implements IStatement
     private string $sql;
     private array $bindings;
 
+    private $wrapBefore = null;
+    private $wrapAfter = null;
+
+    private bool $isNot = false;
+
     public function __construct($sql=null, ...$bindings)
     {// 2023-05-09
         if($sql !== null) $this->sql = (string)$sql;
+
+        if(count($bindings) === 1 && is_array($bindings[0])) $bindings = $bindings[0];
+
         $this->bindings = $bindings;
         // $this->iClient = $iClient;
     }
@@ -80,5 +88,35 @@ class Raw implements IStatement
         $this->bindings = $bindings;
 
         return $this;
+    }
+
+    public function isWrapped(): bool
+    {// 2023-05-09
+        return $this->wrapBefore !== null || $this->wrapAfter !== null;
+    }
+
+    public function wrap(string $before, string $after): self
+    {// 2023-05-09
+        $this->wrapBefore = $before;
+        $this->wrapAfter = $after;
+
+        return $this;
+    }
+
+    public function getWrapBefore(): ?string
+    {// 2023-05-09
+        return $this->wrapBefore;
+    }
+
+    public function getWrapAfter(): ?string
+    {// 2023-05-09
+        return $this->wrapAfter;
+    }
+
+    public function isNot(?bool $isNot=null): bool
+    {// 2023-05-09
+        if($isNot !== null) $this->isNot = $isNot;
+
+        return $this->isNot;
     }
 }

@@ -57,6 +57,8 @@ class MySQL extends Client
         $parts = explode('.', $identifier);
         foreach($parts as &$part)
         {
+            if($part === '*') continue;
+
             $part = '`'.str_replace('`', '\\`', $part).'`';
         }
 
