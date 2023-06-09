@@ -1,7 +1,8 @@
 {
     "name": "sharksmedia/query-builder",
-    "description": "A query builder for PHP",
+    "description": "A query builder for PHP, inspired by KnexJS query builder.",
     "type": "library",
+    "version": "0.1.0",
     "license": "MIT",
     "scripts": {
         "unit-tests": "./vendor/bin/codecept run unit --debug",
@@ -10,7 +11,7 @@
     },
     "authors": [
         {
-            "name": "Magnus S. Rasmussen",
+            "name": "Magnus Schmidt Rasmussen",
             "email": "magnus@sharksmedia.dk"
         }
     ],

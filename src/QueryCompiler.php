@@ -184,7 +184,7 @@ class QueryCompiler
      * @param QueryBuilder $iQueryBuilder
      * @param array<int,mixed> $bindings
      */
-    public function __construct(Client $iClient, QueryBuilder $iQueryBuilder, array $bindings)
+    public function __construct(Client $iClient, QueryBuilder $iQueryBuilder, array $bindings=[])
     {// 2023-05-10
         $this->iClient = $iClient;
         $this->iQueryBuilder = $iQueryBuilder;
