@@ -22,38 +22,59 @@ class Having implements IStatement
     public const TYPE_IN = 'HAVING_IN';
     public const TYPE_RAW = 'HAVING_RAW';
 
+    /**
+     * This is the type property.
+     * @var string
+     */
     private string $type;
 
+    /**
+     * This is the column property.
+     * @var string|Raw
+     */
     private         $column;
+
+    /**
+     * This is the operator property.
+     * @var string|Raw|QueryBuilder|callable|null
+     */
     private ?string $operator;
+
+    /**
+     * This is the value property.
+     * @var string|Raw|QueryBuilder|callable|null
+     */
     private         $value;
+
+    /**
+     * This is the boolType property.
+     * @see QueryBuilder::BOOL_TYPE_* constants
+     * @var string
+     */
     private string  $boolType;
+
+    /**
+     * This is the isNot property.
+     * @var bool
+     */
     private bool    $isNot;
 
+    /**
+     * This method returns the class name.
+     * @return string
+     */
     public function getClass(): string
 	{// 2023-05-10
         return 'Having';
     }
 
+    /**
+     * This method returns the type property.
+     * @return string
+     */
     public function getType(): string
     {// 2023-05-08
         return $this->type;
-    }
-
-    public function getTypes(): array
-    {// 2023-05-08
-        $types =
-        [
-            'havingBasic',
-            'havingWrapped',
-            'havingNull',
-            'havingExists',
-            'havingBetween',
-            'havingIn',
-            'havingRaw',
-        ];
-
-        return $types;
     }
 
     /**
@@ -73,26 +94,47 @@ class Having implements IStatement
         $this->type     = $type;
     }
 
+    /**
+     * This method returns the column property.
+     * @return string|Raw
+     */
     public function getColumn()
     {// 2023-05-15
         return $this->column;
     }
 
+    /**
+     * This method returns the column property.
+     * @return string|Raw|QueryBuilder|callable|null
+     */
     public function getOperator()
     {// 2023-05-15
         return $this->operator;
     }
 
+    /**
+     * This method returns the column property.
+     * @return string|Raw|QueryBuilder|callable|null
+     */
     public function getValue()
     {// 2023-05-15
         return $this->value;
     }
 
+    /**
+     * This method returns the column property.
+     * @return bool
+     */
     public function isNot(): bool
     {// 2023-06-01
         return $this->isNot;
     }
 
+    /**
+     * This method returns the column property.
+     * @see QueryBuilder::BOOL_TYPE_* constants
+     * @return string
+     */
     public function getBoolType(): string
     {// 2023-05-15
         return $this->boolType;

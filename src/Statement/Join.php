@@ -9,74 +9,8 @@ declare(strict_types=1);
 
 namespace Sharksmedia\QueryBuilder\Statement;
 
-use Sharksmedia\QueryBuilder\Statement\IStatement;
-use Sharksmedia\QueryBuilder\Statement\Raw;
+use Sharksmedia\QueryBuilder\Statement\Clause;
 
-class Clause
-{
-    public string           $type;
-    public /* string */     $columnFirst;
-    public                  $value;
-    public /* ?string */    $operator;
-    public string           $boolType;
-    public bool             $isNot;
-
-    public                  $column;
-
-    public function getBoolFunction(): string
-    {// 2023-05-31
-        if($this->boolType === Join::ON_AND) return 'AND';
-        if($this->boolType === Join::ON_OR) return 'OR';
-
-        throw new \Exception('Unknown bool type: ' . $this->boolType);
-    }
-
-    public function getOnFunction(): string
-    {// 2023-05-31
-        if($this->type === Join::ON_TYPE_BASIC) return 'ON';
-        if($this->type === Join::ON_TYPE_VALUE) return 'ON';
-        if($this->type === Join::ON_TYPE_USING) return 'USING';
-        if($this->type === Join::ON_TYPE_WRAPPED) return 'ON';
-        if($this->type === Join::ON_TYPE_RAW) return 'ON';
-
-        throw new \Exception('Unknown on type: ' . $this->type);
-    }
-
-    public function getType(): string
-    {// 2023-06-01
-        return $this->type;
-    }
-
-    public function getColumn()
-    {// 2023-05-31
-        return $this->columnFirst ?? $this->column;
-    }
-
-    public function getOperator()
-    {// 2023-05-31
-        return $this->operator;
-    }
-
-    public function getValue()
-    {// 2023-05-31
-        return $this->value;
-    }
-
-    public function isNot(): bool
-    {// 2023-05-31
-        return $this->isNot;
-    }
-
-}
-
-/**
- * // 2023-05-09
- * @property string $table
- * @property string $joinType
- * @property string $boolType Default bool type
- * @property string $schema
- * @property array<Clause> $iClauses
- */
 class Join implements IStatement
 {
     public const TYPE_RAW               = 'JOIN_RAW';
@@ -105,70 +39,83 @@ class Join implements IStatement
     public const ON_AND                 = 'ON_AND';
     public const ON_OR                  = 'ON_OR';
 
-    private string $type;
+    /**
+     * This is the iClient property.
+     * @var string|Raw
+     */
+    private $table;
 
-    private /* string|Raw */ $table;
+    /**
+     * This is the iClient property.
+     * @var string Join::TYPE_* constants
+     */
     private string $joinType;
-    private string $boolType;
-    private bool   $isNot;
-    private ?string $schema;
 
+    /**
+     * This is the iClient property.
+     * @var string QueryBuilder::BOOL_TYPE_* constants
+     */
+    private string $boolType;
+
+    /**
+     * This is the iClient property.
+     * @var array<int, Clause>
+     */
     private array $iClauses = [];
 
     /**
      * @param string|Raw $table
-     * @param string $joinType
-     * @param string|null $schema
+     * @param string $joinType Join::TYPE_* constants
      */
-    public function __construct($table, string $joinType, ?string $schema=null)
+    public function __construct($table, string $joinType)
     {// 2023-05-09
         $this->table = $table;
         $this->joinType = $joinType;
-        $this->schema = $schema;
 
         $this->boolType = self::ON_AND;
-        $this->isNot = false;
     }
 
+    /**
+     * Get class name.
+     * @return string
+     */
     public function getClass(): string
     {// 2023-05-10
         return 'Join';
     }
 
+    /**
+     * Get the type.
+     * @return string
+     */
     public function getType(): string
     {// 2023-05-09
         return $this->joinType;
     }
 
-    public function getTypes(): array
-    {// 2023-05-09
-        $types =
-        [
-            self::TYPE_RAW,
-            self::TYPE_INNER,
-            self::TYPE_OUTER,
-            self::TYPE_CROSS,
-            self::TYPE_LEFT,
-            self::TYPE_LEFT_OUTER,
-            self::TYPE_RIGHT,
-            self::TYPE_RIGHT_OUTER,
-        ];
-
-        return $types;
-    }
-
+    /**
+     * Get the table name.
+     * @return string|Raw
+     */
     public function getTableName()
     {// 2023-06-01
         return $this->table;
     }
 
-    public function joinType(string $joinType): self
+    /**
+     * @param string $joinType
+     * @return Join
+     */
+    public function joinType(string $joinType): Join
     {// 2023-05-09
         $this->joinType = $joinType;
 
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getJoinFunction(): string
     {// 2023-05-31
         if($this->joinType === self::TYPE_INNER) return 'INNER JOIN';
@@ -181,6 +128,7 @@ class Join implements IStatement
 
         throw new \Exception('Unknown join type: ' . $this->joinType);
     }
+
     /**
      * @return Clause[]
      */
@@ -190,14 +138,10 @@ class Join implements IStatement
     }
 
     /**
-     * @param string $onType Compiler type
-     * @param string $boolType
-     * @param string|callable $first
-     * @param string? $operator
-     * @param string? $second
-     * @return self
-     * @param mixed $operator
-     * @param mixed $second
+     * @param string $onType Join::ON_TYPE_* constants
+     * @param string $boolType QueryBuilder::BOOL_TYPE_* constants
+     * @param array<int, string|Raw|QueryBuilder> $args [first, $operator, $second]
+     * @return Clause
      */
     private function getClauseFromArguments(string $onType, string $boolType, ...$args): Clause
     {// 2023-05-09
@@ -248,9 +192,11 @@ class Join implements IStatement
 
         return $iClause;
     }
+
     /**
-     * @param mixed $first
-     * @param mixed $args
+     * @param string|Raw|callable $first
+     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @return Join
      */
     public function on($first, ...$args): Join
     {// 2023-05-09
@@ -260,10 +206,11 @@ class Join implements IStatement
 
         return $this;
     }
+
     /**
-     * @param mixed $first
-     * @param mixed $operator
-     * @param mixed $second
+     * @param string|Raw|callable $first
+     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @return Join
      */
     public function andOn($first, ...$args): Join
     {// 2023-05-09
@@ -272,10 +219,11 @@ class Join implements IStatement
     
         return $this;
     }
+
     /**
-     * @param mixed $first
-     * @param mixed $operator
-     * @param mixed $second
+     * @param string|Raw|callable $first
+     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @return Join
      */
     public function orOn($first, ...$args): Join
     {// 2023-05-09
@@ -285,7 +233,11 @@ class Join implements IStatement
         return $this;
     }
 
-    public function using($column): self
+    /**
+     * @param string|Raw $column
+     * @return Join
+     */
+    public function using($column): Join
     {// 2023-05-09
         $iClause = new Clause();
         $iClause->type = self::ON_TYPE_USING;
@@ -296,9 +248,11 @@ class Join implements IStatement
 
         return $this;
     }
+
     /**
-     * @param mixed $first
-     * @param mixed $args
+     * @param string|Raw|callable $first
+     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @return Join
      */
     public function onVal($first, ...$args): Join
     {// 2023-05-09
@@ -308,9 +262,11 @@ class Join implements IStatement
 
         return $this;
     }
+
     /**
-     * @param mixed $first
-     * @param mixed $args
+     * @param string|Raw|callable $first
+     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @return Join
      */
     public function andOnVal($first, ...$args): Join
     {// 2023-05-09
@@ -319,9 +275,11 @@ class Join implements IStatement
 
         return $this;
     }
+
     /**
-     * @param mixed $first
-     * @param mixed $args
+     * @param string|Raw|callable $first
+     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @return Join
      */
     public function orOnVal($first, ...$args): Join
     {// 2023-05-09
@@ -330,8 +288,12 @@ class Join implements IStatement
 
         return $this;
     }
+
     /**
-     * @param array<int,mixed> $values
+     * @param string $column
+     * @param array<int, int|float|string|Raw> $values
+     * @param bool $isNot
+     * @return Join
      */
     public function onBetween(string $column, array $values, bool $isNot=false): Join
     {// 2023-05-09
@@ -348,31 +310,44 @@ class Join implements IStatement
 
         return $this;
     }
+
     /**
-     * @param array<int,mixed> $values
+     * @param string $column
+     * @param array<int, int|float|string|Raw> $values
+     * @return Join
      */
     public function onNotBetween(string $column, array $values): Join
     {// 2023-05-09
         return $this->onBetween($column, $values, true);
     }
+
     /**
-     * @param array<int,mixed> $values
+     * @param string $column
+     * @param array<int, int|float|string|Raw> $values
+     * @return Join
      */
     public function orOnBetween(string $column, array $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
         return $this->onBetween($column, $values, false);
     }
+
     /**
-     * @param array<int,mixed> $values
+     * @param string $column
+     * @param array<int, int|float|string|Raw> $values
+     * @return Join
      */
     public function orOnNotBetween(string $column, array $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
         return $this->onBetween($column, $values, true);
     }
+
     /**
-     * @param mixed $values
+     * @param string $column
+     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @param bool $isNot
+     * @return Join
      */
     public function onIn(string $column, $values, bool $isNot=false): Join
     {// 2023-05-09
@@ -389,24 +364,33 @@ class Join implements IStatement
 
         return $this;
     }
+
     /**
-     * @param mixed $values
+     * @param string $column
+     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @return Join
      */
     public function onNotIn(string $column, $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_AND;
         return $this->onIn($column, $values, true);
     }
+
     /**
-     * @param mixed $values
+     * @param string $column
+     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @return Join
      */
     public function orOnIn(string $column, $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
         return $this->onIn($column, $values, false);
     }
+
     /**
-     * @param mixed $values
+     * @param string $column
+     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @return Join
      */
     public function orOnNotIn(string $column, $values): Join
     {// 2023-05-09
@@ -414,6 +398,11 @@ class Join implements IStatement
         return $this->onIn($column, $values, true);
     }
 
+    /**
+     * @param string $column
+     * @param bool $isNot
+     * @return Join
+     */
     public function onNull(string $column, bool $isNot=false): self
     {// 2023-05-09
         $iClause = new Clause();
@@ -427,24 +416,39 @@ class Join implements IStatement
         return $this;
     }
 
+    /**
+     * @param string $column
+     * @return Join
+     */
     public function onNotNull(string $column): self
     {// 2023-05-09
         return $this->onNull($column, true);
     }
 
+    /**
+     * @param string $column
+     * @return Join
+     */
     public function orOnNull(string $column): self
     {// 2023-05-09
         $this->boolType = self::ON_OR;
         return $this->onNull($column, false);
     }
 
+    /**
+     * @param string $column
+     * @return Join
+     */
     public function orOnNotNull(string $column): self
     {// 2023-05-09
         $this->boolType = self::ON_OR;
         return $this->onNull($column, true);
     }
+
     /**
-     * @param callable(): mixed $callback
+     * @param callable $callback
+     * @param bool $isNot
+     * @return Join
      */
     public function onExists(callable $callback, bool $isNot=false): Join
     {// 2023-05-09
@@ -458,29 +462,33 @@ class Join implements IStatement
 
         return $this;
     }
+
     /**
-     * @param callable(): mixed $callback
+     * @param callable $callback
+     * @return Join
      */
     public function onNotExists(callable $callback): Join
     {// 2023-05-09
         return $this->onExists($callback, true);
     }
+
     /**
-     * @param callable(): mixed $callback
+     * @param callable $callback
+     * @return Join
      */
     public function orOnExists(callable $callback): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
         return $this->onExists($callback, false);
     }
+
     /**
-     * @param callable(): mixed $callback
+     * @param callable $callback
+     * @return Join
      */
     public function orOnNotExists(callable $callback): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
         return $this->onExists($callback, true);
     }
-
-
 }

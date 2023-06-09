@@ -30,19 +30,48 @@ class Columns implements IStatement, IAliasable
 
     public const AGGREGATE_FUNCTION_COUNT = 'COUNT';
 
+    /**
+     * This is the type property.
+     * @see Columns::TYPE_* constants
+     * @var string Columns::TYPE_* constants
+     */
     private string $type;
 
+    /**
+     * This is the columns property.
+     * @var array<int|string, string|Raw|QueryBuilder>
+     */
     private array $columns;
+
+    /**
+     * This is the distinct property.
+     * @var bool
+     */
     private bool $distinct = false;
+
+    /**
+     * This is the distinctOn property.
+     * @var bool
+     */
     private bool $distinctOn = false;
 
+    /**
+     * This is the aggregateFunction property.
+     * @var string|null
+     */
     private ?string $aggregateFunction = null;
 
-    // Singles
+    /**
+     * This is the alias property.
+     * @var string|null
+     */
     private ?string $as = null;
 
     /**
+     * @see Columns::TYPE_* constants
+     * @param string|null $aggregateFunction eg: COUNT, SUM, AVG, MIN, MAX
      * @param array<int,string|Raw> $columns
+     * @param string $type Columns::TYPE_* constants
      */
     public function __construct(?string $aggregateFunction, array $columns, string $type=self::TYPE_PLUCK)
     {// 2023-05-08
@@ -51,42 +80,47 @@ class Columns implements IStatement, IAliasable
         $this->type = $type;
     }
 
+    /**
+     * get the class name
+     * @return string
+     */
     public function getClass(): string
     {// 2023-05-08
         return 'Columns';
     }
 
+    /**
+     * get the type
+     * @return string
+     */
     public function getType(): string
     {// 2023-05-08
         return $this->type;
     }
 
-    public function getTypes(): array
-    {// 2023-05-08
-        $types =
-        [
-            'pluck',
-            'analytic',
-            'aggregate',
-            'aggregateRaw',
-        ];
-
-        return $types;
-    }
-
+    /**
+     * get the aggregate function
+     * @return string|null
+     */
     public function getAggregateFunction(): ?string
     {// 2023-05-08
         return $this->aggregateFunction;
     }
 
     /**
-     * @return array<int,string|callable|Raw>
+     * get the columns
+     * @return array<int|string, string|callable|Raw|QueryBuilder>
      */
     public function getColumns(): array
     {// 2023-05-10
         return $this->columns;
     }
 
+    /**
+     * set the columns
+     * @param array<int|string, string|callable|Raw|QueryBuilder> $columns
+     * @return Columns
+     */
     public function setColumns(array $columns): self
     {// 2023-05-10
         $this->columns = $columns;
@@ -94,6 +128,10 @@ class Columns implements IStatement, IAliasable
         return $this;
     }
 
+    /**
+     * Is the columns a single column
+     * @return bool
+     */
     public function isSingleColumn(): bool
     {// 2023-05-26
         if(count($this->columns) > 1) return false;
@@ -106,16 +144,29 @@ class Columns implements IStatement, IAliasable
         return true;
     }
 
+    /**
+     * Has alias
+     * @return bool
+     */
     public function hasAlias(): bool
     {// 2023-05-10
         return (string)$this->as !== '';
     }
 
+    /**
+     * Get alias
+     * @return string|null
+     */
     public function getAlias(): ?string
     {// 2023-05-10
         return $this->as;
     }
 
+    /**
+     * Set alias
+     * @paran string|null $alias
+     * @return Columns
+     */
     public function as(?string $alias): self
     {// 2023-05-08
         $this->as = $alias;
@@ -124,9 +175,9 @@ class Columns implements IStatement, IAliasable
     }
 
     /**
-     * 2023-05-08
+     * Distinct
      * @param bool $distinct
-     * @return self
+     * @return Columns
      */
     public function distinct(bool $distinct): self
     {// 2023-05-08
@@ -136,7 +187,7 @@ class Columns implements IStatement, IAliasable
     }
 
     /**
-     * 2023-05-08
+     * Is distinct
      * @return bool
      */
     public function isDistinct(): bool
@@ -145,9 +196,9 @@ class Columns implements IStatement, IAliasable
     }
 
     /**
-     * 2023-05-08
+     * Distinct on
      * @param bool $distinctOn
-     * @return self
+     * @return Columns
      */
     public function distinctOn(bool $distinctOn): self
     {// 2023-05-08
@@ -157,7 +208,7 @@ class Columns implements IStatement, IAliasable
     }
 
     /**
-     * 2023-05-08
+     * Is distinct on
      * @return bool
      */
     public function isDistinctOn(): bool

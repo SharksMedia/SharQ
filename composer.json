@@ -4,8 +4,9 @@
     "type": "library",
     "license": "MIT",
     "scripts": {
-        "test": "php index.php",
-        "phpdoc": "./vendor/phpdocumentor/phpdocumentor/bin/phpdoc -d src/ -t docs/"
+        "unit-tests": "./vendor/bin/codecept run unit --debug",
+        "phpdoc": "./bin/phpDocumentor.phar -d src/ -t docs/ --force"
+        
     },
     "authors": [
         {
@@ -20,13 +21,6 @@
     },
     "require-dev": {
         "codeception/codeception": "^5.0",
-        "codeception/module-asserts": "*",
-        "phpdocumentor/phpdocumentor": "*",
-        "phpdocumentor/reflection": "^5.2"
-    },
-    "config": {
-        "allow-plugins": {
-            "symfony/flex": true
-        }
+        "codeception/module-asserts": "*"
     }
 }

@@ -1,8 +1,9 @@
 <?php
-
 /**
+ * Class QueryBuilder
  * 2023-05-08
- * @author Magnus Schmidt Rasmussen <magnus@sharksmedia.dk>
+ *
+ * @author      Magnus Schmidt Rasmussen <magnus@sharksmedia.dk>
  */
 
 declare(strict_types=1);
@@ -10,9 +11,10 @@ declare(strict_types=1);
 namespace Sharksmedia\QueryBuilder;
 
 use Sharksmedia\QueryBuilder\Client;
+use Sharksmedia\QueryBuilder\Single;
+use Sharksmedia\QueryBuilder\OnConflictBuilder;
 
 use Sharksmedia\QueryBuilder\Statement\IStatement;
-use Sharksmedia\QueryBuilder\Statement\IAliasable;
 
 use Sharksmedia\QueryBuilder\Statement\Comments;
 use Sharksmedia\QueryBuilder\Statement\With;
@@ -25,89 +27,7 @@ use Sharksmedia\QueryBuilder\Statement\Group;
 use Sharksmedia\QueryBuilder\Statement\Order;
 use Sharksmedia\QueryBuilder\Statement\Union;
 use Sharksmedia\QueryBuilder\Statement\Raw;
-use function PHPUnit\Framework\throwException;
 
-/**
- * 2023-05-08
- * Used for options which can only have 1 value
- * @property ?string $table
- */
-class Single
-{
-    public /* ?string */ $schema = null;
-    public /* ?string */ $table = null;
-    public ?string       $columnMethod = null;
-    public ?array        $update = null;
-    public               $insert = null;
-    public bool          $ignore = false;
-    public ?array        $merge = null;
-    public               $onConflict = null;
-    public ?array        $returning = null;
-    public ?array        $options = null;
-    public               $counter = null;
-    public               $limit = null;
-    public               $offset = null;
-
-    public ?string       $lock = null;
-    public ?string       $waitMode = null;
-
-    public ?array        $lockTables = null;
-    public               $alias = null;
-}
-
-class OnConflictBuilder
-{
-    private QueryBuilder $iQueryBuilder;
-    private              $columns;
-    /**
-     * @param mixed $columns
-     */
-    public function __construct(QueryBuilder $iQueryBuilder, $columns)
-    {// 2023-06-06
-        $this->iQueryBuilder = $iQueryBuilder;
-        $this->columns = $columns;
-    }
-
-    public function ignore(): QueryBuilder
-    {// 2023-06-06
-        $iSingle = &$this->iQueryBuilder->getSingle();
-
-        $iSingle->onConflict = $this->columns;
-        $iSingle->ignore = true;
-
-        return $this->iQueryBuilder;
-    }
-    /**
-     * @param mixed $updates
-     */
-    public function merge($updates=[]): QueryBuilder
-    {// 2023-06-06
-        $iSingle = &$this->iQueryBuilder->getSingle();
-
-        $iSingle->onConflict = $this->columns;
-        $iSingle->merge = $updates;
-
-        return $this->iQueryBuilder;
-    }
-
-    // Prevent
-    public function then(): void
-    {// 2023-06-06
-        throw new \Exception('Incomplete onConflict clause. .onConflict() must be directly followed by either .merge() or .ignore()');
-    }
-}
-
-/**
- * 2023-05-08
- * @property Client $iClient
- * @property IStatement[] $iStatements
- *
- * @property string $schema
- * @property string $joinFlag
- * @property string $whereFlag
- * @property string $boolType
- * @property bool $isNot
- */
 class QueryBuilder
 {
     public const BOOL_TYPE_AND = 'AND';
@@ -147,15 +67,63 @@ class QueryBuilder
         'counters',
     ];
 
+
+    /**
+     * This is the iClient attribute.
+     * @var Client
+     */
     private Client $iClient;
+
+    /**
+     * This is the iStatements attribute.
+     * @var IStatement[]
+     */
     private array $iStatements = [];
+
+    /**
+     * This is the method attribute.
+     * see QueryBuilder::METHOD_* constants
+     * @var string
+     */
     private string $method = self::METHOD_SELECT;
+
+    /**
+     * This is the iSingle attribute.
+     * @var Single
+     */
     private Single $iSingle;
 
+    /**
+     * This is the schema attribute.
+     * @var string
+     */
     private string $schema;
+
+    /**
+     * This is the joinFlag attribute.
+     * see Join::TYPE_* constants
+     * @var string
+     */
     private string $joinFlag = Join::TYPE_INNER;
+
+    /**
+     * This is the whereFlag attribute.
+     * see Where::TYPE_* constants
+     * @var string
+     */
     private string $whereFlag = Where::TYPE_BASIC;
+
+    /**
+     * This is the boolType attribute.
+     * see QueryBuilder::BOOL_TYPE_* constants
+     * @var string
+     */
     private string $boolType = self::BOOL_TYPE_AND;
+
+    /**
+     * This is the isNot attribute.
+     * @var bool
+     */
     private bool   $isNot = false;
 
     public function __construct(Client $iClient, string $schema)
@@ -165,26 +133,40 @@ class QueryBuilder
         $this->iSingle = new Single();
     }
 
-    public function getContext(): string
-    {// 2023-05-10
-        return 'query';
-    }
-
+    /**
+     * This is the getSchema method.
+     * @return string Returns the schema.
+     */
     public function getSchema(): string
     {// 2023-05-10
         return $this->schema;
     }
 
+    /**
+     * This is the getSchema method.
+     * see Columns::TYPE_* constants
+     * @return string|null Returns the select method used.
+     */
     public function getSelectMethod(): ?string
     {// 2023-05-15
         return $this->iSingle->columnMethod;
     }
 
+    /**
+     * This is the getMethod method.
+     * see QueryBuilder::METHOD_* constants
+     * @return string Returns the method used.
+     */
     public function getMethod(): string
     {// 2023-06-05
         return $this->method;
     }
 
+    /**
+     * Clears a specific grouping.
+     * @param string $type
+     * @return QueryBuilder
+     */
     private function clearGrouping(string $type): self
     {// 2023-05-15
         $this->iStatements = array_filter($this->iStatements, function($statement) use($type)
@@ -195,69 +177,124 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * Clears ->with statements
+     * @return QueryBuilder
+     */
     public function clearWith(): self
     {// 2023-05-15
         return $this->clearGrouping(With::class);
     }
 
+    /**
+     * Clears ->select statements
+     * @return QueryBuilder
+     */
     public function clearSelect(): self
     {// 2023-05-15
         return $this->clearGrouping(Columns::class);
     }
 
+    /**
+     * Clears ->join statements
+     * @return QueryBuilder
+     */
     public function clearJoin(): self
     {// 2023-05-15
         return $this->clearGrouping(Join::class);
     }
 
+    /**
+     * Clears ->union statements
+     * @return QueryBuilder
+     */
     public function clearUnion(): self
     {// 2023-05-15
         return $this->clearGrouping(Union::class);
     }
 
+    /**
+     * Clears ->hintComment statements
+     * @return QueryBuilder
+     */
     public function clearHintComments(): self
     {// 2023-05-15
         return $this->clearGrouping(HintComments::class);
     }
 
+    /**
+     * Clears ->where statements
+     * @return QueryBuilder
+     */
     public function clearWhere(): self
     {// 2023-06-01
         return $this->clearGrouping(Where::class);
     }
 
+    /**
+     * Clears ->increment, ->decrement statements
+     * @return QueryBuilder
+     */
     public function clearCounters(): self
     {// 2023-06-01
         $this->iSingle->counter = null;
         return $this;
     }
 
+    /**
+     * Clears ->groupBy statements
+     * @return QueryBuilder
+     */
     public function clearGroup(): self
     {// 2023-06-01
         return $this->clearGrouping(Group::class);
     }
 
+    /**
+     * Clears ->orderBy statements
+     * @return QueryBuilder
+     */
     public function clearOrder(): self
     {// 2023-06-01
         return $this->clearGrouping(Order::class);
     }
 
+    /**
+     * Clears ->having statements
+     * @return QueryBuilder
+     */
     public function clearHaving(): self
     {// 2023-06-01
         return $this->clearGrouping(Having::class);
     }
 
+    /**
+     * Clears ->limit statements
+     * @return QueryBuilder
+     */
     public function clearLimit(): self
     {// 2023-06-01
         $this->iSingle->limit = null;
         return $this;
     }
 
+    /**
+     * Clears ->offset statements
+     * @return QueryBuilder
+     */
     public function clearOffset(): self
     {// 2023-06-01
         $this->iSingle->offset = null;
         return $this;
     }
 
+    /**
+     * Generic clear function. Clears statements
+     * possible values: 'with', 'select', 'columns', 'hintComments', 'where', 'union', 'join', 'group', 'order', 'having', 'limit', 'offset', 'counter', 'counters'
+     *
+     * @param string $statementName
+     * @return QueryBuilder
+     */
     public function clear(string $statementName): self
     {// 2023-06-07
         $statementMap =
@@ -290,21 +327,25 @@ class QueryBuilder
     /**
      * 2023-05-08
      * Get single options
-     * @return string
+     * @return Single
      */
     public function &getSingle(): Single
     {// 2023-05-15
         return $this->iSingle;
     }
+
     /**
-     * @param mixed $arg
+     * @param string|Raw|QueryBuilder|callable $arg
+     * @return bool
      */
     private function isValidStatementArg($arg): bool
     {// 2023-06-07
         return is_callable($arg) || $arg instanceof Raw || $arg instanceof QueryBuilder;
     }
+
     /**
-     * @param mixed $args
+     * @param string $alias
+     * @param array<int, mixed> $args [statementOrColumnList, nothingOrStatement, method]
      */
     private function validateWithArgs(string $alias, ...$args): void
     {// 2023-06-07
@@ -326,8 +367,10 @@ class QueryBuilder
 
         throw new \Exception("{$method}() third argument must be a function / QueryBuilder or a raw when its second argument is a column name list");
     }
+
     /**
-     * @param mixed $args
+     * @param string $alias
+     * @param array<int, mixed> $args [statementOrColumnList, nothingOrStatement, method]
      */
     public function with(string $alias, ...$args): QueryBuilder
     {// 2023-05-15
@@ -339,8 +382,10 @@ class QueryBuilder
 
         return $this->withWrapped($alias, $statementOrColumnList, $nothingOrStatement);
     }
+
     /**
-     * @param mixed $args
+     * @param string $alias
+     * @param array<int, mixed> $args [statementOrColumnList, nothingOrStatement]
      */
     public function withWrapped(string $alias, ...$args): QueryBuilder
     {// 2023-05-15
@@ -366,7 +411,7 @@ class QueryBuilder
     }
 
     /**
-     * @param mixed $tableName
+     * @param string|Raw|QueryBuilder|array<int, string|Raw|QueryBuilder> $tableName
      */
     public function table($tableName): QueryBuilder
     {// 2023-05-15
@@ -378,27 +423,33 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $tableName
+     * @param string|Raw|QueryBuilder|array<int, string|Raw|QueryBuilder> $tableName
      */
     public function from($tableName): QueryBuilder
     {// 2023-05-15
         return $this->table($tableName);
     }
 
+    /**
+     * @param string $raw
+     */
     public function fromRaw(string $raw): QueryBuilder
     {// 2023-05-15
         return $this->table(new Raw($raw));
     }
+
     /**
-     * @param mixed $tableName
+     * @param string|Raw|QueryBuilder|array<int, string|Raw|QueryBuilder> $tableName
      */
     public function into($tableName): QueryBuilder
     {// 2023-05-15
         return $this->table($tableName);
     }
+
     /**
-     * @param mixed $schemaName
+     * @param string|Raw|null $schemaName
      */
     public function withSchema($schemaName): QueryBuilder
     {// 2023-05-26
@@ -414,21 +465,12 @@ class QueryBuilder
      * @throws Exception\QueryTimeoutException
      * @return self
      */
-    public function timeout(int $milliSeconds, bool $cancel=false): self
+    public function timeout(int $milliSeconds, bool $cancel=false): QueryBuilder
     {// 2023-05-08
         // 2023-05-08 TODO: implement me
         if($milliSeconds < 0) throw new \UnexpectedValueException('Timeout must be a positive integer');
 
         return $this;
-    }
-
-    /**
-     * 2023-05-08
-     * @return IStatement|IAliasable
-     */
-    private function getLastStatement(): IStatement
-    {// 2023-05-09
-        return end($this->iStatements);
     }
 
     /**
@@ -442,14 +484,14 @@ class QueryBuilder
 
     /**
      * 2023-05-08
-     * @param string|Raw[] ...$columns One or more values
-     * @return self
-     * @param mixed $columns
+     * @param array<int|string, string|Raw|QueryBuilder> $columns One or more values
+     * @return QueryBuilder
      */
     public function column(...$columns): QueryBuilder
     {// 2023-05-08
         return $this->_column($columns, Columns::TYPE_PLUCK);
     }
+
     /**
      * @param array<int,mixed> $columns
      * @return array<int,mixed>|mixed|bool
@@ -485,7 +527,9 @@ class QueryBuilder
     }
 
     /**
+     * see Column::TYPE_* constants
      * @param array<int,mixed> $columns
+     * @param string $type
      */
     private function _column(array $columns, string $type): QueryBuilder
     {// 2023-05-15
@@ -500,10 +544,10 @@ class QueryBuilder
 
     /**
      * 2023-05-08
-     * @param string|Raw[] ...$columns One or more values
-     * @return self
+     * @param array<int, string|Raw|QueryBuilder> $columns One or more values
+     * @return QueryBuilder
      */
-    public function distinct(string ...$columns): self
+    public function distinct(string ...$columns): QueryBuilder
     {// 2023-05-08
         $columns = $this->_normalizeColumns($columns);
 
@@ -517,10 +561,10 @@ class QueryBuilder
 
     /**
      * 2023-05-08
-     * @param string[] ...$columns One or more values
-     * @return self
+     * @param array<int, string|Raw|QueryBuilder> $columns One or more values
+     * @return QueryBuilder
      */
-    public function distinctOn(string ...$columns): self
+    public function distinctOn(string ...$columns): QueryBuilder
     {// 2023-05-08
         $columns = $this->_normalizeColumns($columns);
 
@@ -535,20 +579,28 @@ class QueryBuilder
     /**
      * 2023-05-08
      * @param string $alias
-     * @return self
+     * @return QueryBuilder
      */
-    public function as(string $alias): self
+    public function as(string $alias): QueryBuilder
     {// 2023-05-09
         $this->iSingle->alias = $alias;
 
         return $this;
     }
 
+    /**
+     * Returns the query alias
+     * @return string|null
+     */
     public function getAlias(): ?string
     {// 2023-06-08
         return $this->iSingle->alias;
     }
     
+    /**
+     * Returns wether the query has an alias
+     * @return bool
+     */
     public function hasAlias(): bool
     {// 2023-06-08
         return !empty($this->iSingle->alias);
@@ -557,7 +609,7 @@ class QueryBuilder
     /**
      * 2023-05-08
      * @param string[] $hintComments One or more values
-     * @return self
+     * @return QueryBuilder
      */
     public function hintComment(...$hintComments): QueryBuilder
     {// 2023-05-09
@@ -571,8 +623,7 @@ class QueryBuilder
     /**
      * 2023-05-08
      * @param string[] $comments One or more values
-     * @return self
-     * @param mixed $comments
+     * @return QueryBuilder
      */
     public function comment(...$comments): QueryBuilder
     {// 2023-05-09
@@ -584,7 +635,9 @@ class QueryBuilder
     }
 
     /**
-     * @param string|Raw[] $columns
+     * Sets the values for a `select` query
+     * @param array<int, string|Raw|QueryBuilder> $columns One or more values
+     * @return QueryBuilder
      */
     public function select(...$columns): QueryBuilder
     {// 2023-05-15
@@ -594,9 +647,9 @@ class QueryBuilder
     }
 
     /**
-     * Sets the values for a `select` query, informing that only the first
-     * row should be returned (limit 1).
-     * @param string|Raw[] $columns
+     * Sets the values for a `select` query, informing that only the first row should be returned (limit 1).
+     * @param array<int, string|Raw|QueryBuilder> $columns One or more values
+     * @return QueryBuilder
      */
     public function first(...$columns): QueryBuilder
     {// 2023-05-15
@@ -606,17 +659,17 @@ class QueryBuilder
 
         return $this->limit(1);
     }
+
     /**
      * 2023-05-08
      *
      * join(string $table, string $first, string $operator, string $second)
      * join(string $table, callable $first)
      *
-     * @param string $table
-     * @param string|callable $first
-     * @param string[] ...$args One or more values
-     * @return self
-     * @param array<int,string|Raw|QueryBuilder> $args
+     * @param string|Raw $table
+     * @param string|Raw|QueryBuilder|callable $first on statement [column]
+     * @param array<int,string|Raw|QueryBuilder> $args on statement [operator, value]
+     * @return QueryBuilder
      */
     public function join($table, $first=null, ...$args): QueryBuilder
     {// 2023-05-09
@@ -645,72 +698,90 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args
+     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
+     * @return QueryBuilder
      */
     public function innerJoin(...$args): QueryBuilder
     {// 2023-05-09
         $this->joinFlag = Join::TYPE_INNER;
         return $this->join(...$args);
     }
+
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args
+     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
+     * @return QueryBuilder
      */
     public function leftJoin(...$args): QueryBuilder
     {// 2023-05-09
         $this->joinFlag = Join::TYPE_LEFT;
         return $this->join(...$args);
     }
+
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args
+     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
+     * @return QueryBuilder
      */
     public function leftOuterJoin(...$args): QueryBuilder
     {// 2023-05-09
         $this->joinFlag = Join::TYPE_LEFT_OUTER;
         return $this->join(...$args);
     }
+
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args
+     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
+     * @return QueryBuilder
      */
     public function rightJoin(...$args): QueryBuilder
     {// 2023-05-09
         $this->joinFlag = Join::TYPE_RIGHT;
         return $this->join(...$args);
     }
+
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args
+     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
+     * @return QueryBuilder
      */
     public function rightOuterJoin(...$args): QueryBuilder
     {// 2023-05-09
         $this->joinFlag = Join::TYPE_RIGHT_OUTER;
         return $this->join(...$args);
     }
+
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args
+     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
+     * @return QueryBuilder
      */
     public function outerJoin(...$args): QueryBuilder
     {// 2023-05-09
         $this->joinFlag = Join::TYPE_OUTER;
         return $this->join(...$args);
     }
+
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args
+     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
+     * @return QueryBuilder
      */
     public function fullOuterJoin(...$args): QueryBuilder
     {// 2023-05-09
         $this->joinFlag = Join::TYPE_FULL_OUTER;
         return $this->join(...$args);
     }
+
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args
+     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
+     * @return QueryBuilder
      */
     public function crossJoin(...$args): QueryBuilder
     {// 2023-05-09
         $this->joinFlag = Join::TYPE_CROSS;
         return $this->join(...$args);
     }
+
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args
+     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
+     * @return QueryBuilder
      */
     public function joinRaw(...$args): QueryBuilder
     {// 2023-05-09
@@ -718,22 +789,29 @@ class QueryBuilder
         return $this->join(...$args);
     }
 
-    // Where modifiers:
+    /**
+     * Where modifier. Changes bool type to OR
+     * @return QueryBuilder
+     */
     public function or(): self
     {// 2023-05-09
         $this->boolType = self::BOOL_TYPE_OR;
         return $this;
     }
 
+    /**
+     * Where modifier. Changes not type
+     * @return QueryBuilder
+     */
     public function not(): self
     {// 2023-05-09
         $this->isNot = true;
         return $this;
     }
+
     /**
-     * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable $value
-     * @param string|Raw|QueryBuilder|callable $args
+     * @param string|Raw|QueryBuilder|callable $args [column, operator, value]
+     * @return QueryBuilder
      */
     public function where(...$args): QueryBuilder
     {// 2023-05-09
@@ -846,8 +924,10 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param array<int, string|Raw|QueryBuilder|callable> $args
+     * @param string|Raw|QueryBuilder|callable $args [column, operator, value]
+     * @return QueryBuilder
      */
     public function whereColumn(...$args): QueryBuilder
     {// 2023-06-01
@@ -856,28 +936,31 @@ class QueryBuilder
     }
 
     /**
-     * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $args
+     * @param array<int, string|Raw|QueryBuilder|callable> $args [column, operator, value]
+     * @return QueryBuilder
      */
-    public function andWhere($column, ...$args): QueryBuilder
+    public function andWhere(...$args): QueryBuilder
     {// 2023-05-09
         $this->whereFlag = Where::TYPE_BASIC;
         $this->boolType = self::BOOL_TYPE_AND;
-        return $this->where($column, ...$args);
+        return $this->where(...$args);
     }
+
     /**
-     * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $args
+     * @param array<int, string|Raw|QueryBuilder|callable> $args [column, operator, value]
+     * @return QueryBuilder
      */
-    public function orWhere($column, ...$args): QueryBuilder
+    public function orWhere(...$args): QueryBuilder
     {// 2023-05-09
         $this->whereFlag = Where::TYPE_BASIC;
         $this->boolType = self::BOOL_TYPE_OR;
-        return $this->where($column, ...$args);
+        return $this->where(...$args);
     }
+
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $args
+     * @param array<int, string|Raw|QueryBuilder|callable> $args [column, operator, value]
+     * @return QueryBuilder
      */
     public function whereNot(...$args): QueryBuilder
     {// 2023-05-09
@@ -885,9 +968,11 @@ class QueryBuilder
         $this->isNot = true;
         return $this->where(...$args);
     }
+
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $args
+     * @param array<int, string|Raw|QueryBuilder|callable> $args [column, operator, value]
+     * @return QueryBuilder
      */
     public function orWhereNot(...$args): QueryBuilder
     {// 2023-05-09
@@ -896,8 +981,10 @@ class QueryBuilder
         $this->isNot = true;
         return $this->where(...$args);
     }
+
     /**
      * @param array<int,mixed> $bindings
+     * @return QueryBuilder
      */
     public function whereRaw(string $sql, ...$bindings): QueryBuilder
     {// 2023-05-09
@@ -911,7 +998,8 @@ class QueryBuilder
         return $this;
     }
     /**
-     * @param callable(): mixed $callback
+     * @param callable $callback
+     * @return QueryBuilder
      */
     public function whereWrapped(callable $callback): QueryBuilder
     {// 2023-05-09
@@ -924,8 +1012,10 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
      * @param string|Raw|QueryBuilder|callable $value
+     * @return QueryBuilder
      */
     private function _whereExists($value): QueryBuilder
     {// 2023-06-02
@@ -938,6 +1028,7 @@ class QueryBuilder
 
     /**
      * @param callable|QueryBuilder $callback
+     * @return QueryBuilder
      */
     public function whereExists($callback): QueryBuilder
     {// 2023-05-09
@@ -945,8 +1036,10 @@ class QueryBuilder
         $this->boolType = self::BOOL_TYPE_AND;
         return $this->_whereExists($callback);
     }
+
     /**
      * @param callable|QueryBuilder $callback
+     * @return QueryBuilder
      */
     public function whereNotExists($callback): QueryBuilder
     {// 2023-05-09
@@ -954,8 +1047,10 @@ class QueryBuilder
         $this->boolType = self::BOOL_TYPE_AND;
         return $this->_whereExists($callback);
     }
+
     /**
      * @param callable $callback
+     * @return QueryBuilder
      */
     public function orWhereExists(callable $callback): QueryBuilder
     {// 2023-05-07
@@ -963,8 +1058,10 @@ class QueryBuilder
         $this->boolType = self::BOOL_TYPE_OR;
         return $this->_whereExists($callback);
     }
+
     /**
      * @param callable $callback
+     * @return QueryBuilder
      */
     public function orWhereNotExists(callable $callback): QueryBuilder
     {// 2023-05-09
@@ -972,9 +1069,11 @@ class QueryBuilder
         $this->boolType = self::BOOL_TYPE_OR;
         return $this->_whereExists($callback);
     }
+
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function whereIn($column, $values): QueryBuilder
     {// 2023-05-09
@@ -995,18 +1094,22 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function whereNotIn($column, $values): QueryBuilder
     {// 2023-05-09
         $this->isNot = true;
         return $this->whereIn($column, $values);
     }
+
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function andWhereIn($column, $values): QueryBuilder
     {// 2023-05-09
@@ -1014,18 +1117,22 @@ class QueryBuilder
         $this->boolType = self::BOOL_TYPE_AND;
         return $this->whereIn($column, $values);
     }
+
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function andWhereNotIn($column, $values): QueryBuilder
     {// 2023-05-09
         $this->isNot = true;
         return $this->andWhereIn($column, $values);
     }
+
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function orWhereIn($column, $values): QueryBuilder
     {// 2023-05-09
@@ -1033,9 +1140,11 @@ class QueryBuilder
         $this->boolType = self::BOOL_TYPE_OR;
         return $this->whereIn($column, $values);
     }
+
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function orWhereNotIn($column, $values): QueryBuilder
     {// 2023-05-09
@@ -1045,8 +1154,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
+     * @return QueryBuilder
      */
-    private function _whereNull($column): self
+    private function _whereNull($column): QueryBuilder
     {// 2023-06-02
         $iWhere = new Where($column, null, null, $this->boolType, $this->isNot, Where::TYPE_NULL);
 
@@ -1057,8 +1167,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
+     * @return QueryBuilder
      */
-    public function whereNull($column): self
+    public function whereNull($column): QueryBuilder
     {// 2023-05-09
         $this->isNot = false;
         $this->boolType = self::BOOL_TYPE_AND;
@@ -1067,8 +1178,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
+     * @return QueryBuilder
      */
-    public function whereNotNull($column): self
+    public function whereNotNull($column): QueryBuilder
     {// 2023-05-09
         $this->isNot = true;
         $this->boolType = self::BOOL_TYPE_AND;
@@ -1077,8 +1189,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
+     * @return QueryBuilder
      */
-    public function orWhereNull($column): self
+    public function orWhereNull($column): QueryBuilder
     {// 2023-05-09
         $this->isNot = false;
         $this->boolType = self::BOOL_TYPE_OR;
@@ -1087,8 +1200,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
+     * @return QueryBuilder
      */
-    public function orWhereNotNull($column): self
+    public function orWhereNotNull($column): QueryBuilder
     {// 2023-05-09
         $this->isNot = true;
         $this->boolType = self::BOOL_TYPE_OR;
@@ -1099,6 +1213,7 @@ class QueryBuilder
      * @param string|Raw $column
      * @param string|Raw|QueryBuilder|callable $value
      * @param string|Raw|QueryBuilder|callable $type
+     * @return QueryBuilder
      */
     private function _whereLike($column, $value, $type): QueryBuilder
     {// 2023-06-01
@@ -1112,6 +1227,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param string|Raw|QueryBuilder|callable $value
+     * @return QueryBuilder
      */
     public function whereLike($column, $value): QueryBuilder
     {// 2023-06-01
@@ -1121,6 +1237,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param string|Raw|QueryBuilder|callable $value
+     * @return QueryBuilder
      */
     public function andWhereLike($column, $value): QueryBuilder
     {// 2023-06-01
@@ -1131,6 +1248,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param string|Raw|QueryBuilder|callable $value
+     * @return QueryBuilder
      */
     public function orWhereLike($column, $value): QueryBuilder
     {// 2023-06-01
@@ -1141,6 +1259,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param string|Raw|QueryBuilder|callable $value
+     * @return QueryBuilder
      */
     public function whereILike($column, $value): QueryBuilder
     {// 2023-06-01
@@ -1150,6 +1269,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param string|Raw|QueryBuilder|callable $value
+     * @return QueryBuilder
      */
     public function andWhereILike($column, $value): QueryBuilder
     {// 2023-06-01
@@ -1160,6 +1280,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param string|Raw|QueryBuilder|callable $value
+     * @return QueryBuilder
      */
     public function orWhereILike($column, $value): QueryBuilder
     {// 2023-06-01
@@ -1170,6 +1291,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     private function _whereBetween($column, $values): QueryBuilder
     {// 2023-06-01
@@ -1185,6 +1307,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function whereBetween($column, $values): QueryBuilder
     {// 2023-06-01
@@ -1195,6 +1318,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function whereNotBetween($column, $values): QueryBuilder
     {// 2023-06-01
@@ -1205,6 +1329,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function andWhereBetween($column, $values): QueryBuilder
     {// 2023-06-01
@@ -1216,6 +1341,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function andWhereNotBetween($column, $values): QueryBuilder
     {// 2023-06-01
@@ -1227,6 +1353,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function orWhereBetween($column, $values): QueryBuilder
     {// 2023-06-01
@@ -1238,6 +1365,7 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @return QueryBuilder
      */
     public function orWhereNotBetween($column, $values): QueryBuilder
     {// 2023-06-01
@@ -1251,6 +1379,7 @@ class QueryBuilder
      * @param string|Raw $method
      * @param string|Raw $column
      * @param array<string, mixed> $options
+     * @return QueryBuilder
      */
     private function aggregate($method, $column, array $options=[]): QueryBuilder
     {// 2023-05-26
@@ -1273,13 +1402,16 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<string, mixed> $options
+     * @return QueryBuilder
      */
     public function count($column=null, array $options=[]): QueryBuilder
     {// 2023-05-26
         return $this->aggregate('COUNT', $column ?? '*', $options);
     }
+
     /**
-     * @param mixed $columns
+     * @param array<int, string|Raw|array<string, mixed> $columns [...column, options]
+     * @return QueryBuilder
      */
     public function countDistinct(...$columns): QueryBuilder
     {// 2023-05-26
@@ -1291,32 +1423,40 @@ class QueryBuilder
         $options['distinct'] = true;
         return $this->aggregate('COUNT', $columns, $options);
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $options
+     * @param string|Raw $column
+     * @param array<string, mixed> $options
+     * @return QueryBuilder
      */
     public function min($column, $options=[]): QueryBuilder
     {// 2023-05-26
         return $this->aggregate('MIN', $column, $options);
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $options
+     * @param string|Raw $column
+     * @param array<string, mixed> $options
+     * @return QueryBuilder
      */
     public function max($column, $options=[]): QueryBuilder
     {// 2023-05-26
         return $this->aggregate('MAX', $column, $options);
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $options
+     * @param string|Raw $column
+     * @param array<string, mixed> $options
+     * @return QueryBuilder
      */
     public function sum($column, $options=[]): QueryBuilder
     {// 2023-05-26
         return $this->aggregate('SUM', $column, $options);
     }
+
     /**
-     * @param mixed $columns
+     * @param array<int, string|Raw|array<string, mixed> $columns [...column, options]
+     * @return QueryBuilder
      */
     public function sumDistinct(...$columns): QueryBuilder
     {// 2023-05-26
@@ -1328,16 +1468,20 @@ class QueryBuilder
         $options['distinct'] = true;
         return $this->aggregate('SUM', $columns, $options);
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $options
+     * @param string|Raw $column
+     * @param array<string, mixed> $options
+     * @return QueryBuilder
      */
     public function avg($column, $options=[]): QueryBuilder
     {// 2023-05-26
         return $this->aggregate('AVG', $column, $options);
     }
+
     /**
-     * @param mixed $columns
+     * @param array<int, string|Raw|array<string, mixed> $columns [...column, options]
+     * @return QueryBuilder
      */
     public function avgDistinct(...$columns): QueryBuilder
     {// 2023-05-26
@@ -1349,8 +1493,12 @@ class QueryBuilder
         $options['distinct'] = true;
         return $this->aggregate('AVG', $columns, $options);
     }
+
     /**
-     * @param mixed $args
+     * see Union::TYPE_* constants
+     * @param string $type Union::TYPE_* constant
+     * @param array<int, callable|QueryBuilder> $args
+     * @return QueryBuilder
      */
     private function _union(string $type, ...$args): QueryBuilder
     {// 2023-06-02
@@ -1374,30 +1522,38 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $args
+     * @param array<int, callable|QueryBuilder> $args
+     * @return QueryBuilder
      */
     public function union(...$args): QueryBuilder
     {// 2023-06-02
         return $this->_union(Union::TYPE_BASIC, ...$args);
     }
+
     /**
-     * @param mixed $args
+     * @param array<int, callable|QueryBuilder> $args
+     * @return QueryBuilder
      */
     public function unionAll(...$args): QueryBuilder
     {// 2023-06-02
         return $this->_union(Union::TYPE_ALL, ...$args);
     }
+
     /**
-     * @param mixed $args
+     * @param array<int, callable|QueryBuilder> $args
+     * @return QueryBuilder
      */
     public function intersect(...$args): QueryBuilder
     {// 2023-06-02
         return $this->_union(Union::TYPE_INTERSECT, ...$args);
     }
+
     /**
      * @param int|Raw|QueryBuilder $value
      * @param array<int,mixed> $options
+     * @return QueryBuilder
      */
     public function offset($value, ...$options): QueryBuilder
     {// 2023-05-26
@@ -1417,9 +1573,11 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
      * @param int|Raw|QueryBuilder $value
      * @param array<int,mixed> $options
+     * @return QueryBuilder
      */
     public function limit($value, ...$options): QueryBuilder
     {// 2023-05-26
@@ -1429,19 +1587,30 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * @return QueryBuilder
+     */
     public function clone(): QueryBuilder
     {// 2023-06-02j
         return clone $this;
     }
 
+    /**
+     * Sets method to DELETE
+     * @return QueryBuilder
+     */
     public function delete(): QueryBuilder
     {// 2023-06-02
         $this->method = self::METHOD_DELETE;
 
         return $this;
     }
+
     /**
-     * @param mixed $column
+     * see Group::TYPE_* constants
+     * @param string $type Group::TYPE_* constant
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     private function _groupBy(string $type, $column): QueryBuilder
     {// 2023-06-05
@@ -1451,8 +1620,10 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $columns
+     * @param array<int, string|Raw> $columns
+     * @return QueryBuilder
      */
     public function groupBy(...$columns): QueryBuilder
     {// 2023-06-05
@@ -1464,8 +1635,10 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $columns
+     * @param array<int, string> $columns
+     * @return QueryBuilder
      */
     public function groupByRaw(...$columns): QueryBuilder
     {// 2023-06-05
@@ -1479,10 +1652,17 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $direction
-     * @param mixed $nullsPosition
+     * see Order::TYPE_* constants
+     * see Order::DIRECTION_* constants
+     * see Order::NULLS_POSITION_* constants
+     *
+     * @param string $type Order::TYPE_* constant
+     * @param string|Raw $column
+     * @param string|null $direction Order::DIRECTION_* constant
+     * @param string|null $nullsPosition Order::NULLS_POSITION_* constants
+     * @return QueryBuilder
      */
     private function _orderBy(string $type, $column, $direction=null, $nullsPosition=null): QueryBuilder
     {// 2023-06-05
@@ -1492,10 +1672,15 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $direction
-     * @param mixed $nullsPosition
+     * see Order::DIRECTION_* constants
+     * see Order::NULLS_POSITION_* constants
+     *
+     * @param string|Raw $column
+     * @param string|null $direction Order::DIRECTION_* constant
+     * @param string|null $nullsPosition Order::NULLS_POSITION_* constants
+     * @return QueryBuilder
      */
     public function orderBy($column, $direction=Order::DIRECTION_ASC, $nullsPosition=null): QueryBuilder
     {// 2023-06-05
@@ -1521,9 +1706,14 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $direction
+     * see Order::DIRECTION_* constants
+     *
+     * @param string|Raw $column
+     * @param string|null $direction Order::NULLS_POSITION_* constants
+     *
+     * @return QueryBuilder
      */
     public function orderByRaw($column, $direction=null): QueryBuilder
     {// 2023-06-05
@@ -1531,12 +1721,18 @@ class QueryBuilder
 
         return $this->_orderBy(Order::TYPE_RAW, $column, $direction);
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $operator
-     * @param mixed $value
-     * @param mixed $boolean
-     * @param mixed $isNot
+     * see Having::TYPE_* constants
+     * see QueryBuilder::BOOL_TYPE_* constants
+     *
+     * @param string $type Having::TYPE_* constant
+     * @param string|Raw $column
+     * @param string|Raw|QueryBuilder|callable $operator
+     * @param string|Raw|QueryBuilder|callable $value
+     * @param string $boolean QueryBuilder::BOOL_TYPE_* constant
+     * @param bool $isNot
+     * @return QueryBuilder
      */
     private function _having(string $type, $column, $operator, $value, $boolean, $isNot): QueryBuilder
     {// 2023-06-05
@@ -1546,10 +1742,12 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $operator
-     * @param mixed $value
+     * @param string|Raw $column
+     * @param string|Raw|QueryBuilder|callable|null $operator
+     * @param string|Raw|QueryBuilder|callable|null $value
+     * @return QueryBuilder
      */
     public function having($column, $operator=null, $value=null): QueryBuilder
     {// 2023-06-05
@@ -1562,10 +1760,12 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_BASIC, $column, $operator, $value, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $operator
-     * @param mixed $value
+     * @param string|Raw $column
+     * @param string|Raw|QueryBuilder|callable|null $operator
+     * @param string|Raw|QueryBuilder|callable|null $value
+     * @return QueryBuilder
      */
     public function orHaving($column, $operator=null, $value=null): QueryBuilder
     {// 2023-06-05
@@ -1578,8 +1778,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_BASIC, $column, $operator, $value, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     public function havingNull($column): QueryBuilder
     {// 2023-06-05
@@ -1588,8 +1790,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_NULL, $column, null, null, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     public function orHavingNull($column): QueryBuilder
     {// 2023-06-05
@@ -1598,8 +1802,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_NULL, $column, null, null, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     public function havingNotNull($column): QueryBuilder
     {// 2023-06-05
@@ -1608,8 +1814,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_NULL, $column, null, null, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     public function orHavingNotNull($column): QueryBuilder
     {// 2023-06-05
@@ -1618,8 +1826,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_NULL, $column, null, null, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     public function havingExists($column): QueryBuilder
     {// 2023-06-05
@@ -1628,8 +1838,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_EXISTS, $column, null, null, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     public function orHavingExists($column): QueryBuilder
     {// 2023-06-05
@@ -1638,8 +1850,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_EXISTS, $column, null, null, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     public function havingNotExists($column): QueryBuilder
     {// 2023-06-05
@@ -1648,8 +1862,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_EXISTS, $column, null, null, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     public function orHavingNotExists($column): QueryBuilder
     {// 2023-06-05
@@ -1658,9 +1874,11 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_EXISTS, $column, null, null, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
-     * @param array<int,mixed> $values
+     * @param string|Raw $column
+     * @param array<int, string|Raw|QueryBuilder> $values
+     * @return QueryBuilder
      */
     private function _havingBetween($column, array $values): QueryBuilder
     {// 2023-06-05
@@ -1668,9 +1886,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_BETWEEN, $column, null, $values, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
-     * @param array<int,mixed> $values
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     public function havingBetween($column, array $values): QueryBuilder
     {// 2023-06-05
@@ -1679,9 +1898,10 @@ class QueryBuilder
 
         return $this->_havingBetween($column, $values);
     }
+
     /**
-     * @param mixed $column
-     * @param array<int,mixed> $values
+     * @param string|Raw $column
+     * @return QueryBuilder
      */
     public function orHavingBetween($column, array $values): QueryBuilder
     {// 2023-06-05
@@ -1690,9 +1910,11 @@ class QueryBuilder
 
         return $this->_havingBetween($column, $values);
     }
+
     /**
-     * @param mixed $column
-     * @param array<int,mixed> $values
+     * @param string|Raw $column
+     * @param array<int, string|Raw|QueryBuilder> $values
+     * @return QueryBuilder
      */
     public function havingNotBetween($column, array $values): QueryBuilder
     {// 2023-06-05
@@ -1701,9 +1923,11 @@ class QueryBuilder
 
         return $this->_havingBetween($column, $values);
     }
+
     /**
-     * @param mixed $column
-     * @param array<int,mixed> $values
+     * @param string|Raw $column
+     * @param array<int, string|Raw|QueryBuilder> $values
+     * @return QueryBuilder
      */
     public function orHavingNotBetween($column, array $values): QueryBuilder
     {// 2023-06-05
@@ -1712,8 +1936,10 @@ class QueryBuilder
 
         return $this->_havingBetween($column, $values);
     }
+
     /**
      * @param string|Raw $value
+     * @return QueryBuilder
      */
     public function havingRaw($value): QueryBuilder
     {// 2023-06-05
@@ -1726,8 +1952,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_RAW, null, null, $iRaw, $this->boolType, $this->isNot);
     }
+
     /**
      * @param string|Raw $value
+     * @return QueryBuilder
      */
     public function orHavingRaw($value): QueryBuilder
     {// 2023-06-05
@@ -1740,9 +1968,11 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_RAW, null, null, $iRaw, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
-     * @param array<int,mixed> $values
+     * @param string|Raw $column
+     * @param array<int, string|Raw> $values
+     * @return QueryBuilder
      */
     private function _havingIn($column, array $values): QueryBuilder
     {// 2023-06-05
@@ -1750,9 +1980,11 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_IN, $column, null, $values, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param mixed $column
-     * @param array<int,mixed> $values
+     * @param string|Raw $column
+     * @param array<int, string|Raw> $values
+     * @return QueryBuilder
      */
     public function havingIn($column, array $values): QueryBuilder
     {// 2023-06-05
@@ -1761,9 +1993,11 @@ class QueryBuilder
 
         return $this->_havingIn($column, $values);
     }
+
     /**
-     * @param mixed $column
-     * @param array<int,mixed> $values
+     * @param string|Raw $column
+     * @param array<int, string|Raw> $values
+     * @return QueryBuilder
      */
     public function orHavingIn($column, array $values): QueryBuilder
     {// 2023-06-05
@@ -1772,9 +2006,11 @@ class QueryBuilder
 
         return $this->_havingIn($column, $values);
     }
+
     /**
-     * @param mixed $column
-     * @param array<int,mixed> $values
+     * @param string|Raw $column
+     * @param array<int, string|Raw> $values
+     * @return QueryBuilder
      */
     public function havingNotIn($column, array $values): QueryBuilder
     {// 2023-06-05
@@ -1783,9 +2019,11 @@ class QueryBuilder
 
         return $this->_havingIn($column, $values);
     }
+
     /**
-     * @param mixed $column
-     * @param array<int,mixed> $values
+     * @param string|Raw $column
+     * @param array<int, string|Raw> $values
+     * @return QueryBuilder
      */
     public function orHavingNotIn($column, array $values): QueryBuilder
     {// 2023-06-05
@@ -1794,8 +2032,10 @@ class QueryBuilder
 
         return $this->_havingIn($column, $values);
     }
+
     /**
-     * @param callable(): mixed $callback
+     * @param callable $callback
+     * @return QueryBuilder
      */
     public function havingWrapped(callable $callback): QueryBuilder
     {// 2023-06-05
@@ -1804,8 +2044,10 @@ class QueryBuilder
 
         return $this->_having(Having::TYPE_WRAPPED, null, null, $callback, $this->boolType, $this->isNot);
     }
+
     /**
-     * @param callable(): mixed $callback
+     * @param callable $callback
+     * @return QueryBuilder
      */
     public function orHavingWrapped(callable $callback): QueryBuilder
     {// 2023-06-05
@@ -1815,8 +2057,13 @@ class QueryBuilder
         return $this->_having(Having::TYPE_WRAPPED, null, null, $callback, $this->boolType, $this->isNot);
     }
 
-    // Sets the values for an `update`, allowing for both
-    // `.update(key, value, [returning])` and `.update(obj, [returning])` syntaxes.
+    /**
+     * Sets the values for an `update`, allowing for both
+     * Support for `.update(key, value, [returning])` and `.update(obj, [returning])` syntaxes.
+     *
+     * @param array<int, string|Raw|QueryBuilder>|string $args [values, returning, options]
+     * @return QueryBuilder
+     */
     public function update(...$args): QueryBuilder
     {// 2023-06-05
         $values = $args[0] ?? null;
@@ -1851,7 +2098,8 @@ class QueryBuilder
     }
 
     /**
-     * @param mixed $args
+     * @param array<int, string|Raw|QueryBuilder> $args [values, returning, options]
+     * @return QueryBuilder
      */
     public function insert(...$args): QueryBuilder
     {// 2023-06-06
@@ -1870,8 +2118,10 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param string|array $columns
+     * @param string|array<int, string|Raw> $columns
+     * @return OnConflictBuilder
      */
     public function onConflict($columns): OnConflictBuilder
     {// 2023-06-06
@@ -1879,9 +2129,11 @@ class QueryBuilder
 
         return new OnConflictBuilder($this, $columns);
     }
+
     /**
-     * @param mixed $returning
-     * @param mixed $options
+     * @param string|Raw|array<int, string|Raw> $returning
+     * @param array<string, mixed> $options
+     * @return QueryBuilder
      */
     public function returning($returning, $options): QueryBuilder
     {// 2023-06-05
@@ -1890,9 +2142,11 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $amount
+     * @param string|Raw $column
+     * @param int|float $amount
+     * @return QueryBuilder
      */
     private function _counter($column, $amount): QueryBuilder
     {// 2023-06-05
@@ -1904,9 +2158,11 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $amount
+     * @param string|Raw $column
+     * @param int|float $amount
+     * @return QueryBuilder
      */
     public function increment($column, $amount=null): QueryBuilder
     {// 2023-06-05
@@ -1922,9 +2178,11 @@ class QueryBuilder
 
         return $this->_counter($column, $amount);
     }
+
     /**
-     * @param mixed $column
-     * @param mixed $amount
+     * @param string|Raw $column
+     * @param int|float $amount
+     * @return QueryBuilder
      */
     public function decrement($column, $amount=null): QueryBuilder
     {// 2023-06-05
@@ -1940,8 +2198,10 @@ class QueryBuilder
 
         return $this->_counter($column, -$amount);
     }
+
     /**
-     * @param mixed $table
+     * @param string|Raw $table
+     * @return QueryBuilder
      */
     public function truncate($table=null): QueryBuilder
     {// 2023-06-06
@@ -1951,8 +2211,10 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $tables
+     * @param array<int, string|Raw> $tables
+     * @return QueryBuilder
      */
     public function forUpdate(...$tables): QueryBuilder
     {// 2023-06-07
@@ -1962,8 +2224,10 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $tables
+     * @param array<int, string|Raw> $tables
+     * @return QueryBuilder
      */
     public function forShare(...$tables): QueryBuilder
     {// 2023-06-07
@@ -1973,8 +2237,10 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $tables
+     * @param array<int, string|Raw> $tables
+     * @return QueryBuilder
      */
     public function forNoKeyUpdate(...$tables): QueryBuilder
     {// 2023-06-07
@@ -1984,8 +2250,10 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param mixed $tables
+     * @param array<int, string|Raw> $tables
+     * @return QueryBuilder
      */
     public function forKeyShare(...$tables): QueryBuilder
     {// 2023-06-07
@@ -1996,12 +2264,19 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * @internal Helper method
+     * @return bool
+     */
     private function isSelectQuery(): bool
     {// 2023-06-07
         return in_array($this->getMethod(), [self::METHOD_SELECT, self::METHOD_FIRST, self::METHOD_PLUCK]);
     }
 
-    // Skips locked rows when using a lock constraint.
+    /**
+     * Skips locked rows when using a lock constraint.
+     * @return QueryBuilder
+     */
     public function skipLocked(): QueryBuilder
     {// 2023-06-07
         if(!$this->isSelectQuery()) throw new \LogicException("Cannot chain ->skipLocked() on \"{$this->getMethod()}\" query!");
@@ -2015,7 +2290,10 @@ class QueryBuilder
         return $this;
     }
 
-    // Causes error when acessing a locked row instead of waiting for it to be released.
+    /**
+     * Causes error when acessing a locked row instead of waiting for it to be released.
+     * @return QueryBuilder
+     */
     public function noWait(): QueryBuilder
     {// 2023-06-07
         if(!$this->isSelectQuery()) throw new \LogicException("Cannot chain ->noWait() on \"{$this->getMethod()}\" query!");
@@ -2028,9 +2306,10 @@ class QueryBuilder
 
         return $this;
     }
+
     /**
-     * @param callable(): mixed $callback
-     * @param mixed $args
+     * @param callable $callback
+     * @param array<int, mixed> $args
      */
     public function modify(callable $callback, ...$args): QueryBuilder
     {// 2023-06-07
@@ -2038,11 +2317,5 @@ class QueryBuilder
 
         return $this;
     }
-
-
-
-
-
-
 }
 

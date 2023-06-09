@@ -11,36 +11,44 @@ namespace Sharksmedia\QueryBuilder\Statement;
 
 use Sharksmedia\QueryBuilder\Statement\IStatement;
 
-/**
- * 2023-05-08
- * @property array<int,string> $hintComments
- */
 class Comments implements IStatement
 {
     public const TYPE_BASIC = 'BASIC';
 
+    /**
+     * This is the type property.
+     * @var array<int, string>
+     */
     private array $comments;
 
     /**
-     * @param array<int,string> $comments
+     * @param array<int, string> $comments
      */
     public function __construct(array $comments)
     {// 2023-05-08
         $this->comments = $comments;
     }
 
+    /**
+     * Get the class
+     * @return string
+     */
     public function getClass(): string
     {// 2023-05-08
         return 'Comments';
     }
 
+    /**
+     * Get the type
+     * @return string
+     */
     public function getType(): string
     {// 2023-05-08
         return 'Comments';
     }
 
     /**
-     * @return array<int,string>
+     * @return array<int, string>
      */
     public function getComments(): array
     {// 2023-05-15

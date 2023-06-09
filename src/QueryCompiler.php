@@ -9,13 +9,14 @@ declare(strict_types=1);
 
 namespace Sharksmedia\QueryBuilder;
 
+use Sharksmedia\QueryBuilder\Single;
+
 use Sharksmedia\QueryBuilder\Formatter\WrappingFormatter;
 use Sharksmedia\QueryBuilder\Statement\Columns;
 use Sharksmedia\QueryBuilder\Statement\Clause;
 use Sharksmedia\QueryBuilder\Statement\Having;
 use Sharksmedia\QueryBuilder\Statement\Join;
 use Sharksmedia\QueryBuilder\Statement\Where;
-use Sharksmedia\QueryBuilder\Statement\Group;
 use Sharksmedia\QueryBuilder\Statement\Order;
 use Sharksmedia\QueryBuilder\Statement\Raw;
 use Sharksmedia\QueryBuilder\Statement\With;
@@ -23,20 +24,55 @@ use Sharksmedia\QueryBuilder\Utilities;
 
 class QueryCompiler
 {
+
+    /**
+     * This is the iClient property.
+     * @var Client
+     */
     private Client           $iClient;
+
+    /**
+     * This is the iQueryBuilder property.
+     * @var QueryBuilder
+     */
     private QueryBuilder     $iQueryBuilder;
+
+    /**
+     * This is the bindings property.
+     * @var array<int, mixed>
+     */
     private array            $bindings;
+
+    /**
+     * This is the iSingle property.
+     * @var Single
+     */
     private Single           $iSingle;
 
+    /**
+     * This is iStatementsGroupedOnType property.
+     * @var array<string, array<int, Statement>>
+     */
     private array $iStatementsGroupedOnType;
 
-    private string $method;
+    /**
+     * This is options property.
+     * @var array<string, mixed>
+     */
     private array $options = [];
-    private bool $single;
+
+
+    /**
+     * This is timeout property.
+     * @var int
+     */
     private int $timeout = 0;
+
+    /**
+     * This is cancelOnTimeout property.
+     * @var bool
+     */
     private bool $cancelOnTimeout = false;
-    private string $grouped;
-    // private Formatter $iFormatter;
 
     public const QUERY_COMPONENTS =
     [
@@ -142,7 +178,10 @@ class QueryCompiler
         '@@'=>'@@',
         '!!'=>'!!',
     ];
+
     /**
+     * @param Client $iClient
+     * @param QueryBuilder $iQueryBuilder
      * @param array<int,mixed> $bindings
      */
     public function __construct(Client $iClient, QueryBuilder $iQueryBuilder, array $bindings)
@@ -162,11 +201,19 @@ class QueryCompiler
         }, []);
     }
 
+    /**
+     * Get bindings
+     * @return array<int, mixed>
+     */
     public function getBindings(): array
     {// 2023-05-16
         return $this->bindings;
     }
 
+    /**
+     * To SQL
+     * @return Query
+     */
     public function toSQL(?string $method=null): Query
     {// 2023-05-15
         $method = $method ?? $this->iQueryBuilder->getMethod();
@@ -184,16 +231,15 @@ class QueryCompiler
 
         return $iQuery;
     }
+
     /**
-     * @param mixed $value
+     * Take a value and processes it to a string
+     * @param string|Raw|QueryBuilder|null $value
+     * @param array<int, mixed> $bindings
+     * @return string
      */
-    private $testCounter = 0;
-    /**
-     * @return <missing>|string|string[]|null
-     */
-    private function unwrapRaw($value, array &$bindings)
+    private function unwrapRaw($value, array &$bindings): string
     {// 2023-05-10
-        $this->testCounter++;
         if($value instanceof Raw)
         {
             $sql = $value->getSQL();
@@ -242,7 +288,7 @@ class QueryCompiler
                     else
                     {
                         $compiledBind = is_array($bind)
-                            ? $this->columnize2($bind)
+                            ? $this->columnize($bind)
                             : $this->wrap($bind);
                     }
 
@@ -263,12 +309,9 @@ class QueryCompiler
         {
             $iQueryCompiler = new QueryCompiler($this->iClient, $value, []);
 
-            // $sql = '(' . $iQueryCompiler->toSQL('select')->toString(true, $this) . ')';
             $sql = $iQueryCompiler->toSQL()->toString(false, $this);
 
             $this->bindings = array_merge($this->bindings, $iQueryCompiler->getBindings());
-
-            // if($value->getSingle()->alias !== null) $sql = $sql . ' AS ' . $this->wrap($value->getAlias());
 
             return $sql;
         }
@@ -278,16 +321,22 @@ class QueryCompiler
         $bindings[] = $value;
 
         return '?';
-        // return $value;
     }
 
+    /**
+     * Wraps a identifier like a column name or table name in quotes appropriately.
+     * @param string $identifier
+     * @return string
+     */
     private function wrapIdentifier(string $identifier): string
     {// 2023-05-10
         return $this->iClient->wrapIdentifier(trim($identifier), 'query');
     }
 
-    // If we haven't specified any columns or a `tableName`, we're assuming this
-    // is only being used for unions.
+    /**
+     * If we haven't specified any columns or a `tableName`, we're assuming this is only being used for unions.
+     * @return bool
+     */
     private function hasOnlyUnions(): bool
     {// 2023-05-10
         if(count($this->iStatementsGroupedOnType['Columns'] ?? []) !== 0) return false;
@@ -297,8 +346,11 @@ class QueryCompiler
         
         return true;
     }
+
     /**
      * @param callable $callback
+     * @param string|null $method QueryBuilder::TYPE_* constant
+     * @param Client|null $iClient
      * @param array<int,mixed> $bindings
      */
     private function compileCallback(callable $callback, ?string $method=null, ?Client $iClient=null, array &$bindings=[]): Query
@@ -318,21 +370,11 @@ class QueryCompiler
         return $iQuery;
     }
 
-    // private function compileColumns(Columns $iColumns, array &$bindings): string
-    /*
-     *  ->select(['baz', ['bar'=>'foo']])
-     *  ->select('baz')
-     *  ->select('bar')->as('foo')
-     *  ->select('bar as foo')
-     *  ->select(new Raw('bar as foo'))
-     *  ->select(function($q){ $q->select('bar')->as('foo')->from('baz')->first(); })
-     *  ->select(function($q){ $q->select('bar')->as('foo')->from('baz')->first(); })->as('foo')
-     *  ->select($iQueryBuilder)
-     *  ->select($iQueryBuilder)->as('foo')
+    /**
+     * @param array<int, string|Raw|QueryBuilder>|null $tables
      * @return string
      */
-
-    public function tables(?array $tables=null)
+    public function tables(?array $tables=null): string
     {// 2023-06-06
         $tables = $tables ?? $this->iSingle->table;
 
@@ -347,11 +389,15 @@ class QueryCompiler
             if($this->iSingle->schema !== null) $table = $this->iSingle->schema.'.'.$table;
         }
 
-        $query = $this->columnize2($tables);
+        $query = $this->columnize($tables);
 
         return $query;
     }
 
+    /**
+     * @param array<int, string|Raw|QueryBuilder>|null $tables
+     * @return string
+     */
     public function compileFrom($tables): string
     {// 2023-05-15
         $query = $this->tables($tables);
@@ -361,6 +407,10 @@ class QueryCompiler
         return " FROM {$query}";
     }
 
+    /**
+     * Compile hint comments
+     * @return string
+     */
     private function hintComments(): string
     {// 2023-05-15
         $iHintComments = $this->iStatementsGroupedOnType['HintComments'] ?? [];
@@ -375,6 +425,10 @@ class QueryCompiler
         return " /*+ {$hints} */";
     }
 
+    /**
+     * Compile comments
+     * @return string
+     */
     private function comments(): string
     {// 2023-06-07
         $iComments = $this->iStatementsGroupedOnType['Comments'] ?? [];
@@ -391,6 +445,11 @@ class QueryCompiler
         return implode(' ', $comments);
     }
 
+    /**
+     * Compiles a basic where clause.
+     * @param Where $iWhere
+     * @return string
+     */
     private function whereBasic(Where $iWhere): string
     {// 2023-05-16
         if($iWhere->getType() !== Where::TYPE_BASIC) throw new \Exception('Invalid where type');
@@ -410,6 +469,11 @@ class QueryCompiler
         return $sql;
     }
 
+    /**
+     * Compiles a raw where clause.
+     * @param Where $iWhere
+     * @return string
+     */
     private function whereRaw(Where $iWhere): string
     {// 2023-05-16
         if($iWhere->getType() !== Where::TYPE_RAW) throw new \Exception('Invalid where type');
@@ -423,6 +487,11 @@ class QueryCompiler
         return "{$isNot}{$sql}";
     }
     
+    /**
+     * Compiles a wrapped where clause.
+     * @param Where $iWhere
+     * @return string
+     */
     private function whereWrapped(Where $iWhere): string
     {// 2023-05-16
         if($iWhere->getType() !== Where::TYPE_WRAPPED) throw new \Exception('Invalid where type');
@@ -444,6 +513,11 @@ class QueryCompiler
         return '';
     }
     
+    /**
+     * Compiles a where exists clause.
+     * @param Where $iWhere
+     * @return string
+     */
     private function whereExists(Where $iWhere): string
     {// 2023-05-16
         if($iWhere->getType() !== Where::TYPE_EXISTS) throw new \Exception('Invalid where type: '.$iWhere->getType());
@@ -457,6 +531,11 @@ class QueryCompiler
         return "{$existsFunction}({$value})";
     }
     
+    /**
+     * Compiles a where in clause.
+     * @param Where $iWhere
+     * @return string
+     */
     private function whereIn(Where $iWhere): string
     {// 2023-05-16
         if($iWhere->getType() !== Where::TYPE_IN) throw new \Exception('Invalid where type');
@@ -470,11 +549,16 @@ class QueryCompiler
 
         // $valuesClause = $this->parametize($values, $this->bindings);
         $valuesClause = $this->values($values, $this->bindings);
-        $columnClause = is_array($column) ? "({$this->columnize2($column)})" : $this->wrap($column);
+        $columnClause = is_array($column) ? "({$this->columnize($column)})" : $this->wrap($column);
 
         return "{$columnClause} {$inFunction}{$valuesClause}";
     }
     
+    /**
+     * Compiles a where null clause.
+     * @param Where $iWhere
+     * @return string
+     */
     private function whereNull(Where $iWhere): string
     {// 2023-05-16
         $isFunction = $iWhere->isNot()
@@ -486,6 +570,11 @@ class QueryCompiler
         return "{$column} {$isFunction} NULL";
     }
     
+    /**
+     * Compiles a where between clause.
+     * @param Where $iWhere
+     * @return string
+     */
     private function whereBetween(Where $iWhere): string
     {// 2023-05-16
         $betweenFunction = $iWhere->isNot()
@@ -499,6 +588,11 @@ class QueryCompiler
         return "{$column} {$betweenFunction} {$values}";
     }
 
+    /**
+     * Compiles a where like case-sensitive clause.
+     * @param Where $iWhere
+     * @return string
+     */
     private function whereLike(Where $iWhere): string
     {// 2023-05-16
         $column = $this->wrap($iWhere->getColumn());
@@ -507,6 +601,11 @@ class QueryCompiler
         return "{$column} LIKE {$value} COLLATE utf8_bin";
     }
 
+    /**
+     * Compiles a where like incase-sensitive clause.
+     * @param Where $iWhere
+     * @return string
+     */
     private function whereILike(Where $iWhere): string
     {// 2023-05-16
         $column = $this->wrap($iWhere->getColumn());
@@ -515,6 +614,11 @@ class QueryCompiler
         return "{$column} LIKE {$value}";
     }
 
+    /**
+     * Compiles a where column name clause.
+     * @param Where $iWhere
+     * @return string
+     */
     private function whereColumn(Where $iWhere): string
     {// 2023-06-02
         if($iWhere->getType() !== Where::TYPE_COLUMN) throw new \Exception('Invalid where type: '.$iWhere->getType());
@@ -528,8 +632,13 @@ class QueryCompiler
         return $sql;
     }
 
+    /**
+     * Compiles the having clauses
+     * @return string
+     */
     public function having(): string
     {// 2023-06-05
+        /** @var Having[] $iHavings */
         $iHavings = $this->iStatementsGroupedOnType['Having'] ?? [];
 
         $boolMap =
@@ -568,6 +677,11 @@ class QueryCompiler
         return $result;
     }
 
+    /**
+     * Compiles a basic having clause
+     * @param Having $iHaving
+     * @return string
+     */
     private function havingBasic(Having $iHaving): string
     {// 2023-06-05
         $column = $this->wrap($iHaving->getColumn());
@@ -577,6 +691,11 @@ class QueryCompiler
         return "{$column} {$operator} {$value}";
     }
 
+    /**
+     * Compiles a wrapped having clause
+     * @param Having $iHaving
+     * @return string
+     */
     private function havingWrapped(Having $iHaving): string
     {// 2023-06-05
         if($iHaving->getType() !== Having::TYPE_WRAPPED) throw new \Exception('Invalid having type');
@@ -598,6 +717,11 @@ class QueryCompiler
         return '';
     }
 
+    /**
+     * Compiles a having null clause
+     * @param Having $iHaving
+     * @return string
+     */
     private function havingNull(Having $iHaving): string
     {// 2023-06-05
         $column = $this->wrap($iHaving->getColumn());
@@ -608,7 +732,11 @@ class QueryCompiler
         return "{$column} {$isFunction} NULL";
     }
 
-
+    /**
+     * Compiles a having exists clause
+     * @param Having $iHaving
+     * @return string
+     */
     private function havingExists(Having $iHaving): string
     {// 2023-06-05
         $column = $this->wrap($iHaving->getColumn());
@@ -619,6 +747,11 @@ class QueryCompiler
         return "{$isFunction} {$column}";
     }
 
+    /**
+     * Compiles a having between clause
+     * @param Having $iHaving
+     * @return string
+     */
     private function havingBetween(Having $iHaving): string
     {// 2023-06-05
         $column = $this->wrap($iHaving->getColumn());
@@ -632,6 +765,11 @@ class QueryCompiler
         return "{$column} {$betweenFunction} {$values}";
     }
 
+    /**
+     * Compiles a having in clause
+     * @param Having $iHaving
+     * @return string
+     */
     private function havingIn(Having $iHaving): string
     {// 2023-06-05
         $column = $this->wrap($iHaving->getColumn());
@@ -645,6 +783,11 @@ class QueryCompiler
         return "{$column} {$inFunction} ({$values})";
     }
 
+    /**
+     * Compiles a raw having clause
+     * @param Having $iHaving
+     * @return string
+     */
     private function havingRaw(Having $iHaving): string
     {// 2023-06-05
         $value = $this->unwrapRaw($iHaving->getValue(), $this->bindings);
@@ -653,7 +796,9 @@ class QueryCompiler
     }
 
     /**
-     * @param mixed $value
+     * Wraps a value in quotes appropriately. Queries and callbacks are wrapped.
+     * @param int|float|string|Raw|QueryBuilder|callable $value
+     * @return string
      */
     public function wrap($value): string
     {// 2023-05-15
@@ -671,11 +816,12 @@ class QueryCompiler
 
         return $this->wrapIdentifier($value.'');
     }
+
     /**
-     * @param mixed $value
-     * @return <missing>|string
+     * @param string|Raw|QueryBuilder $value
+     * @return string
      */
-    private function operator($value)
+    private function operator($value): string
     {// 2023-05-15
         if($value instanceof Raw || $value instanceof QueryBuilder) return $this->unwrapRaw($value, $this->bindings);
 
@@ -686,6 +832,10 @@ class QueryCompiler
         return strtoupper($operator);
     }
 
+    /**
+     * Compiles columns clauses
+     * @return string
+     */
     public function columns(): ?string
     {// 2023-05-15
         if($this->hasOnlyUnions()) return null;
@@ -698,19 +848,13 @@ class QueryCompiler
         $distinctClause = null;
 
         $sql = [];
+        /** @var Columns[] $iColumns */
         $iColumns = $this->iStatementsGroupedOnType['Columns'] ?? [];
         foreach($iColumns as $iStatement)
         {
             $isDistinct = $isDistinct || $iStatement->isDistinct();
 
             if($isDistinct && !$iStatement->isDistinct()) $distinctClause = 'DISTINCT ';
-
-            // if($iStatement->isDistinctOn())
-            // {
-            //     $distinctClause = $this->distinctOn($iStatement->getValue());
-            //     continue;
-            // }
-            //
 
             if($iStatement->getType() === Columns::TYPE_PLUCK)
             {
@@ -746,7 +890,12 @@ class QueryCompiler
         return $query;
     }
 
-    public function columnize2(array $columns): string
+    /**
+     * Creates alist of appropriately wrapped columns or queries, which can be used in ex. a select statement
+     * @param array<int|string, string|Raw|QueryBuilder|callable> $columns
+     * @return string
+     */
+    public function columnize(array $columns): string
     {// 2023-05-31
         $query = '';
 
@@ -763,7 +912,7 @@ class QueryCompiler
             {
                 $alias = $i;
 
-                if(is_array($column)) $columnStr = $this->columnize2($column);
+                if(is_array($column)) $columnStr = $this->columnize($column);
                 else if($column instanceof QueryBuilder) $columnStr = "{$this->wrap($column)}";
                 else $columnStr = $this->wrap($column);
 
@@ -774,7 +923,7 @@ class QueryCompiler
 
             if(is_array($column))
             {
-                $query .= $this->columnize2($column);
+                $query .= $this->columnize($column);
 
                 continue;
             }
@@ -786,18 +935,26 @@ class QueryCompiler
 
         return $query;
     }
+
     /**
-     * @return array<int,string>
+     * Creates a pluck clause
+     * @param Columns $iColumns
+     * @return array<int, string>
      */
     public function pluck(Columns $iColumns): array
     {// 2023-05-15
-        $sql = $this->columnize2($iColumns->getColumns());
+        $sql = $this->columnize($iColumns->getColumns());
 
         if($iColumns->hasAlias()) $sql .= " AS {$this->wrap($iColumns->getAlias())}";
 
         return [$sql];
     }
 
+    /**
+     * Creates a aggregate clause
+     * @param Columns $iColumns
+     * @return array<int, string>
+     */
     public function aggregate(Columns $iColumns): array
     {// 2023-05-15
         $isDistinct = $iColumns->isDistinct();
@@ -861,6 +1018,12 @@ class QueryCompiler
         return [$aggregateString($value, $iColumns->getAlias())];
     }
 
+    /**
+     * Creates a aggregate raw clause
+     * @param Columns $iColumns
+     * @param array<string, mixed> $bindings
+     * @return string
+     */
     public function aggregateRaw(Columns $iColumns, array &$bindings=[]): string
     {// 2023-05-15
         $rawStatements = [];
@@ -876,10 +1039,12 @@ class QueryCompiler
 
         return $query;
     }
+
     /**
-     * @return <missing>|string
+     * Compiles all statements into a full query
+     * @return string
      */
-    public function compileStatements(string $method)
+    public function compileStatements(string $method): string
     {// 2023-06-06
         // With always comes first
         // $query = $this->with();
@@ -964,6 +1129,10 @@ class QueryCompiler
         return $query;
     }
 
+    /**
+     * Compiles the appropriate method clause
+     * @return string
+     */
     public function method(): string
     {// 2023-06-06
         $methodMap =
@@ -979,6 +1148,10 @@ class QueryCompiler
         return call_user_func([$this, $methodMap[$this->iQueryBuilder->getMethod()]]);
     }
 
+    /**
+     * Compiles the appropriate select clause
+     * @return string
+     */
     public function select(): string
     {// 2023-05-10
         // With always comes first
@@ -986,7 +1159,9 @@ class QueryCompiler
 
         return $this->columns();
     }
+
     /**
+     * Normalizes the update statements into a single array. compiles statements.
      * @return array<int,string>
      */
     private function _prepUpdate(array $data=[]): array
@@ -1030,6 +1205,10 @@ class QueryCompiler
         return $values;
     }
 
+    /**
+     * Compiles the appropriate update clause
+     * @return string
+     */
     public function sets(): string
     {// 2023-06-06
         $updateData = $this->_prepUpdate($this->iSingle->update ?? []);
@@ -1041,6 +1220,10 @@ class QueryCompiler
         return "SET {$sql}";
     }
 
+    /**
+     * Compiles the update method
+     * @return string
+     */
     public function update(): string
     {// 2023-06-05
         $tableName = $this->tables();
@@ -1048,6 +1231,10 @@ class QueryCompiler
         return "UPDATE {$tableName}";
     }
 
+    /**
+     * Compiles the update method
+     * @return string
+     */
     public function insert(): string
     {// 2023-06-06
         $tableName = $this->tables();
@@ -1056,10 +1243,12 @@ class QueryCompiler
 
         return "INSERT{$ignore} INTO {$tableName}";
     }
+
     /**
+     * @param array<int, string|Raw|QueryBuilder> $values
      * @return string
      */
-    private function _buildInsertValues($values)
+    private function _buildInsertValues($values): string
     {// 2023-06-06
         $sql = '';
         $count = 0;
@@ -1073,9 +1262,10 @@ class QueryCompiler
         return $sql;
     }
     /**
-     * @return <missing>|string
+     * @param array<int, string|Raw|QueryBuilder> $insertValues
+     * @return string
      */
-    private function _insertBody($insertValues)
+    private function _insertBody($insertValues): string
     {// 2023-06-06
         if($insertValues instanceof QueryBuilder) return $this->unwrapRaw($insertValues, $this->bindings);
         if(is_callable($insertValues)) return $this->compileCallback($insertValues, null, null, $this->bindings)->toString(false, $this);
@@ -1093,7 +1283,7 @@ class QueryCompiler
 
         if(count($columns) !== 0)
         {
-            $sql .= '('.$this->columnize2($columns);
+            $sql .= '('.$this->columnize($columns);
 
             $sql .= ') VALUES (';
 
@@ -1104,10 +1294,12 @@ class QueryCompiler
 
         return $sql;
     }
+
     /**
-     * @return <missing>|array<string,array>
+     * @param array<int, string|Raw|QueryBuilder> $data
+     * @return array<string,array<int, string>>
      */
-    private function _prepInsert($data)
+    private function _prepInsert($data): array
     {// 2023-06-06
         if($data instanceof Raw) return $this->unwrapRaw($data, $this->bindings);
 
@@ -1143,7 +1335,12 @@ class QueryCompiler
         return ['columns'=>$columns, 'values'=>$values];
     }
 
-    private function _merge($updates, $insert)
+    /**
+     * @param array<int, string|Raw|QueryBuilder> $updates
+     * @param array<int, string|Raw|QueryBuilder> $insert
+     * @return string
+     */
+    private function _merge($updates, $insert): string
     {// 2023-06-07
         $sql = ' ON DUPLICATE KEY UPDATE ';
 
@@ -1173,8 +1370,13 @@ class QueryCompiler
         return $sql;
     }
 
+    /**
+     * Compiles with clause
+     * @return array<int, string>
+     */
     public function with(): string
     {// 2023-05-10
+        /** @var WithStatement[] $iWithStatements */
         $iWithStatements = $this->iStatementsGroupedOnType['With'] ?? [];
 
         if(count($iWithStatements) === 0) return '';
@@ -1191,6 +1393,10 @@ class QueryCompiler
         return "WITH " . ($hasRecursive ? 'RECURSIVE ' : '') . implode(', ', $sqlStrings);
     }
 
+    /**
+     * Compiles truncate method
+     * @return string
+     */
     public function truncate(): string
     {// 2023-06-06
         $tableName = $this->tables();
@@ -1198,6 +1404,10 @@ class QueryCompiler
         return "TRUNCATE {$tableName}";
     }
 
+    /**
+     * Compiles delete method
+     * @return string
+     */
     public function delete(): string
     {// 2023-06-06
         $tableName = $this->tables();
@@ -1205,24 +1415,11 @@ class QueryCompiler
         return "DELETE FROM {$tableName}";
     }
 
-    public function withWrapped(With $iWithStatement): string
-    {// 2023-05-10
-        $sqlString = WrappingFormatter::fnOrRaw($iWithStatement->getValue(), null, $this->iQueryBuilder, $this->iClient, $this->bindings);
-
-        $columnList = $iWithStatement->hasColumnList()
-            ? '(' . WrappingFormatter::columnize($iWithStatement->getColumnList(), $this->iQueryBuilder, $this->iClient, $this->bindings) . ')'
-            : '';
-
-        $aliasList = WrappingFormatter::columnize($iWithStatement->getAlias(), $this->iQueryBuilder, $this->iClient, $this->bindings);
-
-        return $aliasList . $columnList + 'AS ' + $iWithStatement->getMaterialized() + '(' + $sqlString + ')';
-    }
-
-    // public function columnClause(Columns $iColumnStatement): string
-    // {// 2023-05-10
-    //     return '('.WrappingFormatter::columnize($iColumnStatement->getColumns(), $this->iQueryBuilder, $this->iClient, $this->bindings).')';
-    // }
-
+    /**
+     * Compiles update method
+     * @param Clause $iClause
+     * @return string
+     */
     private function processJoinClause(Clause $iClause): ?string
     {// 2023-06-01
         $value = null;
@@ -1239,13 +1436,16 @@ class QueryCompiler
             
         return $value;
     }
+
     /**
+     * Compiles join statements
      * @return string
      */
-    public function join()
+    public function join(): string
     {// 2023-05-15
         $sql = '';
 
+        /** @var Join[] $iJoins */
         $iJoins = $this->iStatementsGroupedOnType['Join'] ?? [];
 
         $count = 0;
@@ -1279,11 +1479,21 @@ class QueryCompiler
         return $sql;
     }
 
+    /**
+     * Compiles on raw clause
+     * @param Clause $iClause
+     * @return string
+     */
     private function onRaw(Clause $iClause): string
     {// 2023-05-31
         return $this->unwrapRaw($iClause->getValue(), $this->bindings);
     }
 
+    /**
+     * Compiles basic on clause
+     * @param Clause $iClause
+     * @return string
+     */
     private function onBasic(Clause $iClause): string
     {// 2023-05-31
         // $wrap = $iClause->getValue() instanceof QueryBuilder;
@@ -1300,6 +1510,11 @@ class QueryCompiler
         return $sql;
     }
 
+    /**
+     * Compiles on value clause
+     * @param Clause $iClause
+     * @return string
+     */
     private function onValue(Clause $iClause): string
     {// 2023-05-31
         $column = $this->wrap($iClause->getColumn());
@@ -1311,6 +1526,11 @@ class QueryCompiler
         return $sql;
     }
 
+    /**
+     * Compiles on between clause
+     * @param Clause $iClause
+     * @return string
+     */
     private function onBetween(Clause $iClause): string
     {// 2023-06-01
         $betweenFunction = $iClause->isNot()
@@ -1326,6 +1546,11 @@ class QueryCompiler
         return $sql;
     }
 
+    /**
+     * Compiles on wrapped clause
+     * @param Clause $iClause
+     * @return string
+     */
     private function onWrapped(Clause $iClause): string
     {// 2023-05-31
         $iJoin = new Join($iClause->getValue(), Join::TYPE_RAW);
@@ -1348,11 +1573,21 @@ class QueryCompiler
         return $sql;
     }
 
+    /**
+     * Compiles using clause
+     * @param Clause $iClause
+     * @return string
+     */
     private function onUsing(Clause $iClause): string
     {// 2023-05-31
-        return "{$this->columnize2([$iClause->getColumn()])}";
+        return "{$this->columnize([$iClause->getColumn()])}";
     }
 
+    /**
+     * Compiles on in clause
+     * @param Clause $iClause
+     * @return string
+     */
     private function onIn(Clause $iClause): string
     {// 2023-05-31
         if(is_array($iClause->getValue()) && is_array($iClause->getValue()[0] ?? 0)) return $this->onInMultiple($iClause);
@@ -1369,9 +1604,14 @@ class QueryCompiler
         return "{$this->wrap($iClause->getColumn())} {$onFunction}({$values})";
     }
 
+    /**
+     * Compiles on in multiple clause
+     * @param Clause $iClause
+     * @return string
+     */
     private function onInMultiple(Clause $iClause): string
     {// 2023-05-31
-        $sql = $this->columnize2([$iClause->getColumn()]);
+        $sql = $this->columnize([$iClause->getColumn()]);
 
         $onFunction = $iClause->isNot()
             ? 'NOT IN'
@@ -1389,6 +1629,11 @@ class QueryCompiler
         return $sql.'))';
     }
 
+    /**
+     * Compiles on null clause
+     * @param Clause $iClause
+     * @return string
+     */
     private function onNull(Clause $iClause): string
     {// 2023-05-31
         $column = $this->wrap($iClause->getColumn());
@@ -1402,6 +1647,11 @@ class QueryCompiler
         return "{$column} {$isFunction} {$value}";
     }
 
+    /**
+     * Compiles on exists clause
+     * @param Clause $iClause
+     * @return string
+     */
     private function onExists(Clause $iClause): string
     {// 2023-05-31
         $existsFunction = $iClause->isNot()
@@ -1410,11 +1660,14 @@ class QueryCompiler
 
         return "{$existsFunction}({$this->parameter($iClause->getValue(), $this->bindings)})";
     }
+
     /**
+     * Compiles where statements
      * @return string
      */
-    public function where()
+    public function where(): string
     {// 2023-05-15
+        /** @var Where[] $iWheres */
         $iWheres = $this->iStatementsGroupedOnType['Where'] ?? [];
 
         $boolMap =
@@ -1453,10 +1706,12 @@ class QueryCompiler
 
         return implode(' ', $sql);
     }
+
     /**
+     * Compiles limit statement
      * @return string
      */
-    public function limit()
+    public function limit(): string
     {// 2023-05-15
         $noLimit = $this->iSingle->limit === null;
 
@@ -1466,7 +1721,9 @@ class QueryCompiler
 
         return "LIMIT {$limit}";
     }
+
     /**
+     * Compiles offset statement
      * @return string
      */
     public function offset()
@@ -1489,6 +1746,12 @@ class QueryCompiler
         return "{$limit}OFFSET {$offset}";
     }
 
+    /**
+     * Compiles group by statement
+     * @param string|Raw|QueryBuilder $value
+     * @param Order::TYPE_NULLS_POSITION_* $nullsPosition
+     * @return string
+     */
     private function _orderBy($value, $nullsPosition): string
     {// 2023-06-05
         $nullOrder = '';
@@ -1503,26 +1766,33 @@ class QueryCompiler
         {
             if($value instanceof QueryBuilder) $value = [$value];
 
-            $orderBy = $this->columnize2($value).$nullOrder;
+            $orderBy = $this->columnize($value).$nullOrder;
 
             if($nullsPosition !== null) $orderBy = '('.$orderBy.')';
 
             return $orderBy;
         }
 
-        return $this->columnize2($value);
+        return $this->columnize($value);
     }
 
-    // Compiles the `order by` statements.
+    /**
+     * Compiles the `group by` statements.
+     * @param string|Raw|QueryBuilder $value
+     * @return string
+     */
     private function _groupBy($value): string
     {// 2023-06-05
         return $this->_orderBy($value, null);
     }
+
     /**
+     * Compiles group by statements
      * @return string
      */
-    public function group()
+    public function group(): string
     {// 2023-06-05
+        /** @var Group[] $iGroupBys */
         $iGroupBys = $this->iStatementsGroupedOnType['Group'] ?? [];
 
         if(count($iGroupBys) === 0) return '';
@@ -1537,11 +1807,14 @@ class QueryCompiler
 
         return $result;
     }
+
     /**
+     * Compiles order by statements
      * @return string
      */
-    public function order()
+    public function order(): string
     {// 2023-06-05
+        /** @var Order[] $iOrderBys */
         $iOrderBys = $this->iStatementsGroupedOnType['Order'] ?? [];
 
         if(count($iOrderBys) === 0) return '';
@@ -1577,11 +1850,14 @@ class QueryCompiler
 
         return 'ORDER BY '.implode(', ', $sql);
     }
+
     /**
+     * Compiles union statements
      * @return string
      */
-    public function union()
+    public function union(): string
     {// 2023-06-07
+        /** @var Union[] $iUnions */
         $iUnions = $this->iStatementsGroupedOnType['Union'] ?? [];
 
         if(count($iUnions) === 0) return '';
@@ -1593,7 +1869,7 @@ class QueryCompiler
             if($i > 0 || !$this->hasOnlyUnions()) $sql .= $iUnion->getClause().' ';
 
             $statement = $this->parameter($iUnion->getStatement(), $this->bindings, false);
-            // $statement = $this->columnize2([$iUnion->getStatement()], $this->bindings);
+            // $statement = $this->columnize([$iUnion->getStatement()], $this->bindings);
 
             if($statement)
             {
@@ -1608,6 +1884,11 @@ class QueryCompiler
         return $sql;
     }
 
+    /**
+     * Compiles lock statements
+     * @return string
+     * @throws \Exception
+     */
     public function lock(): string
     {// 2023-05-15
         if($this->iSingle->lock === null) return '';
@@ -1620,26 +1901,51 @@ class QueryCompiler
         throw new \Exception('Invalid lock mode "'.$this->iSingle->lock.'"');
     }
 
+    /**
+     * Compiles for update statement
+     * @return string
+     * @throws \Exception
+     */
     private function forUpdate(): string
     {// 2023-05-15
         return 'FOR UPDATE';
     }
 
+    /**
+     * Compiles for share statement
+     * @return string
+     * @throws \Exception
+     */
     private function forShare(): string
     {// 2023-05-15
         return 'LOCK IN SHARE MODE';
     }
 
+    /**
+     * Compiles for no key update statement
+     * @return string
+     * @throws \Exception
+     */
     private function forNoKeyUpdate(): string
     {// 2023-05-15
         throw new \Exception('Not implemented');
     }
 
+    /**
+     * Compiles for key share statement
+     * @return string
+     * @throws \Exception
+     */
     private function forKeyShare(): string
     {// 2023-05-15
         throw new \Exception('Not implemented');
     }
 
+    /**
+     * Compiles wait mode statement
+     * @return string
+     * @throws \Exception
+     */
     public function waitMode(): string
     {// 2023-06-07
         if($this->iSingle->waitMode === null) return '';
@@ -1650,19 +1956,34 @@ class QueryCompiler
         throw new \Exception('Invalid wait mode "'.$this->iSingle->waitMode.'"');
     }
 
+    /**
+     * Compiles skip locked statement
+     * @return string
+     * @throws \Exception
+     */
     private function skipLocked(): string
     {// 2023-06-07
         return 'SKIP LOCKED';
     }
 
+    /**
+     * Compiles NOWAIT statement
+     * @return string
+     * @throws \Exception
+     */
     private function noWait(): string
     {// 2023-06-07
         return 'NOWAIT';
     }
 
-    // Checks whether a value is a function... if it is, we compile it
-    // otherwise we check whether it's a raw
-    private function parameter($value, array &$bindings, bool $wrap=false)
+    /**
+     * Checks whether a value is a function... if it is, we compile it otherwise we check whether it's a raw
+     * @param $value
+     * @param array<int, mixed> $bindings
+     * @param bool $wrap
+     * @return string
+     */
+    private function parameter($value, array &$bindings, bool $wrap=false): string
     {// 2023-05-31
         if(is_callable($value)) return $this->compileCallback($value, null, null, $bindings)->toString($wrap, $this);
         if($value instanceof QueryBuilder) return $this->unwrapRaw($value, $this->bindings);
@@ -1670,6 +1991,13 @@ class QueryCompiler
         return $this->unwrapRaw($value, $bindings) ?? '?';
     }
 
+    /**
+     * Take an array of values and runs parameter on them.
+     *
+     * @param array<int, mixed> $values
+     * @param array<int, mixed> $bindings
+     * @return string
+     */
     private function parametize($values, array &$bindings): string
     {// 2023-05-31
         if(is_callable($values)) return $this->parameter($values, $bindings);
@@ -1698,14 +2026,19 @@ class QueryCompiler
         return $sql;
     }
 
-    // Formats `values` into a parenthesized list of parameters for a `VALUES`
-    // clause.
-    //
-    // [1, 2]                  -> '(?, ?)'
-    // [[1, 2], [3, 4]]        -> '((?, ?), (?, ?))'
-	// knex('table')		   -> '(select * from "table")'
-    // knex.raw('select ?', 1) -> '(select ?)'
-    //
+    /**
+     * Formats `values` into a parenthesized list of parameters for a `VALUES`
+     * clause.
+     *
+     * [1, 2]                  -> '(?, ?)'
+     * [[1, 2], [3, 4]]        -> '((?, ?), (?, ?))'
+	 * knex('table')		   -> '(select * from "table")'
+     * knex.raw('select ?', 1) -> '(select ?)'
+     *
+     * @param array<int, mixed>|QueryBuilder|Raw $values
+     * @param array<int, mixed> $bindings
+     * @return string
+     */
     private function values($values, array &$bindings): string
     {// 2023-06-02
         if($values instanceof Raw || $values instanceof QueryBuilder) return "({$this->parameter($values, $bindings)})";
