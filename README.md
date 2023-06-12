@@ -24,7 +24,7 @@ $iQueryBuilder
 
 $iQuery = $iQueryCompiler->toSQL();
 
-$sql = $iQuery->getSQL(); // SELECT `name` FROM `users` WHERE id = ?
+$sql = $iQuery->getSQL(); // SELECT `name` FROM `users` WHERE `id` = ?
 $bindings = $iQuery->getBindings(); // [1]
 
 print $sql.PHP_EOL;
