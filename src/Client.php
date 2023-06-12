@@ -19,7 +19,6 @@ abstract class Client
     public function __construct(Config $iConfig)
     {// 2023-05-08
         $this->iConfig = $iConfig;
-        $this->initializeDriver();
     }
 
     abstract public function query(Query $iQuery): \PDOStatement; // Execute query

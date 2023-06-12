@@ -20,7 +20,7 @@ class MySQL extends Client
     private Config $iConfig;
 
     /** @var Database */
-    private Database $driver;
+    private \PDO $driver;
 
     /** @var \PDOStatement[] */
     private array $preparedStatements = [];
@@ -35,7 +35,11 @@ class MySQL extends Client
      */
     public static function create(Config $iConfig): Client
     {// 2023-05-08
-        return new self($iConfig);
+        $iClient = new self($iConfig);
+
+        $iClient->initializeDriver();
+
+        return $iClient;
     }
 
     /**

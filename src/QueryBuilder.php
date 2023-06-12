@@ -2318,24 +2318,25 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * @return array<int, mixed>|mixed
+     * @throws \PDOException
+     */
     public function run()
-    {// 2023-06-07
+    {// 2023-06-12
         $iQueryCompiler = new QueryCompiler($this->iClient, $this, []);
 
         $iQuery = $iQueryCompiler->toSQL();
 
         $statement = $this->iClient->query($iQuery);
 
-        if($this->getMethod() === self::METHOD_FIRST)
-        {
-            $result = $statement->fetch();
+        $result = ($this->getMethod() === self::METHOD_FIRST)
+            ? $statement->fetch()
+            : $statement->fetchAll();
 
-            $statement->closeCursor();
+        $statement->closeCursor();
 
-            return $result;
-        }
-        
-        return $statement->fetchAll();
+        return $result;
     }
 }
 
