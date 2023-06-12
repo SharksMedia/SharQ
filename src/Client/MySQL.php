@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Sharksmedia\QueryBuilder\Client;
 
-use \Sharksmedia\QueryBuilder\Database;
 use \Sharksmedia\QueryBuilder\Config;
 use \Sharksmedia\QueryBuilder\Client;
 use \Sharksmedia\QueryBuilder\Query;
@@ -19,7 +18,7 @@ class MySQL extends Client
     /** @var Config */
     private Config $iConfig;
 
-    /** @var Database */
+    /** @var \PDO */
     private \PDO $driver;
 
     /** @var \PDOStatement[] */
@@ -53,11 +52,11 @@ class MySQL extends Client
 		$pdo = new \PDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword());
 		
 		$pdo->exec('SET sql_auto_is_null = 0');		//to fix horrible bugs: https://www.xaprb.com/blog/2007/05/31/why-is-null-doesnt-always-work-in-mysql/ & http://dev.mysql.com/doc/refman/5.6/en/server-system-variables.html#sysvar_sql_auto_is_null
-		$pdo->setAttribute(Database::ATTR_CASE, Database::CASE_NATURAL);
-		$pdo->setAttribute(Database::ATTR_ERRMODE, Database::ERRMODE_EXCEPTION);
-		$pdo->setAttribute(Database::ATTR_ORACLE_NULLS, Database::NULL_NATURAL);
-		$pdo->setAttribute(Database::ATTR_STRINGIFY_FETCHES, false);
-		$pdo->setAttribute(Database::ATTR_TIMEOUT, $iConfig->getTimeout());
+		$pdo->setAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
+		$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+		$pdo->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
+		$pdo->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
+		$pdo->setAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
 		
 		$this->driver = $pdo;
     }
@@ -65,17 +64,18 @@ class MySQL extends Client
     /**
      * 2023-06-12
      * @param Query $iQuery
+     * @param array<int, int> $options
      * @return \PDOStatement
      * @throws \PDOException
      */
-    public function query(Query $iQuery): \PDOStatement
+    public function query(Query $iQuery, array $options=[]): \PDOStatement
     {
         $sql = $iQuery->getSQL();
         $bindings = $iQuery->getBindings();
 
         if(!isset($this->preparedStatements[$sql]))
         {
-            $this->preparedStatements[$sql] = $this->driver->prepare($sql);
+            $this->preparedStatements[$sql] = $this->driver->prepare($sql, $options);
         }
 
         $statement = $this->preparedStatements[$sql];

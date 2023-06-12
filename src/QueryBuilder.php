@@ -134,6 +134,15 @@ class QueryBuilder
     }
 
     /**
+     * 2023-06-12
+     * @return Client
+     */
+    public function getClient(): Client
+    {
+        return $this->iClient;
+    }
+
+    /**
      * This is the getSchema method.
      * @return string Returns the schema.
      */

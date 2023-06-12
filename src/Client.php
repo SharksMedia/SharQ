@@ -21,7 +21,7 @@ abstract class Client
         $this->iConfig = $iConfig;
     }
 
-    abstract public function query(Query $iQuery): \PDOStatement; // Execute query
+    abstract public function query(Query $iQuery, array $options=[]): \PDOStatement; // Execute query
 
     abstract public static function create(Config $iConfig): self; // Create new instance of self
     abstract protected function initializeDriver(): void; // Create new PDO
