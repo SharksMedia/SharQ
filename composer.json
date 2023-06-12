@@ -9,7 +9,6 @@
     "scripts": {
         "unit-tests": "./vendor/bin/codecept run unit --debug",
         "phpdoc": "./bin/phpDocumentor.phar -d src/ -t docs/ --force"
-        
     },
     "authors": [
         {
