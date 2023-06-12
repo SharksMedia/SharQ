@@ -2,7 +2,7 @@
     "name": "sharksmedia/query-builder",
     "description": "A query builder for PHP, inspired by KnexJS query builder.",
     "type": "library",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "license": "MIT",
     "minimum-stability": "dev",
     "prefer-stable" : true,

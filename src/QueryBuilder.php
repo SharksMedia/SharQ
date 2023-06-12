@@ -126,10 +126,10 @@ class QueryBuilder
      */
     private bool   $isNot = false;
 
-    public function __construct(Client $iClient, string $schema)
+    public function __construct(Client $iClient, ?string $schema=null)
     {// 2023-05-08
         $this->iClient = $iClient;
-        $this->schema = $schema;
+        $this->schema = $schema ?? $iClient->getConfig()->getDatabase();
         $this->iSingle = new Single();
     }
 
@@ -2316,6 +2316,26 @@ class QueryBuilder
         $callback($this, ...$args);
 
         return $this;
+    }
+
+    public function run()
+    {// 2023-06-07
+        $iQueryCompiler = new QueryCompiler($this->iClient, $this, []);
+
+        $iQuery = $iQueryCompiler->toSQL();
+
+        $statement = $this->iClient->query($iQuery);
+
+        if($this->getMethod() === self::METHOD_FIRST)
+        {
+            $result = $statement->fetch();
+
+            $statement->closeCursor();
+
+            return $result;
+        }
+        
+        return $statement->fetchAll();
     }
 }
 
