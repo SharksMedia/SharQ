@@ -30,20 +30,6 @@ class MySQL extends Client
 
     /**
      * 2023-05-08
-     * @param Config $iConfig
-     * @return Client
-     */
-    public static function create(Config $iConfig): Client
-    {// 2023-05-08
-        $iClient = new self($iConfig);
-
-        $iClient->initializeDriver();
-
-        return $iClient;
-    }
-
-    /**
-     * 2023-05-08
      * @throws \PDOException if connection fails
      */
     protected function initializeDriver(): void

@@ -25,7 +25,18 @@ abstract class Client
 
     abstract public function query(Query $iQuery, array $options=[]): \PDOStatement; // Execute query
 
-    abstract public static function create(Config $iConfig): self; // Create new instance of self
+    public static function create(Config $iConfig): Client
+    {// 2023-06-14
+        switch ($iConfig->getClient()) {
+            case self::TYPE_MYSQL:
+                $iClient = new Client\MySQL($iConfig);
+                $iClient->initializeDriver();
+                return $iClient;
+            default:
+                throw new \Exception('Unknown client type: ' . $iConfig->getClient());
+        }
+    }
+
     abstract protected function initializeDriver(): void; // Create new PDO
     abstract public function wrapIdentifier(string $identifier, string $context): string; // Wrap identifier in quotes
 
