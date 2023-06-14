@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Sharksmedia\QueryBuilder\Client;
 
+use \Sharksmedia\QueryBuilder\CustomPDO;
 use \Sharksmedia\QueryBuilder\Config;
 use \Sharksmedia\QueryBuilder\Client;
 use \Sharksmedia\QueryBuilder\Query;
@@ -18,8 +19,8 @@ class MySQL extends Client
     /** @var Config */
     private Config $iConfig;
 
-    /** @var \PDO */
-    private \PDO $driver;
+    /** @var CustomPDO */
+    private CustomPDO $driver;
 
     /** @var \PDOStatement[] */
     private array $preparedStatements = [];
@@ -49,7 +50,7 @@ class MySQL extends Client
     {// 2023-05-08
         $iConfig = $this->iConfig;
 
-		$pdo = new \PDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword());
+		$pdo = new CustomPDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword());
 		
 		$pdo->exec('SET sql_auto_is_null = 0');		//to fix horrible bugs: https://www.xaprb.com/blog/2007/05/31/why-is-null-doesnt-always-work-in-mysql/ & http://dev.mysql.com/doc/refman/5.6/en/server-system-variables.html#sysvar_sql_auto_is_null
 		$pdo->setAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
@@ -132,18 +133,30 @@ class MySQL extends Client
     }
 
     /**
+     * 2023-06-14
+     * @return bool
+     */
+    public function isTransacting(): bool
+    {
+        return $this->driver->inTransaction();
+    }
+
+    /**
      * @param string $name
      * @return bool
      */
 	public function beginTransaction(): bool
 	{// 2023-01-10
-		$this->transactionCounter++;
-		
-		if($this->transactionCounter === 1) return $this->driver->beginTransaction();
-		
-		$this->driver->exec('SAVEPOINT trans'.$this->transactionCounter);
-		
-		return $this->transactionCounter >= 0;
+
+        return $this->driver->beginTransaction();
+
+		// $this->transactionCounter++;
+		// 
+		// if($this->transactionCounter === 1) return $this->driver->beginTransaction();
+		// 
+		// $this->driver->exec('SAVEPOINT trans'.$this->transactionCounter);
+		// 
+		// return $this->transactionCounter >= 0;
 	}
 	
     /**
@@ -152,11 +165,13 @@ class MySQL extends Client
      */
 	public function commit(): bool
 	{// 2023-01-10
-		$this->transactionCounter--;
-		
-		if($this->transactionCounter === 0) return $this->driver->commit();
-		
-		return $this->transactionCounter >= 0;
+        return $this->driver->commit();
+
+		// $this->transactionCounter--;
+		// 
+		// if($this->transactionCounter === 0) return $this->driver->commit();
+		// 
+		// return $this->transactionCounter >= 0;
 	}
 	
     /**
@@ -165,13 +180,15 @@ class MySQL extends Client
      */
 	public function rollback(): bool
 	{// 2023-01-10
-		$this->transactionCounter--;
-		
-		if($this->transactionCounter === 0) return $this->driver->rollback();
-		
-		$this->driver->exec('ROLLBACK TO trans'.($this->transactionCounter + 1));
+        return $this->driver->rollback();
 
-		return true;
+		// $this->transactionCounter--;
+		// 
+		// if($this->transactionCounter === 0) return $this->driver->rollback();
+		// 
+		// $this->driver->exec('ROLLBACK TO trans'.($this->transactionCounter + 1));
+		//
+		// return true;
 	}
 
 }

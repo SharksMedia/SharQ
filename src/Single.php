@@ -117,4 +117,10 @@ class Single
      * @var string|Raw|null
      */
     public               $alias = null;
+
+    /**
+     * This is the join property.
+     * @var Transaction|null
+     */
+    public               $transaction = null;
 }

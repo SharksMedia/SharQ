@@ -23,7 +23,7 @@ class Query
 
     private array  $aliases = [];
 
-    public function __construct(string $method, array $options , int $timeout, bool $cancelOnTimeout, array $bindings, string $queryUUID)
+    public function __construct(string $method, array $options, int $timeout, bool $cancelOnTimeout, array $bindings, string $queryUUID)
     {// 2023-05-15
         $this->method = $method;
         $this->options = $options;

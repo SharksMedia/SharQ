@@ -2327,6 +2327,13 @@ class QueryBuilder
         return $this;
     }
 
+    public function transaction(?Transaction $iTransaction=null): QueryBuilder
+    {// 2023-06-07
+        $this->iSingle->transaction = $iTransaction;
+
+        return $this;
+    }
+
     /**
      * @return array<int, mixed>|mixed
      * @throws \PDOException
