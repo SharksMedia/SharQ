@@ -17,7 +17,7 @@ use \Sharksmedia\QueryBuilder\Query;
 class MySQL extends Client
 {
     /** @var Config */
-    private Config $iConfig;
+    protected Config $iConfig;
 
     /** @var CustomPDO */
     private CustomPDO $driver;

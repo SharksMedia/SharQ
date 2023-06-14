@@ -15,8 +15,7 @@ abstract class Client
 {
     public const TYPE_MYSQL = 'mysql';
 
-    private \PDO $driver;
-    private Config $iConfig;
+    protected  Config $iConfig;
 
     public function __construct(Config $iConfig)
     {// 2023-05-08
