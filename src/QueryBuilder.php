@@ -2346,11 +2346,13 @@ class QueryBuilder
 
         $statement = $this->iClient->query($iQuery);
 
-        $result = ($this->getMethod() === self::METHOD_FIRST)
+        $result = ($this->getSelectMethod() === self::METHOD_FIRST)
             ? $statement->fetch()
             : $statement->fetchAll();
 
         $statement->closeCursor();
+
+        if($result === false) return null;
 
         return $result;
     }
