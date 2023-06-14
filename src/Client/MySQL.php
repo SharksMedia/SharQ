@@ -84,6 +84,12 @@ class MySQL extends Client
         return $statement;
     }
 
+    /**
+     * 2023-05-10
+     * @param string $identifier
+     * @param string $context
+     * @return string
+     */
     public function wrapIdentifier(string $identifier, string $context): string
     {// 2023-05-10
         if($identifier === '*') return $identifier;
@@ -99,6 +105,10 @@ class MySQL extends Client
         return implode('.', $parts);
     }
 
+    /**
+     * 2023-06-12
+     * @return string
+     */
     private function createDSN(): string
     {// 2023-06-12
         return sprintf(

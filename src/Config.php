@@ -11,6 +11,13 @@ namespace Sharksmedia\QueryBuilder;
 
 class Config
 {
+    public const CLIENT_MYSQL = 'mysql';
+
+    public const CLIENTS =
+    [
+        self::CLIENT_MYSQL,
+    ];
+
     private string $client;
 
     private string $host;
@@ -24,10 +31,7 @@ class Config
 
     public function __construct(string $client)
     {// 2023-05-08
-        if(!in_array($client, ['mysql']))
-        {// 2023-05-08
-            throw new \Exception('Invalid client');
-        }
+        if(!in_array($client, self::CLIENTS)) throw new \Exception('Invalid client: '.$client);
 
         $this->client = $client;
     }

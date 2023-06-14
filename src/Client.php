@@ -13,6 +13,8 @@ use Sharksmedia\QueryBuilder\Config;
 
 abstract class Client
 {
+    public const TYPE_MYSQL = 'mysql';
+
     private \PDO $driver;
     private Config $iConfig;
 
