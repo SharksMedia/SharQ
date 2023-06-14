@@ -27,7 +27,7 @@ class Config
     private string $database;
     private string $charset;
 
-    private int $timeout;
+    private int $timeout = 10000;
 
     public function __construct(string $client)
     {// 2023-05-08
