@@ -28,7 +28,7 @@ class MySQL extends Client
     /** @var int */
 	private $transactionCounter = 0;
 
-    /**
+    /*
      * 2023-05-08
      * @throws \PDOException if connection fails
      */
