@@ -80,7 +80,16 @@ class MySQL extends Client
         }
 
         $statement = $this->preparedStatements[$sql];
-        $statement->execute($bindings);
+
+        foreach($bindings as $i=>$value)
+        {
+            $type = \PDO::PARAM_STR;
+            if(is_int($value)) $type = \PDO::PARAM_INT;
+
+            $statement->bindValue($i + 1, $value, $type);
+        }
+
+        $statement->execute();
 
         return $statement;
     }
