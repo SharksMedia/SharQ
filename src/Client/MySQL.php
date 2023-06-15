@@ -32,7 +32,7 @@ class MySQL extends Client
      * 2023-05-08
      * @throws \PDOException if connection fails
      */
-    protected function initializeDriver(): void
+    public function initializeDriver(): void
     {// 2023-05-08
         $iConfig = $this->iConfig;
 

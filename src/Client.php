@@ -29,14 +29,14 @@ abstract class Client
         switch ($iConfig->getClient()) {
             case self::TYPE_MYSQL:
                 $iClient = new Client\MySQL($iConfig);
-                $iClient->initializeDriver();
+                // $iClient->initializeDriver();
                 return $iClient;
             default:
                 throw new \Exception('Unknown client type: ' . $iConfig->getClient());
         }
     }
 
-    abstract protected function initializeDriver(): void; // Create new PDO
+    abstract public function initializeDriver(): void; // Create new PDO
     abstract public function wrapIdentifier(string $identifier, string $context): string; // Wrap identifier in quotes
 
     abstract public function isTransacting(): bool;
