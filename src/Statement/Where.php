@@ -118,6 +118,11 @@ class Where implements IStatement, IAliasable
         return $this;
     }
 
+    public function getAlias(): ?string
+    {// 2023-06-15
+        return $this->as;
+    }
+
     public function getBoolType(): string
     {// 2023-05-15
         return $this->boolType;

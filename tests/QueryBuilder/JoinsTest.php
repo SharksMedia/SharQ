@@ -904,6 +904,26 @@ class JoinsTest extends \Codeception\Test\Unit
             return $case;
         };
 
+        $cases['join with alias'] = function()
+        {
+            $case =
+            [
+                self::qb()
+                    ->select('*')
+                    ->from('users')
+                    ->join('photos as p', 'p.id', '>', 0),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT * FROM `users` INNER JOIN `photos` AS `p` ON(`p`.`id` > ?)',
+                        'bindings'=>[0]
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
         foreach($cases as $name=>$caseFn)
         {
             $cases[$name] = $caseFn();

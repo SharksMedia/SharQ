@@ -1460,6 +1460,8 @@ class QueryCompiler
                 ? $this->unwrapRaw($iJoin->getTableName(), $this->bindings)
                 : $iJoin->getJoinFunction().' '.$this->wrap($tableName);
 
+            if($iJoin->getAlias() !== null) $sql .= ' AS '.$this->wrap($iJoin->getAlias());
+
             $clausesCount = 0;
             foreach($iJoin->getClauses() as $iClause)
             {

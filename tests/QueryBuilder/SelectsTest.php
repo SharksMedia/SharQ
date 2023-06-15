@@ -963,6 +963,7 @@ class SelectsTest extends \Codeception\Test\Unit
 
             return $case;
         };
+
         foreach($cases as $name=>$caseFn)
         {
             $cases[$name] = $caseFn();
@@ -974,7 +975,7 @@ class SelectsTest extends \Codeception\Test\Unit
 	/**
 	 * @dataProvider caseProvider
 	 */
-    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected): void
     {
         $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
 

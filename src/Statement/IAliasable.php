@@ -18,5 +18,12 @@ interface IAliasable
      * @return self
      */
     public function as(string $alias): self;
+
+    /**
+     * 2023-05-08
+     * Returns the statement type as a string
+     * @return string|null
+     */
+    public function getAlias(): ?string;
 }
 

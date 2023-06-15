@@ -11,7 +11,7 @@ namespace Sharksmedia\QueryBuilder\Statement;
 
 use Sharksmedia\QueryBuilder\Statement\Clause;
 
-class Join implements IStatement
+class Join implements IStatement, IAliasable
 {
     public const TYPE_RAW               = 'JOIN_RAW';
     public const TYPE_INNER             = 'JOIN_INNER';
@@ -44,6 +44,12 @@ class Join implements IStatement
      * @var string|Raw
      */
     private $table;
+
+    /**
+     * This is the iClient property.
+     * @var string|Raw
+     */
+    private $alias;
 
     /**
      * This is the iClient property.
@@ -490,5 +496,17 @@ class Join implements IStatement
     {// 2023-05-09
         $this->boolType = self::ON_OR;
         return $this->onExists($callback, true);
+    }
+
+    public function as(string $alias): IAliasable
+    {
+        $this->alias = $alias;
+
+        return $this;
+    }
+
+    public function getAlias(): ?string
+    {
+        return $this->alias;
     }
 }

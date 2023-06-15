@@ -683,6 +683,13 @@ class QueryBuilder
     public function join($table, $first=null, ...$args): QueryBuilder
     {// 2023-05-09
         $iJoin = null;
+
+        $tableParts = is_string($table)
+            ? preg_split('/ AS /i', $table)
+            : [$table];
+
+        $table = array_shift($tableParts);
+        $alias = array_shift($tableParts);
         
         if(is_callable($first))
         {
@@ -702,6 +709,8 @@ class QueryBuilder
             $iJoin = new Join($table, $this->joinFlag, $this->schema);
             if($first) $iJoin->on($first, ...$args);
         }
+
+        if($alias) $iJoin->as($alias);
 
         $this->iStatements[] = $iJoin;
 

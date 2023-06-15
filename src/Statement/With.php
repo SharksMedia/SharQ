@@ -61,4 +61,9 @@ class With implements IStatement, IAliasable
 
         return $this;
     }
+
+    public function getAlias(): ?string
+    {// 2023-06-07
+        return $this->alias;
+    }
 }
