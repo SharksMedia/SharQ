@@ -2365,5 +2365,12 @@ class QueryBuilder
 
         return $result;
     }
+
+    public function toSQL(): Query
+    {// 2023-06-12
+        $iQueryCompiler = new QueryCompiler($this->iClient, $this, []);
+
+        return $iQueryCompiler->toSQL();
+    }
 }
 
