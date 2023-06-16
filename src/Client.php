@@ -36,6 +36,11 @@ abstract class Client
         }
     }
 
+    public function getConfig(): Config
+    {// 2023-05-08
+        return $this->iConfig;
+    }
+
     abstract public function initializeDriver(): void; // Create new PDO
     abstract public function wrapIdentifier(string $identifier, string $context): string; // Wrap identifier in quotes
 
