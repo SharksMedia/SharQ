@@ -964,6 +964,23 @@ class SelectsTest extends \Codeception\Test\Unit
             return $case;
         };
 
+        $cases['raw'] = function()
+        {
+            $case =
+            [
+                self::qb()->raw('select * from users where age > 18'),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'select * from users where age > 18',
+                        'bindings'=>[]
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
         foreach($cases as $name=>$caseFn)
         {
             $cases[$name] = $caseFn();

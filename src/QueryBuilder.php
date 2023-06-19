@@ -33,6 +33,7 @@ class QueryBuilder
     public const BOOL_TYPE_AND = 'AND';
     public const BOOL_TYPE_OR = 'OR';
     
+    public const METHOD_RAW = 'RAW';
     public const METHOD_SELECT = 'SELECT';
     public const METHOD_FIRST = 'FIRST';
     public const METHOD_PLUCK = 'PLUCK';
@@ -2343,15 +2344,24 @@ class QueryBuilder
         return $this;
     }
 
+    public function raw(string $raw, ...$bindings): QueryBuilder
+    {// 2023-06-07
+        $this->method = self::METHOD_RAW;
+
+        $iRaw = new Raw($raw, ...$bindings);
+
+        $this->iStatements[] = $iRaw;
+
+        return $this;
+    }
+
     /**
      * @return array<int, mixed>|mixed
      * @throws \PDOException
      */
     public function run()
     {// 2023-06-12
-        $iQueryCompiler = new QueryCompiler($this->iClient, $this, []);
-
-        $iQuery = $iQueryCompiler->toSQL();
+        $iQuery = $this->toSQL();
 
         $statement = $this->iClient->query($iQuery);
 

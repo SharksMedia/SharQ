@@ -135,6 +135,13 @@ class QueryCompiler
         'waitMode',
     ];
 
+    public const RAW_COMPONENTS =
+    [
+        'comments',
+        'method',
+        'waitMode',
+    ];
+
     public const QUERY_OPERATORS =
     [
         '='=>'=',
@@ -1058,6 +1065,7 @@ class QueryCompiler
             'UPDATE' => self::UPDATE_COMPONENTS,
             'DELETE' => self::DELETE_COMPONENTS,
             'TRUNCATE' => self::TRUNCATE_COMPONENTS,
+            'RAW'=>self::RAW_COMPONENTS,
         ];
 
         $components = $componentsMap[$this->iQueryBuilder->getMethod()] ?? self::QUERY_COMPONENTS;
@@ -1137,6 +1145,7 @@ class QueryCompiler
     {// 2023-06-06
         $methodMap =
         [
+            'RAW'=>'raw',
             'SELECT'=>'select',
             'FIRST'=>'select',
             'INSERT'=>'insert',
@@ -1146,6 +1155,15 @@ class QueryCompiler
         ];
 
         return call_user_func([$this, $methodMap[$this->iQueryBuilder->getMethod()]]);
+    }
+
+    public function raw(): string
+    {// 2023-06-06
+        $iRaws = $this->iStatementsGroupedOnType['Raw'] ?? [];
+
+        $iRaw = $iRaws[0] ?? null; // There can only be one raw statement
+
+        return $this->unwrapRaw($iRaw, $this->bindings);
     }
 
     /**
