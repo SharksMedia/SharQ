@@ -2356,8 +2356,8 @@ class QueryBuilder
         $statement = $this->iClient->query($iQuery);
 
         $result = ($this->getSelectMethod() === self::METHOD_FIRST)
-            ? $statement->fetch()
-            : $statement->fetchAll();
+            ? $statement->fetch(\PDO::FETCH_ASSOC)
+            : $statement->fetchAll(\PDO::FETCH_ASSOC);
 
         $statement->closeCursor();
 
