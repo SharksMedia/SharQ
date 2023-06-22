@@ -92,7 +92,7 @@ class QueryBuilder
      * This is the iSingle attribute.
      * @var Single
      */
-    private Single $iSingle;
+    protected Single $iSingle;
 
     /**
      * This is the schema attribute.
