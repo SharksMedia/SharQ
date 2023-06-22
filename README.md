@@ -34,7 +34,7 @@ print_r($bindings);
 ### Installation
 Add Sharksmedia repository
 ```bash
-composer config repositories.sharksmedia/query-builder vcs git@bitbucket.org:sharksmedia/QueryBuilder
+composer config repositories.sharksmedia/query-builder vcs git@github.com:SharkMagnus/QueryBuilder.git
 ```
 
 Require the QueryBuilder
