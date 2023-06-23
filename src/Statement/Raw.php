@@ -9,12 +9,10 @@ declare(strict_types=1);
 
 namespace Sharksmedia\QueryBuilder\Statement;
 
-use Sharksmedia\QueryBuilder\Client;
 use Sharksmedia\QueryBuilder\Statement\IStatement;
 
 /**
  * // 2023-05-09
- * @property Client $iClient
  * @property string $sql
  * @property array<string,mixed> $bindings
  */
@@ -23,8 +21,6 @@ class Raw implements IStatement
     public const TYPE_RAW = 'RAW_RAW';
 
     private string $type;
-
-    private Client $iClient;
 
     private string $sql;
     private array $bindings;
@@ -41,7 +37,6 @@ class Raw implements IStatement
         if(count($bindings) === 1 && is_array($bindings[0])) $bindings = $bindings[0];
 
         $this->bindings = $bindings;
-        // $this->iClient = $iClient;
     }
 
     public function getClass(): string
