@@ -387,6 +387,28 @@ class Join implements IStatement, IAliasable
      * @param array<int, int|float|string|Raw>|QueryBuilder $values
      * @return Join
      */
+    public function andOnIn(string $column, $values): Join
+    {// 2023-05-09
+        $this->boolType = self::ON_AND;
+        return $this->onIn($column, $values, false);
+    }
+
+    /**
+     * @param string $column
+     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @return Join
+     */
+    public function andOnNotIn(string $column, $values): Join
+    {// 2023-05-09
+        $this->boolType = self::ON_AND;
+        return $this->onIn($column, $values, true);
+    }
+
+    /**
+     * @param string $column
+     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @return Join
+     */
     public function orOnIn(string $column, $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
