@@ -86,7 +86,7 @@ class QueryBuilder
      * see QueryBuilder::METHOD_* constants
      * @var string
      */
-    private string $method = self::METHOD_SELECT;
+    protected string $method = self::METHOD_SELECT;
 
     /**
      * This is the iSingle attribute.
