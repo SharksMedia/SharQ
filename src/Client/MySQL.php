@@ -46,6 +46,8 @@ class MySQL extends Client
 		$pdo->setAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
 		
 		$this->driver = $pdo;
+
+        $this->isInitialized = true;
     }
 
     /**

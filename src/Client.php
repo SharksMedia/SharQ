@@ -16,6 +16,7 @@ abstract class Client
     public const TYPE_MYSQL = 'mysql';
 
     protected  Config $iConfig;
+    protected  bool $isInitialized = false;
 
     public function __construct(Config $iConfig)
     {// 2023-05-08
@@ -39,6 +40,11 @@ abstract class Client
     public function getConfig(): Config
     {// 2023-05-08
         return $this->iConfig;
+    }
+
+    public function isInitialized(): bool
+    {// 2023-05-08
+        return $this->isInitialized;
     }
 
     abstract public function initializeDriver(): void; // Create new PDO
