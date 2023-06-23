@@ -924,6 +924,34 @@ class JoinsTest extends \Codeception\Test\Unit
             return $case;
         };
 
+        $cases['Join on query'] = function()
+        {
+            $qb = self::qb()
+                    ->select('userID')
+                    ->from('users')
+                    ->where('userID', 1)
+                    ->as('u');
+
+            $case =
+            [
+                self::qb()
+                    ->select('*')
+                    ->from('users')
+                    ->join($qb, 'users.userID', '=', 'p.userID'),
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT * FROM `users` INNER JOIN (SELECT `userID` FROM `users` WHERE `userID` = ?) AS `u` ON(`users`.`userID` = `p`.`userID`)',
+                        'bindings'=>[1]
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
+        
+
         foreach($cases as $name=>$caseFn)
         {
             $cases[$name] = $caseFn();
