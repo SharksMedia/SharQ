@@ -153,6 +153,7 @@ class QueryBuilder
     }
 
     /**
+     * @deprecated
      * This is the getSchema method.
      * see Columns::TYPE_* constants
      * @return string|null Returns the select method used.
@@ -663,7 +664,7 @@ class QueryBuilder
      */
     public function first(...$columns): QueryBuilder
     {// 2023-05-15
-        $this->iSingle->columnMethod = Columns::TYPE_FIRST;
+        $this->method = self::METHOD_FIRST;
 
         if(count($columns) !== 0) $this->_column($columns, Columns::TYPE_PLUCK);
 

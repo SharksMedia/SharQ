@@ -847,8 +847,8 @@ class QueryCompiler
     {// 2023-05-15
         if($this->hasOnlyUnions()) return null;
 
-        if($this->iQueryBuilder->getMethod() === 'UPDATE') return $this->sets();
-        if($this->iQueryBuilder->getMethod() === 'INSERT') return $this->_insertBody($this->iSingle->insert);
+        if($this->iQueryBuilder->getMethod() === QueryBuilder::METHOD_UPDATE) return $this->sets();
+        if($this->iQueryBuilder->getMethod() === QueryBuilder::METHOD_INSERT) return $this->_insertBody($this->iSingle->insert);
         
         $hints = $this->hintComments();
         $isDistinct = false;
@@ -892,9 +892,28 @@ class QueryCompiler
 
         $selectSql = implode(', ', $sql);
 
-        $query = "{$this->iQueryBuilder->getMethod()}{$hints} {$distinctClause}{$selectSql}{$this->compileFrom($this->iSingle->table)}";
+        $query = "{$this->getMethodFunction()}{$hints} {$distinctClause}{$selectSql}{$this->compileFrom($this->iSingle->table)}";
 
         return $query;
+    }
+
+    private function getMethodFunction(?string $method=null)
+    {
+        $method = $method ?? $this->iQueryBuilder->getMethod();
+
+        $methodMap =
+        [
+            QueryBuilder::METHOD_RAW=>'',
+            QueryBuilder::METHOD_SELECT=>'SELECT',
+            QueryBuilder::METHOD_FIRST=>'SELECT',
+            QueryBuilder::METHOD_PLUCK=>'SELECT',
+            QueryBuilder::METHOD_INSERT=>'INSERT',
+            QueryBuilder::METHOD_UPDATE=>'UPDATE',
+            QueryBuilder::METHOD_DELETE=>'DELETE',
+            QueryBuilder::METHOD_TRUNCATE=>'TRUNCATE',
+        ];
+
+        return $methodMap[$method];
     }
 
     /**
