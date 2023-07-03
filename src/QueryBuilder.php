@@ -2288,7 +2288,7 @@ class QueryBuilder
      * @internal Helper method
      * @return bool
      */
-    private function isSelectQuery(): bool
+    protected function isSelectQuery(): bool
     {// 2023-06-07
         return in_array($this->getMethod(), [self::METHOD_SELECT, self::METHOD_FIRST, self::METHOD_PLUCK]);
     }
