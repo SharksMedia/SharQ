@@ -155,7 +155,7 @@ class Join implements IStatement, IAliasable
         $operator = $args[1] ?? null;
         $second = $args[2] ?? null;
 
-        if(is_callable($first))
+        if($first instanceof \Closure)
         {
             $iClause = new Clause();
             $iClause->type = self::ON_TYPE_WRAPPED;
@@ -200,8 +200,8 @@ class Join implements IStatement, IAliasable
     }
 
     /**
-     * @param string|Raw|callable $first
-     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @param string|Raw|\Closure $first
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
      * @return Join
      */
     public function on($first, ...$args): Join
@@ -214,8 +214,8 @@ class Join implements IStatement, IAliasable
     }
 
     /**
-     * @param string|Raw|callable $first
-     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @param string|Raw|\Closure $first
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
      * @return Join
      */
     public function andOn($first, ...$args): Join
@@ -227,8 +227,8 @@ class Join implements IStatement, IAliasable
     }
 
     /**
-     * @param string|Raw|callable $first
-     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @param string|Raw|\Closure $first
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
      * @return Join
      */
     public function orOn($first, ...$args): Join
@@ -256,8 +256,8 @@ class Join implements IStatement, IAliasable
     }
 
     /**
-     * @param string|Raw|callable $first
-     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @param string|Raw|\Closure $first
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
      * @return Join
      */
     public function onVal($first, ...$args): Join
@@ -270,8 +270,8 @@ class Join implements IStatement, IAliasable
     }
 
     /**
-     * @param string|Raw|callable $first
-     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @param string|Raw|\Closure $first
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
      * @return Join
      */
     public function andOnVal($first, ...$args): Join
@@ -283,8 +283,8 @@ class Join implements IStatement, IAliasable
     }
 
     /**
-     * @param string|Raw|callable $first
-     * @param array<int, string|Raw|QueryBuilder|callable> $args [operator, $second]
+     * @param string|Raw|\Closure $first
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
      * @return Join
      */
     public function orOnVal($first, ...$args): Join
@@ -474,11 +474,11 @@ class Join implements IStatement, IAliasable
     }
 
     /**
-     * @param callable $callback
+     * @param \Closure $callback
      * @param bool $isNot
      * @return Join
      */
-    public function onExists(callable $callback, bool $isNot=false): Join
+    public function onExists(\Closure $callback, bool $isNot=false): Join
     {// 2023-05-09
         $iClause = new Clause();
         $iClause->type = self::ON_TYPE_EXISTS;
@@ -492,29 +492,29 @@ class Join implements IStatement, IAliasable
     }
 
     /**
-     * @param callable $callback
+     * @param \Closure $callback
      * @return Join
      */
-    public function onNotExists(callable $callback): Join
+    public function onNotExists(\Closure $callback): Join
     {// 2023-05-09
         return $this->onExists($callback, true);
     }
 
     /**
-     * @param callable $callback
+     * @param \Closure $callback
      * @return Join
      */
-    public function orOnExists(callable $callback): Join
+    public function orOnExists(\Closure $callback): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
         return $this->onExists($callback, false);
     }
 
     /**
-     * @param callable $callback
+     * @param \Closure $callback
      * @return Join
      */
-    public function orOnNotExists(callable $callback): Join
+    public function orOnNotExists(\Closure $callback): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
         return $this->onExists($callback, true);

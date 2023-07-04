@@ -353,7 +353,7 @@ class TestLimits extends \Codeception\Test\Unit
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);
     }
 
-    public function seeExceptionThrown(callable $function): string
+    public function seeExceptionThrown(\Closure $function): string
     {// 2023-06-05
         try
         {

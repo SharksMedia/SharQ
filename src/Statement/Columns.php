@@ -109,7 +109,7 @@ class Columns implements IStatement, IAliasable
 
     /**
      * get the columns
-     * @return array<int|string, string|callable|Raw|QueryBuilder>
+     * @return array<int|string, string|\Closure|Raw|QueryBuilder>
      */
     public function getColumns(): array
     {// 2023-05-10
@@ -118,7 +118,7 @@ class Columns implements IStatement, IAliasable
 
     /**
      * set the columns
-     * @param array<int|string, string|callable|Raw|QueryBuilder> $columns
+     * @param array<int|string, string|\Closure|Raw|QueryBuilder> $columns
      * @return Columns
      */
     public function setColumns(array $columns): self

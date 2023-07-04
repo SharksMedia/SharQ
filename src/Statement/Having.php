@@ -36,13 +36,13 @@ class Having implements IStatement
 
     /**
      * This is the operator property.
-     * @var string|Raw|QueryBuilder|callable|null
+     * @var string|Raw|QueryBuilder|\Closure|null
      */
     private ?string $operator;
 
     /**
      * This is the value property.
-     * @var string|Raw|QueryBuilder|callable|null
+     * @var string|Raw|QueryBuilder|\Closure|null
      */
     private         $value;
 
@@ -78,7 +78,7 @@ class Having implements IStatement
     }
 
     /**
-     * @param string|callable|Raw $column
+     * @param string|\Closure|Raw $column
      * @param string $operator
      * @param mixed $value
      * @param string $boolType
@@ -105,7 +105,7 @@ class Having implements IStatement
 
     /**
      * This method returns the column property.
-     * @return string|Raw|QueryBuilder|callable|null
+     * @return string|Raw|QueryBuilder|\Closure|null
      */
     public function getOperator()
     {// 2023-05-15
@@ -114,7 +114,7 @@ class Having implements IStatement
 
     /**
      * This method returns the column property.
-     * @return string|Raw|QueryBuilder|callable|null
+     * @return string|Raw|QueryBuilder|\Closure|null
      */
     public function getValue()
     {// 2023-05-15

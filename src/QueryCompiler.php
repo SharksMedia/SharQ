@@ -355,12 +355,12 @@ class QueryCompiler
     }
 
     /**
-     * @param callable $callback
+     * @param \Closure $callback
      * @param string|null $method QueryBuilder::TYPE_* constant
      * @param Client|null $iClient
      * @param array<int,mixed> $bindings
      */
-    private function compileCallback(callable $callback, ?string $method=null, ?Client $iClient=null, array &$bindings=[]): Query
+    private function compileCallback(\Closure $callback, ?string $method=null, ?Client $iClient=null, array &$bindings=[]): Query
     {// 2023-05-10
         $iQueryBuilder = new QueryBuilder($this->iClient, $this->iQueryBuilder->getSchema());
 
@@ -469,7 +469,7 @@ class QueryCompiler
         $operator = $this->operator($iWhere->getOperator() ?? '=');
         $value = $this->parameter($iWhere->getValue(), $this->bindings, false);
 
-        if(is_callable($iWhere->getValue())) $value = "({$value})";
+        if($iWhere->getValue() instanceof \Closure) $value = "({$value})";
 
         $sql = "{$notFunction}{$column} {$operator} {$value}";
 
@@ -804,7 +804,7 @@ class QueryCompiler
 
     /**
      * Wraps a value in quotes appropriately. Queries and callbacks are wrapped.
-     * @param int|float|string|Raw|QueryBuilder|callable $value
+     * @param int|float|string|Raw|QueryBuilder|\Closure $value
      * @return string
      */
     public function wrap($value): string
@@ -819,7 +819,7 @@ class QueryCompiler
             return $sql;
         }
 
-        if(is_callable($value)) return $this->compileCallback($value, null, null, $this->bindings)->toString(true, $this);
+        if($value instanceof \Closure) return $this->compileCallback($value, null, null, $this->bindings)->toString(true, $this);
 
         return $this->wrapIdentifier($value.'');
     }
@@ -918,7 +918,7 @@ class QueryCompiler
 
     /**
      * Creates alist of appropriately wrapped columns or queries, which can be used in ex. a select statement
-     * @param array<int|string, string|Raw|QueryBuilder|callable> $columns
+     * @param array<int|string, string|Raw|QueryBuilder|\Closure> $columns
      * @return string
      */
     public function columnize(array $columns): string
@@ -1305,7 +1305,7 @@ class QueryCompiler
     private function _insertBody($insertValues): string
     {// 2023-06-06
         if($insertValues instanceof QueryBuilder) return $this->unwrapRaw($insertValues, $this->bindings);
-        if(is_callable($insertValues)) return $this->compileCallback($insertValues, null, null, $this->bindings)->toString(false, $this);
+        if($insertValues instanceof \Closure) return $this->compileCallback($insertValues, null, null, $this->bindings)->toString(false, $this);
 
         if(is_array($insertValues) && count($insertValues) === 0) return '';
 
@@ -2024,7 +2024,7 @@ class QueryCompiler
      */
     private function parameter($value, array &$bindings, bool $wrap=false): string
     {// 2023-05-31
-        if(is_callable($value)) return $this->compileCallback($value, null, null, $bindings)->toString($wrap, $this);
+        if($value instanceof \Closure) return $this->compileCallback($value, null, null, $bindings)->toString($wrap, $this);
         if($value instanceof QueryBuilder) return $this->unwrapRaw($value, $this->bindings);
 
         return $this->unwrapRaw($value, $bindings) ?? '?';
@@ -2039,7 +2039,7 @@ class QueryCompiler
      */
     private function parametize($values, array &$bindings): string
     {// 2023-05-31
-        if(is_callable($values)) return $this->parameter($values, $bindings);
+        if($values instanceof \Closure) return $this->parameter($values, $bindings);
 
         if(!is_array($values)) $values = [$values];
 

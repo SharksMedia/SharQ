@@ -30,7 +30,7 @@ class Clause
 
     /**
      * This is the type value.
-     * @var string|Raw|QueryBuilder|callable
+     * @var string|Raw|QueryBuilder|\Closure
      */
     public                  $value;
 
@@ -118,7 +118,7 @@ class Clause
 
     /**
      * Get the value of the clause
-     * @return string|Raw|QueryBuilder|callable
+     * @return string|Raw|QueryBuilder|\Closure
      */
     public function getValue()
     {// 2023-05-31

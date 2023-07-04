@@ -42,7 +42,7 @@ class Union implements IStatement
         return $types;
     }
     /**
-     * @param callable|\Sharksmedia\QueryBuilder\QueryBuilder $statement
+     * @param \Closure|\Sharksmedia\QueryBuilder\QueryBuilder $statement
      */
     public function __construct(string $type, $statement, bool $wrap)
     {// 2023-05-08
@@ -52,7 +52,7 @@ class Union implements IStatement
     }
 
     /**
-     * @return callable|\Sharksmedia\QueryBuilder\QueryBuilder
+     * @return \Closure|\Sharksmedia\QueryBuilder\QueryBuilder
      */
     public function getStatement()
     {// 2023-05-08

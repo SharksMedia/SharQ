@@ -15,7 +15,7 @@ use Sharksmedia\QueryBuilder\Statement\IAliasable;
 
 /**
  * 2023-05-08
- * @property string|callable $column
+ * @property string|\Closure $column
  * @property string $operator
  * @property mixed $value
  * @property string $boolType
@@ -49,7 +49,7 @@ class Where implements IStatement, IAliasable
     private ?string $as = null;
 
     /**
-     * @param string|callable|Raw $column
+     * @param string|\Closure|Raw $column
      * @param string $operator
      * @param mixed $value
      * @param string $boolType

@@ -188,5 +188,14 @@ class MySQL extends Client
 		// return true;
 	}
 
+    /**
+     * 2023-07-04
+     * @return string
+     */
+    public function getLastInsertId(): string
+    {
+        return $this->driver->lastInsertId();
+    }
+
 }
 

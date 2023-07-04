@@ -50,6 +50,8 @@ abstract class Client
     abstract public function initializeDriver(): void; // Create new PDO
     abstract public function wrapIdentifier(string $identifier, string $context): string; // Wrap identifier in quotes
 
+    abstract public function getLastInsertId(): string;
+
     abstract public function isTransacting(): bool;
     abstract public function beginTransaction(): bool;
     abstract public function commit(): bool;

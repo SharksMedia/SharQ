@@ -366,6 +366,34 @@ class WheresTest extends \Codeception\Test\Unit
             return $case;
         };
 
+
+        $cases['Med24 get content drug approvals'] = function()
+        {
+            function t() { print 'hello'; }
+
+            $query = self::qb()
+                ->select('*')
+                ->from('users')
+                ->as('t');
+
+            $qq = self::qb()
+                ->select($query);
+
+            $case =
+            [
+                $qq,
+                [
+                    'mysql'=>
+                    [
+                        'sql'=>'SELECT (SELECT * FROM `users`) AS `t`',
+                        'bindings'=>[]
+                    ]
+                ]
+            ];
+
+            return $case;
+        };
+
         // $cases['#4199 - forbids "/*", "*/" and "?" in hint comments'] = function()
         // {
         //     // FIXME: Implement me!

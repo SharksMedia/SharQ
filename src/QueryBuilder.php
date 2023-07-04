@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Sharksmedia\QueryBuilder;
 
+use Closure;
 use Sharksmedia\QueryBuilder\Client;
 use Sharksmedia\QueryBuilder\Single;
 use Sharksmedia\QueryBuilder\OnConflictBuilder;
@@ -346,12 +347,12 @@ class QueryBuilder
     }
 
     /**
-     * @param string|Raw|QueryBuilder|callable $arg
+     * @param string|Raw|QueryBuilder|\Closure $arg
      * @return bool
      */
     private function isValidStatementArg($arg): bool
     {// 2023-06-07
-        return is_callable($arg) || $arg instanceof Raw || $arg instanceof QueryBuilder;
+        return $arg instanceof \Closure || $arg instanceof Raw || $arg instanceof QueryBuilder;
     }
 
     /**
@@ -675,10 +676,10 @@ class QueryBuilder
      * 2023-05-08
      *
      * join(string $table, string $first, string $operator, string $second)
-     * join(string $table, callable $first)
+     * join(string $table, \Closure $first)
      *
      * @param string|Raw $table
-     * @param string|Raw|QueryBuilder|callable $first on statement [column]
+     * @param string|Raw|QueryBuilder|\Closure $first on statement [column]
      * @param array<int,string|Raw|QueryBuilder> $args on statement [operator, value]
      * @return QueryBuilder
      */
@@ -693,7 +694,7 @@ class QueryBuilder
         $table = array_shift($tableParts);
         $alias = array_shift($tableParts);
         
-        if(is_callable($first))
+        if($first instanceof \Closure)
         {
             $iJoin = new Join($table, $this->joinFlag, $this->schema);
             $first($iJoin);
@@ -830,7 +831,7 @@ class QueryBuilder
     }
 
     /**
-     * @param string|Raw|QueryBuilder|callable $args [column, operator, value]
+     * @param string|Raw|QueryBuilder|\Closure $args [column, operator, value]
      * @return QueryBuilder
      */
     public function where(...$args): QueryBuilder
@@ -845,7 +846,7 @@ class QueryBuilder
 
         // Check if the column is a function, in which case it's
         // a where statement wrapped in parens.
-        if(is_callable($column)) return $this->whereWrapped($column);
+        if($column instanceof \Closure) return $this->whereWrapped($column);
 
         // Check if the column is an array, in which case it's multiple wheres
         if(is_array($column))
@@ -946,7 +947,7 @@ class QueryBuilder
     }
 
     /**
-     * @param string|Raw|QueryBuilder|callable $args [column, operator, value]
+     * @param string|Raw|QueryBuilder|\Closure $args [column, operator, value]
      * @return QueryBuilder
      */
     public function whereColumn(...$args): QueryBuilder
@@ -956,7 +957,7 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, string|Raw|QueryBuilder|callable> $args [column, operator, value]
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [column, operator, value]
      * @return QueryBuilder
      */
     public function andWhere(...$args): QueryBuilder
@@ -967,7 +968,7 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, string|Raw|QueryBuilder|callable> $args [column, operator, value]
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [column, operator, value]
      * @return QueryBuilder
      */
     public function orWhere(...$args): QueryBuilder
@@ -979,7 +980,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $args [column, operator, value]
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [column, operator, value]
      * @return QueryBuilder
      */
     public function whereNot(...$args): QueryBuilder
@@ -991,7 +992,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $args [column, operator, value]
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [column, operator, value]
      * @return QueryBuilder
      */
     public function orWhereNot(...$args): QueryBuilder
@@ -1018,10 +1019,10 @@ class QueryBuilder
         return $this;
     }
     /**
-     * @param callable $callback
+     * @param \Closure $callback
      * @return QueryBuilder
      */
-    public function whereWrapped(callable $callback): QueryBuilder
+    public function whereWrapped(\Closure $callback): QueryBuilder
     {// 2023-05-09
         $iQueryBuilder = new QueryBuilder($this->iClient, $this->schema);
         $callback($iQueryBuilder);
@@ -1034,7 +1035,7 @@ class QueryBuilder
     }
 
     /**
-     * @param string|Raw|QueryBuilder|callable $value
+     * @param string|Raw|QueryBuilder|\Closure $value
      * @return QueryBuilder
      */
     private function _whereExists($value): QueryBuilder
@@ -1047,7 +1048,7 @@ class QueryBuilder
     }
 
     /**
-     * @param callable|QueryBuilder $callback
+     * @param \Closure|QueryBuilder $callback
      * @return QueryBuilder
      */
     public function whereExists($callback): QueryBuilder
@@ -1058,7 +1059,7 @@ class QueryBuilder
     }
 
     /**
-     * @param callable|QueryBuilder $callback
+     * @param \Closure|QueryBuilder $callback
      * @return QueryBuilder
      */
     public function whereNotExists($callback): QueryBuilder
@@ -1069,10 +1070,10 @@ class QueryBuilder
     }
 
     /**
-     * @param callable $callback
+     * @param \Closure $callback
      * @return QueryBuilder
      */
-    public function orWhereExists(callable $callback): QueryBuilder
+    public function orWhereExists(\Closure $callback): QueryBuilder
     {// 2023-05-07
         $this->isNot = false;
         $this->boolType = self::BOOL_TYPE_OR;
@@ -1080,10 +1081,10 @@ class QueryBuilder
     }
 
     /**
-     * @param callable $callback
+     * @param Closure $callback
      * @return QueryBuilder
      */
-    public function orWhereNotExists(callable $callback): QueryBuilder
+    public function orWhereNotExists(\Closure $callback): QueryBuilder
     {// 2023-05-09
         $this->isNot = true;
         $this->boolType = self::BOOL_TYPE_OR;
@@ -1092,7 +1093,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function whereIn($column, $values): QueryBuilder
@@ -1117,7 +1118,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function whereNotIn($column, $values): QueryBuilder
@@ -1128,7 +1129,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function andWhereIn($column, $values): QueryBuilder
@@ -1140,7 +1141,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function andWhereNotIn($column, $values): QueryBuilder
@@ -1151,7 +1152,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function orWhereIn($column, $values): QueryBuilder
@@ -1163,7 +1164,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function orWhereNotIn($column, $values): QueryBuilder
@@ -1231,8 +1232,8 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable $value
-     * @param string|Raw|QueryBuilder|callable $type
+     * @param string|Raw|QueryBuilder|\Closure $value
+     * @param string|Raw|QueryBuilder|\Closure $type
      * @return QueryBuilder
      */
     private function _whereLike($column, $value, $type): QueryBuilder
@@ -1246,7 +1247,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable $value
+     * @param string|Raw|QueryBuilder|\Closure $value
      * @return QueryBuilder
      */
     public function whereLike($column, $value): QueryBuilder
@@ -1256,7 +1257,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable $value
+     * @param string|Raw|QueryBuilder|\Closure $value
      * @return QueryBuilder
      */
     public function andWhereLike($column, $value): QueryBuilder
@@ -1267,7 +1268,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable $value
+     * @param string|Raw|QueryBuilder|\Closure $value
      * @return QueryBuilder
      */
     public function orWhereLike($column, $value): QueryBuilder
@@ -1278,7 +1279,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable $value
+     * @param string|Raw|QueryBuilder|\Closure $value
      * @return QueryBuilder
      */
     public function whereILike($column, $value): QueryBuilder
@@ -1288,7 +1289,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable $value
+     * @param string|Raw|QueryBuilder|\Closure $value
      * @return QueryBuilder
      */
     public function andWhereILike($column, $value): QueryBuilder
@@ -1299,7 +1300,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable $value
+     * @param string|Raw|QueryBuilder|\Closure $value
      * @return QueryBuilder
      */
     public function orWhereILike($column, $value): QueryBuilder
@@ -1310,7 +1311,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     private function _whereBetween($column, $values): QueryBuilder
@@ -1326,7 +1327,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function whereBetween($column, $values): QueryBuilder
@@ -1337,7 +1338,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function whereNotBetween($column, $values): QueryBuilder
@@ -1348,7 +1349,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function andWhereBetween($column, $values): QueryBuilder
@@ -1360,7 +1361,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function andWhereNotBetween($column, $values): QueryBuilder
@@ -1372,7 +1373,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function orWhereBetween($column, $values): QueryBuilder
@@ -1384,7 +1385,7 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|callable> $values
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
     public function orWhereNotBetween($column, $values): QueryBuilder
@@ -1517,7 +1518,7 @@ class QueryBuilder
     /**
      * see Union::TYPE_* constants
      * @param string $type Union::TYPE_* constant
-     * @param array<int, callable|QueryBuilder> $args
+     * @param array<int, \Closure|QueryBuilder> $args
      * @return QueryBuilder
      */
     private function _union(string $type, ...$args): QueryBuilder
@@ -1544,7 +1545,7 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, callable|QueryBuilder> $args
+     * @param array<int, \Closure|QueryBuilder> $args
      * @return QueryBuilder
      */
     public function union(...$args): QueryBuilder
@@ -1553,7 +1554,7 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, callable|QueryBuilder> $args
+     * @param array<int, \Closure|QueryBuilder> $args
      * @return QueryBuilder
      */
     public function unionAll(...$args): QueryBuilder
@@ -1562,7 +1563,7 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, callable|QueryBuilder> $args
+     * @param array<int, \Closure|QueryBuilder> $args
      * @return QueryBuilder
      */
     public function intersect(...$args): QueryBuilder
@@ -1748,8 +1749,8 @@ class QueryBuilder
      *
      * @param string $type Having::TYPE_* constant
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable $operator
-     * @param string|Raw|QueryBuilder|callable $value
+     * @param string|Raw|QueryBuilder|\Closure $operator
+     * @param string|Raw|QueryBuilder|\Closure $value
      * @param string $boolean QueryBuilder::BOOL_TYPE_* constant
      * @param bool $isNot
      * @return QueryBuilder
@@ -1765,8 +1766,8 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable|null $operator
-     * @param string|Raw|QueryBuilder|callable|null $value
+     * @param string|Raw|QueryBuilder|\Closure|null $operator
+     * @param string|Raw|QueryBuilder|\Closure|null $value
      * @return QueryBuilder
      */
     public function having($column, $operator=null, $value=null): QueryBuilder
@@ -1776,15 +1777,15 @@ class QueryBuilder
 
         if($column instanceof Raw) return $this->havingRaw($column);
 
-        if(is_callable($column)) return $this->havingWrapped($column);
+        if($column instanceof \Closure) return $this->havingWrapped($column);
 
         return $this->_having(Having::TYPE_BASIC, $column, $operator, $value, $this->boolType, $this->isNot);
     }
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|callable|null $operator
-     * @param string|Raw|QueryBuilder|callable|null $value
+     * @param string|Raw|QueryBuilder|\Closure|null $operator
+     * @param string|Raw|QueryBuilder|\Closure|null $value
      * @return QueryBuilder
      */
     public function orHaving($column, $operator=null, $value=null): QueryBuilder
@@ -1794,7 +1795,7 @@ class QueryBuilder
 
         if($column instanceof Raw) return $this->orHavingRaw($column);
 
-        if(is_callable($column)) return $this->orHavingWrapped($column);
+        if($column instanceof \Closure) return $this->orHavingWrapped($column);
 
         return $this->_having(Having::TYPE_BASIC, $column, $operator, $value, $this->boolType, $this->isNot);
     }
@@ -2054,10 +2055,10 @@ class QueryBuilder
     }
 
     /**
-     * @param callable $callback
+     * @param \Closure $callback
      * @return QueryBuilder
      */
-    public function havingWrapped(callable $callback): QueryBuilder
+    public function havingWrapped(\Closure $callback): QueryBuilder
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = false;
@@ -2066,10 +2067,10 @@ class QueryBuilder
     }
 
     /**
-     * @param callable $callback
+     * @param \Closure $callback
      * @return QueryBuilder
      */
-    public function orHavingWrapped(callable $callback): QueryBuilder
+    public function orHavingWrapped(\Closure $callback): QueryBuilder
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = false;
@@ -2328,10 +2329,10 @@ class QueryBuilder
     }
 
     /**
-     * @param callable $callback
+     * @param \Closure $callback
      * @param array<int, mixed> $args
      */
-    public function modify(callable $callback, ...$args): QueryBuilder
+    public function modify(\Closure $callback, ...$args): QueryBuilder
     {// 2023-06-07
         $callback($this, ...$args);
 

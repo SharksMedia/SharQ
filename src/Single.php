@@ -20,7 +20,7 @@ class Single
 
     /**
      * This is the table property.
-     * @var array<int|string, string|Raw|QueryBuilder|callable>|null
+     * @var array<int|string, string|Raw|QueryBuilder|\Closure>|null
      */
     public ?array $table = null;
 
