@@ -2380,7 +2380,7 @@ class QueryBuilder
 
     public function toSQL(): Query
     {// 2023-06-12
-        $iQueryCompiler = new QueryCompiler($this->iClient, clone $this, []);
+        $iQueryCompiler = new QueryCompiler($this->iClient, $this, []);
 
         return $iQueryCompiler->toSQL();
     }
