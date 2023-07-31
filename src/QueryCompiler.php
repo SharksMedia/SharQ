@@ -1444,8 +1444,6 @@ class QueryCompiler
 
     private function withWrapped(With $iWithStatement): string
     {// 2023-07-31
-        codecept_debug($iWithStatement->getValue());
-
         // $value = $this->parameter($iWithStatement->getValue(), $this->bindings, true);
         // $value = $this->values($iWithStatement->getValue(), $this->bindings);
         $value = $this->wrap($iWithStatement->getValue());
