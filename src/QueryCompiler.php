@@ -94,6 +94,7 @@ class QueryCompiler
     public const DELETE_COMPONENTS =
     [
         'comments',
+        'with',
         'method',
         'join',
         'where',
@@ -107,6 +108,7 @@ class QueryCompiler
     public const UPDATE_COMPONENTS =
     [
         'comments',
+        'with',
         'method',
         'join',
         'columns',
@@ -121,6 +123,7 @@ class QueryCompiler
     public const INSERT_COMPONENTS =
     [
         'comments',
+        'with',
         'method',
         'join',
         'columns',
@@ -1105,6 +1108,7 @@ class QueryCompiler
                     $unionStatement = $statement;
                     break;
                 case 'comments':
+                case 'with':
                 case 'method':
                 case 'columns':
                 case 'join':
@@ -1413,7 +1417,7 @@ class QueryCompiler
      */
     public function with(): string
     {// 2023-05-10
-        /** @var WithStatement[] $iWithStatements */
+        /** @var With[] $iWithStatements */
         $iWithStatements = $this->iStatementsGroupedOnType['With'] ?? [];
 
         if(count($iWithStatements) === 0) return '';
@@ -1424,10 +1428,51 @@ class QueryCompiler
         {// 2023-05-10
             $hasRecursive = $hasRecursive || $iWithStatement->isRecursive();
 
-            $sqlStrings[] = call_user_func([$this, $iWithStatement->getType(), $iWithStatement]);
+            $sql = null;
+
+            if($iWithStatement->getType() === With::TYPE_WRAPPED) $sql = $this->withWrapped($iWithStatement);
+            else if($iWithStatement->getType() === With::TYPE_RECURSIVE_WRAPPED) $sql = $this->withRecursiveWrapped($iWithStatement);
+            else if($iWithStatement->getType() === With::TYPE_MATERIALIZED_WRAPPED) $sql = $this->withMaterializedWrapped($iWithStatement);
+            else if($iWithStatement->getType() === With::TYPE_NOT_MATERIALIZED_WRAPPED) $sql = $this->withNotMaterializedWrapped($iWithStatement);
+            else throw new \Exception('Unknown with type: ' . $iWithStatement->getType());
+
+            $sqlStrings[] = $sql;
         }
         
         return "WITH " . ($hasRecursive ? 'RECURSIVE ' : '') . implode(', ', $sqlStrings);
+    }
+
+    private function withWrapped(With $iWithStatement): string
+    {// 2023-07-31
+        codecept_debug($iWithStatement->getValue());
+
+        // $value = $this->parameter($iWithStatement->getValue(), $this->bindings, true);
+        // $value = $this->values($iWithStatement->getValue(), $this->bindings);
+        $value = $this->wrap($iWithStatement->getValue());
+        $columns = implode(',', array_map(fn($v) => $this->wrap($v), $iWithStatement->getColumns() ?? []));
+
+        if($columns !== '') $columns = " ($columns)";
+
+        $alias = $this->wrap($iWithStatement->getAlias());
+
+        $sql = "$alias$columns AS $value";
+
+        return $sql;
+    }
+
+    private function withRecursiveWrapped(With $iWithStatement): string
+    {// 2023-07-31
+        return $this->withWrapped($iWithStatement);
+    }
+
+    private function withMaterializedWrapped()
+    {
+
+    }
+
+    private function withNotMaterializedWrapped()
+    {
+
     }
 
     /**

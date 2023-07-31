@@ -68,7 +68,7 @@ class Query
     {// 2023-05-15
         $sql = $this->getSQL();
 
-        if(in_array($this->getMethod(), [QueryBuilder::METHOD_SELECT, QueryBuilder::METHOD_FIRST]) && ($isParameter || $this->hasAs()))
+        if(in_array($this->getMethod(), [QueryBuilder::METHOD_SELECT, QueryBuilder::METHOD_FIRST, QueryBuilder::METHOD_UPDATE, QueryBuilder::METHOD_DELETE]) && ($isParameter || $this->hasAs()))
         {
             $sql = "({$sql})";
 

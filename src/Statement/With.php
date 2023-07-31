@@ -14,18 +14,21 @@ use Sharksmedia\QueryBuilder\Statement\IStatement;
 class With implements IStatement, IAliasable
 {
     public const TYPE_WRAPPED = 'WITH_WRAPPED';
+    public const TYPE_RECURSIVE_WRAPPED = 'WITH_RECURSIVE_WRAPPED';
+    public const TYPE_MATERIALIZED_WRAPPED = 'WITH_MATERIALIZED_WRAPPED';
+    public const TYPE_NOT_MATERIALIZED_WRAPPED = 'WITH_NOT_MATERIALIZED_WRAPPED';
 
     private string $type;
-    private bool   $isReqursive = false;
 
     private string $alias;
     private ?array  $columnList;
     private $value;
 
-    public function __construct(string $alias, ?array $columnList, $value=null)
+    public function __construct(string $type, string $alias, ?array $columnList, $value=null)
     {// 2023-06-07
         $this->as($alias);
 
+        $this->type       = $type;
         $this->columnList = $columnList;
         $this->value      = $value;
     }
@@ -40,19 +43,9 @@ class With implements IStatement, IAliasable
         return $this->type;
     }
 
-    public function getTypes(): array
-    {// 2023-05-08
-        $types =
-        [
-            'withWrapped',
-        ];
-
-        return $types;
-    }
-
     public function isRecursive(): bool
     {// 2023-05-10
-        return $this->isReqursive;
+        return $this->type === self::TYPE_RECURSIVE_WRAPPED;
     }
 
     public function as(string $alias): IAliasable
@@ -65,5 +58,15 @@ class With implements IStatement, IAliasable
     public function getAlias(): ?string
     {// 2023-06-07
         return $this->alias;
+    }
+
+    public function getValue()
+    {// 2023-06-07
+        return $this->value;
+    }
+
+    public function getColumns(): ?array
+    {// 2023-06-07
+        return $this->columnList;
     }
 }

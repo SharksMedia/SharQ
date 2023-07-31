@@ -395,31 +395,77 @@ class QueryBuilder
         return $this->withWrapped($alias, $statementOrColumnList, $nothingOrStatement);
     }
 
+    public function withRecursive(string $alias, ...$args): QueryBuilder
+    {// 2023-07-31
+        return $this->withRecursiveWrapped($alias, ...$args);
+    }
+
+    public function withRecursiveWrapped(string $alias, ...$args): QueryBuilder
+    {// 2023-07-31
+        $this->validateWithArgs($alias, ...$args);
+
+        return $this->_withWrapped(With::TYPE_RECURSIVE_WRAPPED, $alias, ...$args);
+    }
+
+    public function withMaterialized(string $alias, ...$args): QueryBuilder
+    {// 2023-07-31
+        return $this->withMaterializedWrapped($alias, ...$args);
+    }
+
+    public function withMaterializedWrapped(string $alias, ...$args): QueryBuilder
+    {
+        $this->validateWithArgs($alias, ...$args);
+
+        return $this->_withWrapped(With::TYPE_MATERIALIZED_WRAPPED, $alias, ...$args);
+    }
+
+    public function withNotMaterialized(string $alias, ...$args): QueryBuilder
+    {// 2023-07-31
+        return $this->withNotMaterializedWrapped($alias, ...$args);
+    }
+
+    public function withNotMaterializedWrapped(string $alias, ...$args): QueryBuilder
+    {
+        $this->validateWithArgs($alias, ...$args);
+
+        return $this->_withWrapped(With::TYPE_NOT_MATERIALIZED_WRAPPED, $alias, ...$args);
+    }
+
     /**
      * @param string $alias
      * @param array<int, mixed> $args [statementOrColumnList, nothingOrStatement]
      */
-    public function withWrapped(string $alias, ...$args): QueryBuilder
+    private function _withWrapped(string $type, string $alias, ...$args): QueryBuilder
     {// 2023-05-15
-
         $statementOrColumnList = $args[0] ?? null;
         $nothingOrStatement = $args[1] ?? null;
 
         $statement = null;
         $columnList = null;
 
-        if($this->isValidStatementArg($statementOrColumnList)) $statement = $statementOrColumnList;
+        if($this->isValidStatementArg($statementOrColumnList))
+        {
+            $statement = $statementOrColumnList;
+        }
         else
         {
             $columnList = $statementOrColumnList;
             $statement = $nothingOrStatement;
         }
 
-        $iWith = new With($alias, $columnList, $statement);
+        $iWith = new With($type, $alias, $columnList, $statement);
 
         $this->iStatements[] = $iWith;
 
         return $this;
+    }
+    /**
+     * @param string $alias
+     * @param array<int, mixed> $args [statementOrColumnList, nothingOrStatement]
+     */
+    public function withWrapped(string $alias, ...$args): QueryBuilder
+    {// 2023-07-31
+        return $this->_withWrapped(With::TYPE_WRAPPED, $alias, ...$args);
     }
 
     /**
@@ -2152,12 +2198,15 @@ class QueryBuilder
     }
 
     /**
+     * Not supported in MySQL, and will have no effect
      * @param string|Raw|array<int, string|Raw> $returning
      * @param array<string, mixed> $options
      * @return QueryBuilder
      */
-    public function returning($returning, $options): QueryBuilder
+    public function returning($returning, $options=[]): QueryBuilder
     {// 2023-06-05
+        if(!is_array($returning)) $returning = [$returning];
+
         $this->iSingle->returning = $returning;
         $this->iSingle->options = $options;
 
