@@ -51,6 +51,31 @@ class QueryBuilder
     public const WAIT_MODE_SKIP_LOCKED = 'SKIP LOCKED';
     public const WAIT_MODE_NO_WAIT = 'NO WAIT';
 
+    /**
+     * returns an array indexed by column name as returned in your result set.
+     */
+    public const FETCH_MODE_ASSOCIATIVE = \PDO::FETCH_ASSOC;
+
+    /**
+     * returns an anonymous object with property names that correspond to the column names returned in your result set.
+     */
+    public const FETCH_MODE_OBJECT = \PDO::FETCH_OBJ;
+
+    /**
+     * returns an array indexed by column number as returned in your result set, starting at column 0.
+     */
+    public const FETCH_MODE_NUMBERED = \PDO::FETCH_NUM;
+
+    /**
+     * returns an array where each key is the first column's value and each value is the second column's value as returned in your result set.
+     */
+    public const FETCH_MODE_KEY_PAIR = \PDO::FETCH_KEY_PAIR;
+
+    /**
+     * returns an array where each value corresponds to a single column's value as returned in your result set, defaults to column 0
+     */
+    public const FETCH_MODE_COLUMN = \PDO::FETCH_COLUMN;
+
     public const CLEARABLE_STATEMENTS =
     [
         'with',
@@ -81,6 +106,13 @@ class QueryBuilder
      * @var IStatement[]
      */
     private array $iStatements = [];
+
+    /**
+     * This is the fetchMode attribute.
+     * see QueryBuilder::FETCH_MODE_* constants
+     * @var int
+     */
+    protected int $fetchMode = self::FETCH_MODE_ASSOCIATIVE;
 
     /**
      * This is the method attribute.
@@ -324,7 +356,7 @@ class QueryBuilder
             'limit'=>'clearLimit',
             'offset'=>'clearOffset',
             'counter'=>'clearCounters',
-            'counters'=>'clearCounters',
+            'counters'=>'clearCounters'
         ];
 
         $statementClearingFunction = $statementMap[$statementName] ?? null;
@@ -2406,6 +2438,24 @@ class QueryBuilder
         return $this;
     }
 
+    public function fetchMode(int $fetchMode): QueryBuilder
+    {// 2023-08-03
+        static $validFetchModes =
+        [
+            self::FETCH_MODE_ASSOCIATIVE=>\PDO::FETCH_ASSOC,
+            self::FETCH_MODE_OBJECT=>\PDO::FETCH_OBJ,
+            self::FETCH_MODE_NUMBERED=>\PDO::FETCH_NUM,
+            self::FETCH_MODE_KEY_PAIR=>\PDO::FETCH_KEY_PAIR,
+            self::FETCH_MODE_COLUMN=>\PDO::FETCH_COLUMN
+        ];
+
+        if(!isset($validFetchModes[$fetchMode])) Throw new \LogicException('invalid fetch mode provided.');
+
+        $this->fetchMode = $validFetchModes[$fetchMode];
+
+        return $this;
+    }
+
     /**
      * @return array<int, mixed>|mixed
      * @throws \PDOException
@@ -2417,8 +2467,8 @@ class QueryBuilder
         $statement = $this->iClient->query($iQuery);
 
         $result = ($this->getSelectMethod() === self::METHOD_FIRST)
-            ? $statement->fetch(\PDO::FETCH_ASSOC)
-            : $statement->fetchAll(\PDO::FETCH_ASSOC);
+            ? $statement->fetch($this->fetchMode)
+            : $statement->fetchAll($this->fetchMode);
 
         $statement->closeCursor();
 

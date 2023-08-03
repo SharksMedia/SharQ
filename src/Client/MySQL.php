@@ -43,6 +43,7 @@ class MySQL extends Client
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $pdo->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
         $pdo->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
+        $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
         $pdo->setAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
         
         $this->driver = $pdo;
