@@ -26,7 +26,7 @@ class MySQL extends Client
     private array $preparedStatements = [];
 
     /** @var int */
-	private $transactionCounter = 0;
+    private $transactionCounter = 0;
 
     /*
      * 2023-05-08
@@ -36,16 +36,16 @@ class MySQL extends Client
     {// 2023-05-08
         $iConfig = $this->iConfig;
 
-		$pdo = new CustomPDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword());
-		
-		$pdo->exec('SET sql_auto_is_null = 0');		//to fix horrible bugs: https://www.xaprb.com/blog/2007/05/31/why-is-null-doesnt-always-work-in-mysql/ & http://dev.mysql.com/doc/refman/5.6/en/server-system-variables.html#sysvar_sql_auto_is_null
-		$pdo->setAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
-		$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		$pdo->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
-		$pdo->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
-		$pdo->setAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
-		
-		$this->driver = $pdo;
+        $pdo = new CustomPDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword());
+        
+        $pdo->exec('SET sql_auto_is_null = 0');        //to fix horrible bugs: https://www.xaprb.com/blog/2007/05/31/why-is-null-doesnt-always-work-in-mysql/ & http://dev.mysql.com/doc/refman/5.6/en/server-system-variables.html#sysvar_sql_auto_is_null
+        $pdo->setAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
+        $pdo->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
+        $pdo->setAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
+        
+        $this->driver = $pdo;
 
         $this->isInitialized = true;
     }
@@ -142,51 +142,51 @@ class MySQL extends Client
      * @param string $name
      * @return bool
      */
-	public function beginTransaction(): bool
-	{// 2023-01-10
+    public function beginTransaction(): bool
+    {// 2023-01-10
 
         return $this->driver->beginTransaction();
 
-		// $this->transactionCounter++;
-		// 
-		// if($this->transactionCounter === 1) return $this->driver->beginTransaction();
-		// 
-		// $this->driver->exec('SAVEPOINT trans'.$this->transactionCounter);
-		// 
-		// return $this->transactionCounter >= 0;
-	}
-	
+        // $this->transactionCounter++;
+        // 
+        // if($this->transactionCounter === 1) return $this->driver->beginTransaction();
+        // 
+        // $this->driver->exec('SAVEPOINT trans'.$this->transactionCounter);
+        // 
+        // return $this->transactionCounter >= 0;
+    }
+    
     /**
      * @param string $name
      * @return bool
      */
-	public function commit(): bool
-	{// 2023-01-10
+    public function commit(): bool
+    {// 2023-01-10
         return $this->driver->commit();
 
-		// $this->transactionCounter--;
-		// 
-		// if($this->transactionCounter === 0) return $this->driver->commit();
-		// 
-		// return $this->transactionCounter >= 0;
-	}
-	
+        // $this->transactionCounter--;
+        // 
+        // if($this->transactionCounter === 0) return $this->driver->commit();
+        // 
+        // return $this->transactionCounter >= 0;
+    }
+    
     /**
      * @param string $name
      * @return bool
      */
-	public function rollback(): bool
-	{// 2023-01-10
+    public function rollback(): bool
+    {// 2023-01-10
         return $this->driver->rollback();
 
-		// $this->transactionCounter--;
-		// 
-		// if($this->transactionCounter === 0) return $this->driver->rollback();
-		// 
-		// $this->driver->exec('ROLLBACK TO trans'.($this->transactionCounter + 1));
-		//
-		// return true;
-	}
+        // $this->transactionCounter--;
+        // 
+        // if($this->transactionCounter === 0) return $this->driver->rollback();
+        // 
+        // $this->driver->exec('ROLLBACK TO trans'.($this->transactionCounter + 1));
+        //
+        // return true;
+    }
 
     /**
      * 2023-07-04
