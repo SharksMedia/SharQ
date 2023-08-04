@@ -837,7 +837,7 @@ class QueryCompiler
 
         $operator = self::QUERY_OPERATORS[trim(strtolower($value ?? ''))] ?? null;
 
-        if($operator === null) throw new \Exception("Invalid operator: {$value}");
+        if($operator === null) throw new \InvalidArgumentException("Invalid operator: {$value}");
 
         return strtoupper($operator);
     }
