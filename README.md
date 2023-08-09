@@ -11,21 +11,44 @@ use \Sharksmedia\QueryBuilder\Client;
 use \Sharksmedia\QueryBuilder\QueryBuilder;
 use \Sharksmedia\QueryBuilder\QueryCompiler;
 
-$iConfig = new Config('mysql');
-$iClient = Client::createFromConfig($iConfig);
 
-$iQueryBuilder = new QueryBuilder($iClient, 'my_schema');
-$iQueryCompiler = new QueryCompiler($iClient, $iQueryBuilder);
+function getClient(): Client
+{
+    $iConfig = (new Config(Config::CLIENT_MYSQL))
+        ->host('127.0.0.0')
+        ->port(3306)
+        ->user('user')
+        ->password('password')
+        ->database('main_db')
+        ->charset('utf8mb4');
 
-$iQueryBuilder
-    ->select('name')
+    $iClient = Client::create($iConfig);
+
+    return $Client;
+}
+
+function qb(): QueryBuilder
+{
+    $iQueryBuilder = new QueryBuilder($iClient);
+
+    return $iQueryBuilder;
+}
+
+// SELECT `name` FROM `users` WHERE `id` = ?
+$usersQB = qb()->select('name')
     ->from('users')
     ->where('id', '=', 1);
 
-$iQuery = $iQueryCompiler->toSQL();
+// SELECT `name` FROM `users` WHERE `id` = ? OR `id` = ?
+$usersQB->orWhere('id', 2);
 
-$sql = $iQuery->getSQL(); // SELECT `name` FROM `users` WHERE `id` = ?
-$bindings = $iQuery->getBindings(); // [1]
+// use ->run() function to execute the query
+// $users = $usersQuery->run();
+
+$iQuery = $users->toQuery();
+
+$sql = $iQuery->getSQL();
+$bindings = $iQuery->getBindings();
 
 print $sql.PHP_EOL;
 print_r($bindings);
