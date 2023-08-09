@@ -25,6 +25,8 @@ class MySQL extends Client
     /** @var \PDOStatement[] */
     private array $preparedStatements = [];
 
+    private array $pdoOptions = [];
+
     /** @var int */
     private $transactionCounter = 0;
 
@@ -36,19 +38,30 @@ class MySQL extends Client
     {// 2023-05-08
         $iConfig = $this->iConfig;
 
-        $pdo = new CustomPDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword());
+        $this->setPDOAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
+        $this->setPDOAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $this->setPDOAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
+        $this->setPDOAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
+        $this->setPDOAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+        $this->setPDOAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
+
+        $pdo = new CustomPDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword(), $this->pdoOptions);
         
         $pdo->exec('SET sql_auto_is_null = 0');        //to fix horrible bugs: https://www.xaprb.com/blog/2007/05/31/why-is-null-doesnt-always-work-in-mysql/ & http://dev.mysql.com/doc/refman/5.6/en/server-system-variables.html#sysvar_sql_auto_is_null
-        $pdo->setAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $pdo->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
-        $pdo->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
-        $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
-        $pdo->setAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
         
         $this->driver = $pdo;
 
         $this->isInitialized = true;
+    }
+
+    public function setPDOAttribute(int $attribute, $value): void
+    {
+        $this->pdoOptions[$attribute] = $value;
+
+        if($this->isInitialized)
+        {
+            $this->driver->setAttribute($attribute, $value);
+        }
     }
 
     /**
