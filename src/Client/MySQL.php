@@ -54,14 +54,22 @@ class MySQL extends Client
         $this->isInitialized = true;
     }
 
-    public function setPDOAttribute(int $attribute, $value): void
+    /**
+     * 2023-08-09
+     * @param int $attribute
+     * @param mixed $value
+     * @return bool
+     */
+    public function setPDOAttribute(int $attribute, $value): bool
     {
         $this->pdoOptions[$attribute] = $value;
 
         if($this->isInitialized)
         {
-            $this->driver->setAttribute($attribute, $value);
+            return $this->driver->setAttribute($attribute, $value);
         }
+
+        return true;
     }
 
     /**
