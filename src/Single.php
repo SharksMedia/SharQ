@@ -122,5 +122,5 @@ class Single
      * This is the join property.
      * @var Transaction|null
      */
-    public               $transaction = null;
+    public ?Transaction  $transaction = null;
 }

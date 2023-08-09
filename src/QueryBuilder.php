@@ -2420,9 +2420,9 @@ class QueryBuilder
         return $this;
     }
 
-    public function transaction(?Transaction $iTransaction=null): QueryBuilder
+    public function transacting(?Transaction &$iTransaction=null): QueryBuilder
     {// 2023-06-07
-        $this->iSingle->transaction = $iTransaction;
+        $this->iSingle->transaction = &$iTransaction;
 
         return $this;
     }
@@ -2463,6 +2463,10 @@ class QueryBuilder
     public function run()
     {// 2023-06-12
         $iQuery = $this->toQuery();
+
+        $iTransaction = $this->iSingle->transaction;
+
+        if($iTransaction) $iTransaction->start($this->iClient);
 
         $statement = $this->iClient->query($iQuery);
 
