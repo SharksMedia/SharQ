@@ -153,6 +153,7 @@ class QueryCompiler
         '<='=>'<=',
         '>='=>'>=',
         '<>'=>'<>',
+        '<=>'=>'<=>',
         '!='=>'!=',
         'like'=>'like',
         'not like'=>'not like',
