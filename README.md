@@ -27,8 +27,10 @@ function getClient(): Client
     return $Client;
 }
 
-function qb(): QueryBuilder
+function qb(?Client $iClient=null): QueryBuilder
 {
+    $iClient = $iClient ?? getClient();
+
     $iQueryBuilder = new QueryBuilder($iClient);
 
     return $iQueryBuilder;
