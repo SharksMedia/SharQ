@@ -24,7 +24,7 @@ function getClient(): Client
 
     $iClient = Client::create($iConfig);
 
-    return $Client;
+    return $iClient;
 }
 
 function qb(?Client $iClient=null): QueryBuilder
@@ -47,7 +47,7 @@ $usersQB->orWhere('id', 2);
 // use ->run() function to execute the query
 // $users = $usersQuery->run();
 
-$iQuery = $users->toQuery();
+$iQuery = $usersQB->toQuery();
 
 $sql = $iQuery->getSQL();
 $bindings = $iQuery->getBindings();
