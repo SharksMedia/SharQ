@@ -97,7 +97,7 @@ class GroupByTest extends \Codeception\Test\Unit
     {
         $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
 
-        $iQuery = $iQueryCompiler->toSQL('select');
+        $iQuery = $iQueryCompiler->toQuery('select');
         $sqlAndBindings =
         [
             'sql'=>$iQuery->getSQL(),

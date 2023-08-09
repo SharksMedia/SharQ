@@ -322,7 +322,7 @@ class ClearingsTest extends \Codeception\Test\Unit
     {
         $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
 
-        $iQuery = $iQueryCompiler->toSQL();
+        $iQuery = $iQueryCompiler->toQuery();
         $sqlAndBindings =
         [
             'sql'=>$iQuery->getSQL(),

@@ -2462,7 +2462,7 @@ class QueryBuilder
      */
     public function run()
     {// 2023-06-12
-        $iQuery = $this->toSQL();
+        $iQuery = $this->toQuery();
 
         $statement = $this->iClient->query($iQuery);
 
@@ -2477,11 +2477,11 @@ class QueryBuilder
         return $result;
     }
 
-    public function toSQL(): Query
+    public function toQuery(): Query
     {// 2023-06-12
         $iQueryCompiler = new QueryCompiler($this->iClient, $this, []);
 
-        return $iQueryCompiler->toSQL();
+        return $iQueryCompiler->toQuery();
     }
 }
 

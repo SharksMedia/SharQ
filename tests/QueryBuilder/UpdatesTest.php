@@ -518,7 +518,7 @@ class UpdatesTest extends \Codeception\Test\Unit
     {
         $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
 
-        $iQuery = $iQueryCompiler->toSQL('update');
+        $iQuery = $iQueryCompiler->toQuery('update');
         $sqlAndBindings =
         [
             'sql'=>$iQuery->getSQL(),

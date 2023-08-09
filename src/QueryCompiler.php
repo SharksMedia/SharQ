@@ -224,16 +224,13 @@ class QueryCompiler
      * To SQL
      * @return Query
      */
-    public function toSQL(?string $method=null): Query
+    public function toQuery(?string $method=null): Query
     {// 2023-05-15
         $method = $method ?? $this->iQueryBuilder->getMethod();
-        // $method = $this->iQueryBuilder->getMethod();
-        // $method = strtolower($method);
 
         // FIXME: Generate UUID
         $iQuery = new Query($method, $this->options, $this->timeout, $this->cancelOnTimeout, $this->bindings, '<UUID>');
 
-        // $value = $this->{$method}();
         $value = $this->compileStatements($method);
 
         $iQuery->setSQL($value);
@@ -319,7 +316,7 @@ class QueryCompiler
         {
             $iQueryCompiler = new QueryCompiler($this->iClient, $value, []);
 
-            $sql = $iQueryCompiler->toSQL()->toString(false, $this);
+            $sql = $iQueryCompiler->toQuery()->toString(false, $this);
 
             $this->bindings = array_merge($this->bindings, $iQueryCompiler->getBindings());
 
@@ -371,7 +368,7 @@ class QueryCompiler
 
         $iQueryCompiler = new QueryCompiler($iClient ?? $this->iClient, $iQueryBuilder, []);
 
-        $iQuery = $iQueryCompiler->toSQL($method);
+        $iQuery = $iQueryCompiler->toQuery($method);
 
         $bindings = array_merge($bindings, $iQuery->getBindings());
 
