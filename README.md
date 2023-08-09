@@ -12,8 +12,6 @@ use \Sharksmedia\QueryBuilder\Config;
 use \Sharksmedia\QueryBuilder\Client;
 
 use \Sharksmedia\QueryBuilder\QueryBuilder;
-use \Sharksmedia\QueryBuilder\QueryCompiler;
-
 
 function getClient(): Client
 {
