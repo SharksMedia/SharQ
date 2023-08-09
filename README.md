@@ -4,6 +4,9 @@ A query builder for PHP
 ### Usage
 ```php
 <?php
+// src/index.php
+
+require_once __DIR__.'/../vendor/autoload.php';
 
 use \Sharksmedia\QueryBuilder\Config;
 use \Sharksmedia\QueryBuilder\Client;
