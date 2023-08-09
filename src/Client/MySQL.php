@@ -38,12 +38,13 @@ class MySQL extends Client
     {// 2023-05-08
         $iConfig = $this->iConfig;
 
-        $this->setPDOAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
-        $this->setPDOAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $this->setPDOAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
-        $this->setPDOAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
-        $this->setPDOAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
-        $this->setPDOAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
+        // Don't override the values if they are already set
+        if(!isset($this->pdoOptions[\PDO::ATTR_CASE]))$this->setPDOAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
+        if(!isset($this->pdoOptions[\PDO::ATTR_ERRMODE]))$this->setPDOAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        if(!isset($this->pdoOptions[\PDO::ATTR_ORACLE_NULLS]))$this->setPDOAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
+        if(!isset($this->pdoOptions[\PDO::ATTR_STRINGIFY_FETCHES]))$this->setPDOAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
+        if(!isset($this->pdoOptions[\PDO::ATTR_EMULATE_PREPARES]))$this->setPDOAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+        if(!isset($this->pdoOptions[\PDO::ATTR_TIMEOUT]))$this->setPDOAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
 
         $pdo = new CustomPDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword(), $this->pdoOptions);
         
