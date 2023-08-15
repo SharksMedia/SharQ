@@ -2488,7 +2488,7 @@ class QueryBuilder
         return $iQueryCompiler->toQuery();
     }
 
-    public function __clone(): void
+    public function __clone()
     {
         foreach(get_object_vars($this) as $name => $value)
         {
