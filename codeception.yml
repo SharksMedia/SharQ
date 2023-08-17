@@ -2,7 +2,13 @@ namespace: Tests
 support_namespace: Support
 suites:
     unit:
-        path: .
+        path: Unit
+        actor: UnitTester
+        modules:
+            enabled:
+                # add more modules here
+                - Asserts
+        step_decorators: ~
 
 settings:
     shuffle: true

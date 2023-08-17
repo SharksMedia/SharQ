@@ -10,7 +10,7 @@ use Sharksmedia\QueryBuilder\Config;
 use Sharksmedia\QueryBuilder\QueryCompiler;
 use Sharksmedia\QueryBuilder\Statement\Raw;
 
-class TestWheres extends \Codeception\Test\Unit
+class WheresTest extends \Codeception\Test\Unit
 {
     public static function getClient()
     {// 2023-05-16
@@ -1661,6 +1661,7 @@ class TestWheres extends \Codeception\Test\Unit
             return $case;
         };
 
+
         foreach($cases as $name=>$caseFn)
         {
             $cases[$name] = $caseFn();
@@ -1672,7 +1673,7 @@ class TestWheres extends \Codeception\Test\Unit
 	/**
 	 * @dataProvider caseProvider
 	 */
-    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected): void
     {
         $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
 
@@ -1684,6 +1685,31 @@ class TestWheres extends \Codeception\Test\Unit
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);
+    }
+
+    public function testShouldBeAbleToMakeWhereInFollowedByWhereLike(): void
+    {
+        $qb = self::qb()
+            ->from('testtable')
+            ->whereIn('id', [1])
+            ->where('name', 'like', '%test%');
+
+        // codecept_debug($qb);
+
+        $iQueryCompiler = new QueryCompiler(self::getClient(), $qb, []);
+
+        $iQuery = $iQueryCompiler->toQuery('select');
+        $sqlAndBindings =
+        [
+            'sql'=>$iQuery->getSQL(),
+            'bindings'=>$iQuery->getBindings()
+        ];
+
+        $this->assertSame(
+        [
+            'sql'=>'SELECT * FROM `testtable` WHERE `id` IN(?) AND `name` LIKE ?',
+            'bindings'=>[]
+        ], $sqlAndBindings);
     }
 }
 

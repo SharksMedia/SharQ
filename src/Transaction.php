@@ -8,6 +8,8 @@ namespace Sharksmedia\QueryBuilder;
 
 use function PHPUnit\Framework\throwException;
 
+// FIXME: Transaction should propably extend querybuilder
+
 class Transaction
 {
     public const ISOLATION_READ_UNCOMMITTED     = 'READ UNCOMMITTED';
