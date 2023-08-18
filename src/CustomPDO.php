@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder;
+namespace Sharksmedia\SharQ;
 
 // 2023-06-14
 

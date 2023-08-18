@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder;
+namespace Sharksmedia\SharQ;
 
-use Sharksmedia\QueryBuilder\Config;
+use Sharksmedia\SharQ\Config;
 
 abstract class Client
 {
@@ -57,8 +57,8 @@ abstract class Client
     abstract public function commit(): bool;
     abstract public function rollback(): bool;
     
-    public function getQueryCompiler(QueryBuilder $iQueryBuilder): QueryCompiler
+    public function getSharQCompiler(SharQ $iSharQ): SharQCompiler
     {// 2023-05-10
-        return new QueryCompiler($this, $iQueryBuilder, []);
+        return new SharQCompiler($this, $iSharQ, []);
     }
 }

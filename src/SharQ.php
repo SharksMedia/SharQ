@@ -1,6 +1,6 @@
 <?php
 /**
- * Class QueryBuilder
+ * Class SharQ
  * 2023-05-08
  *
  * @author      Magnus Schmidt Rasmussen <magnus@sharksmedia.dk>
@@ -8,28 +8,28 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder;
+namespace Sharksmedia\SharQ;
 
 use Closure;
-use Sharksmedia\QueryBuilder\Client;
-use Sharksmedia\QueryBuilder\Single;
-use Sharksmedia\QueryBuilder\OnConflictBuilder;
+use Sharksmedia\SharQ\Client;
+use Sharksmedia\SharQ\Single;
+use Sharksmedia\SharQ\OnConflictBuilder;
 
-use Sharksmedia\QueryBuilder\Statement\IStatement;
+use Sharksmedia\SharQ\Statement\IStatement;
 
-use Sharksmedia\QueryBuilder\Statement\Comments;
-use Sharksmedia\QueryBuilder\Statement\With;
-use Sharksmedia\QueryBuilder\Statement\Columns;
-use Sharksmedia\QueryBuilder\Statement\HintComments;
-use Sharksmedia\QueryBuilder\Statement\Join;
-use Sharksmedia\QueryBuilder\Statement\Where;
-use Sharksmedia\QueryBuilder\Statement\Having;
-use Sharksmedia\QueryBuilder\Statement\Group;
-use Sharksmedia\QueryBuilder\Statement\Order;
-use Sharksmedia\QueryBuilder\Statement\Union;
-use Sharksmedia\QueryBuilder\Statement\Raw;
+use Sharksmedia\SharQ\Statement\Comments;
+use Sharksmedia\SharQ\Statement\With;
+use Sharksmedia\SharQ\Statement\Columns;
+use Sharksmedia\SharQ\Statement\HintComments;
+use Sharksmedia\SharQ\Statement\Join;
+use Sharksmedia\SharQ\Statement\Where;
+use Sharksmedia\SharQ\Statement\Having;
+use Sharksmedia\SharQ\Statement\Group;
+use Sharksmedia\SharQ\Statement\Order;
+use Sharksmedia\SharQ\Statement\Union;
+use Sharksmedia\SharQ\Statement\Raw;
 
-class QueryBuilder
+class SharQ
 {
     public const BOOL_TYPE_AND = 'AND';
     public const BOOL_TYPE_OR = 'OR';
@@ -109,14 +109,14 @@ class QueryBuilder
 
     /**
      * This is the fetchMode attribute.
-     * see QueryBuilder::FETCH_MODE_* constants
+     * see SharQ::FETCH_MODE_* constants
      * @var int
      */
     protected int $fetchMode = self::FETCH_MODE_ASSOCIATIVE;
 
     /**
      * This is the method attribute.
-     * see QueryBuilder::METHOD_* constants
+     * see SharQ::METHOD_* constants
      * @var string
      */
     protected string $method = self::METHOD_SELECT;
@@ -149,7 +149,7 @@ class QueryBuilder
 
     /**
      * This is the boolType attribute.
-     * see QueryBuilder::BOOL_TYPE_* constants
+     * see SharQ::BOOL_TYPE_* constants
      * @var string
      */
     private string $boolType = self::BOOL_TYPE_AND;
@@ -198,7 +198,7 @@ class QueryBuilder
 
     /**
      * This is the getMethod method.
-     * see QueryBuilder::METHOD_* constants
+     * see SharQ::METHOD_* constants
      * @return string Returns the method used.
      */
     public function getMethod(): string
@@ -209,7 +209,7 @@ class QueryBuilder
     /**
      * Clears a specific grouping.
      * @param string $type
-     * @return QueryBuilder
+     * @return SharQ
      */
     private function clearGrouping(string $type): self
     {// 2023-05-15
@@ -223,7 +223,7 @@ class QueryBuilder
 
     /**
      * Clears ->with statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearWith(): self
     {// 2023-05-15
@@ -232,7 +232,7 @@ class QueryBuilder
 
     /**
      * Clears ->select statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearSelect(): self
     {// 2023-05-15
@@ -241,7 +241,7 @@ class QueryBuilder
 
     /**
      * Clears ->join statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearJoin(): self
     {// 2023-05-15
@@ -250,7 +250,7 @@ class QueryBuilder
 
     /**
      * Clears ->union statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearUnion(): self
     {// 2023-05-15
@@ -259,7 +259,7 @@ class QueryBuilder
 
     /**
      * Clears ->hintComment statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearHintComments(): self
     {// 2023-05-15
@@ -268,7 +268,7 @@ class QueryBuilder
 
     /**
      * Clears ->where statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearWhere(): self
     {// 2023-06-01
@@ -277,7 +277,7 @@ class QueryBuilder
 
     /**
      * Clears ->increment, ->decrement statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearCounters(): self
     {// 2023-06-01
@@ -287,7 +287,7 @@ class QueryBuilder
 
     /**
      * Clears ->groupBy statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearGroup(): self
     {// 2023-06-01
@@ -296,7 +296,7 @@ class QueryBuilder
 
     /**
      * Clears ->orderBy statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearOrder(): self
     {// 2023-06-01
@@ -305,7 +305,7 @@ class QueryBuilder
 
     /**
      * Clears ->having statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearHaving(): self
     {// 2023-06-01
@@ -314,7 +314,7 @@ class QueryBuilder
 
     /**
      * Clears ->limit statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearLimit(): self
     {// 2023-06-01
@@ -324,7 +324,7 @@ class QueryBuilder
 
     /**
      * Clears ->offset statements
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clearOffset(): self
     {// 2023-06-01
@@ -337,7 +337,7 @@ class QueryBuilder
      * possible values: 'with', 'select', 'columns', 'hintComments', 'where', 'union', 'join', 'group', 'order', 'having', 'limit', 'offset', 'counter', 'counters'
      *
      * @param string $statementName
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function clear(string $statementName): self
     {// 2023-06-07
@@ -379,12 +379,12 @@ class QueryBuilder
     }
 
     /**
-     * @param string|Raw|QueryBuilder|\Closure $arg
+     * @param string|Raw|SharQ|\Closure $arg
      * @return bool
      */
     private function isValidStatementArg($arg): bool
     {// 2023-06-07
-        return $arg instanceof \Closure || $arg instanceof Raw || $arg instanceof QueryBuilder;
+        return $arg instanceof \Closure || $arg instanceof Raw || $arg instanceof SharQ;
     }
 
     /**
@@ -409,14 +409,14 @@ class QueryBuilder
 
         if($this->isValidStatementArg($nothingOrStatement)) return;
 
-        throw new \Exception("{$method}() third argument must be a function / QueryBuilder or a raw when its second argument is a column name list");
+        throw new \Exception("{$method}() third argument must be a function / SharQ or a raw when its second argument is a column name list");
     }
 
     /**
      * @param string $alias
      * @param array<int, mixed> $args [statementOrColumnList, nothingOrStatement, method]
      */
-    public function with(string $alias, ...$args): QueryBuilder
+    public function with(string $alias, ...$args): SharQ
     {// 2023-05-15
         $this->validateWithArgs($alias, ...$args);
 
@@ -427,36 +427,36 @@ class QueryBuilder
         return $this->withWrapped($alias, $statementOrColumnList, $nothingOrStatement);
     }
 
-    public function withRecursive(string $alias, ...$args): QueryBuilder
+    public function withRecursive(string $alias, ...$args): SharQ
     {// 2023-07-31
         return $this->withRecursiveWrapped($alias, ...$args);
     }
 
-    public function withRecursiveWrapped(string $alias, ...$args): QueryBuilder
+    public function withRecursiveWrapped(string $alias, ...$args): SharQ
     {// 2023-07-31
         $this->validateWithArgs($alias, ...$args);
 
         return $this->_withWrapped(With::TYPE_RECURSIVE_WRAPPED, $alias, ...$args);
     }
 
-    public function withMaterialized(string $alias, ...$args): QueryBuilder
+    public function withMaterialized(string $alias, ...$args): SharQ
     {// 2023-07-31
         return $this->withMaterializedWrapped($alias, ...$args);
     }
 
-    public function withMaterializedWrapped(string $alias, ...$args): QueryBuilder
+    public function withMaterializedWrapped(string $alias, ...$args): SharQ
     {
         $this->validateWithArgs($alias, ...$args);
 
         return $this->_withWrapped(With::TYPE_MATERIALIZED_WRAPPED, $alias, ...$args);
     }
 
-    public function withNotMaterialized(string $alias, ...$args): QueryBuilder
+    public function withNotMaterialized(string $alias, ...$args): SharQ
     {// 2023-07-31
         return $this->withNotMaterializedWrapped($alias, ...$args);
     }
 
-    public function withNotMaterializedWrapped(string $alias, ...$args): QueryBuilder
+    public function withNotMaterializedWrapped(string $alias, ...$args): SharQ
     {
         $this->validateWithArgs($alias, ...$args);
 
@@ -467,7 +467,7 @@ class QueryBuilder
      * @param string $alias
      * @param array<int, mixed> $args [statementOrColumnList, nothingOrStatement]
      */
-    private function _withWrapped(string $type, string $alias, ...$args): QueryBuilder
+    private function _withWrapped(string $type, string $alias, ...$args): SharQ
     {// 2023-05-15
         $statementOrColumnList = $args[0] ?? null;
         $nothingOrStatement = $args[1] ?? null;
@@ -495,15 +495,15 @@ class QueryBuilder
      * @param string $alias
      * @param array<int, mixed> $args [statementOrColumnList, nothingOrStatement]
      */
-    public function withWrapped(string $alias, ...$args): QueryBuilder
+    public function withWrapped(string $alias, ...$args): SharQ
     {// 2023-07-31
         return $this->_withWrapped(With::TYPE_WRAPPED, $alias, ...$args);
     }
 
     /**
-     * @param string|Raw|QueryBuilder|array<int, string|Raw|QueryBuilder> $tableName
+     * @param string|Raw|SharQ|array<int, string|Raw|SharQ> $tableName
      */
-    public function table($tableName): QueryBuilder
+    public function table($tableName): SharQ
     {// 2023-05-15
         if(!is_array($tableName)) $tableName = [$tableName];
 
@@ -515,9 +515,9 @@ class QueryBuilder
     }
 
     /**
-     * @param string|Raw|QueryBuilder|array<int, string|Raw|QueryBuilder> $tableName
+     * @param string|Raw|SharQ|array<int, string|Raw|SharQ> $tableName
      */
-    public function from($tableName): QueryBuilder
+    public function from($tableName): SharQ
     {// 2023-05-15
         return $this->table($tableName);
     }
@@ -525,15 +525,15 @@ class QueryBuilder
     /**
      * @param string $raw
      */
-    public function fromRaw(string $raw): QueryBuilder
+    public function fromRaw(string $raw): SharQ
     {// 2023-05-15
         return $this->table(new Raw($raw));
     }
 
     /**
-     * @param string|Raw|QueryBuilder|array<int, string|Raw|QueryBuilder> $tableName
+     * @param string|Raw|SharQ|array<int, string|Raw|SharQ> $tableName
      */
-    public function into($tableName): QueryBuilder
+    public function into($tableName): SharQ
     {// 2023-05-15
         return $this->table($tableName);
     }
@@ -541,7 +541,7 @@ class QueryBuilder
     /**
      * @param string|Raw|null $schemaName
      */
-    public function withSchema($schemaName): QueryBuilder
+    public function withSchema($schemaName): SharQ
     {// 2023-05-26
         $this->iSingle->schema = $schemaName;
         return $this;
@@ -555,7 +555,7 @@ class QueryBuilder
      * @throws Exception\QueryTimeoutException
      * @return self
      */
-    public function timeout(int $milliSeconds, bool $cancel=false): QueryBuilder
+    public function timeout(int $milliSeconds, bool $cancel=false): SharQ
     {// 2023-05-08
         // 2023-05-08 TODO: implement me
         if($milliSeconds < 0) throw new \UnexpectedValueException('Timeout must be a positive integer');
@@ -574,10 +574,10 @@ class QueryBuilder
 
     /**
      * 2023-05-08
-     * @param array<int|string, string|Raw|QueryBuilder> $columns One or more values
-     * @return QueryBuilder
+     * @param array<int|string, string|Raw|SharQ> $columns One or more values
+     * @return SharQ
      */
-    public function column(...$columns): QueryBuilder
+    public function column(...$columns): SharQ
     {// 2023-05-08
         return $this->_column($columns, Columns::TYPE_PLUCK);
     }
@@ -621,7 +621,7 @@ class QueryBuilder
      * @param array<int,mixed> $columns
      * @param string $type
      */
-    private function _column(array $columns, string $type): QueryBuilder
+    private function _column(array $columns, string $type): SharQ
     {// 2023-05-15
         $columns = $this->_normalizeColumns($columns);
         
@@ -634,10 +634,10 @@ class QueryBuilder
 
     /**
      * 2023-05-08
-     * @param array<int, string|Raw|QueryBuilder> $columns One or more values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ> $columns One or more values
+     * @return SharQ
      */
-    public function distinct(string ...$columns): QueryBuilder
+    public function distinct(string ...$columns): SharQ
     {// 2023-05-08
         $columns = $this->_normalizeColumns($columns);
 
@@ -651,10 +651,10 @@ class QueryBuilder
 
     /**
      * 2023-05-08
-     * @param array<int, string|Raw|QueryBuilder> $columns One or more values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ> $columns One or more values
+     * @return SharQ
      */
-    public function distinctOn(string ...$columns): QueryBuilder
+    public function distinctOn(string ...$columns): SharQ
     {// 2023-05-08
         $columns = $this->_normalizeColumns($columns);
 
@@ -669,9 +669,9 @@ class QueryBuilder
     /**
      * 2023-05-08
      * @param string $alias
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function as(string $alias): QueryBuilder
+    public function as(string $alias): SharQ
     {// 2023-05-09
         $this->iSingle->alias = $alias;
 
@@ -699,9 +699,9 @@ class QueryBuilder
     /**
      * 2023-05-08
      * @param string[] $hintComments One or more values
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function hintComment(...$hintComments): QueryBuilder
+    public function hintComment(...$hintComments): SharQ
     {// 2023-05-09
         $iHintComments = new HintComments($hintComments);
 
@@ -713,9 +713,9 @@ class QueryBuilder
     /**
      * 2023-05-08
      * @param string[] $comments One or more values
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function comment(...$comments): QueryBuilder
+    public function comment(...$comments): SharQ
     {// 2023-05-09
         $iComments = new Comments($comments);
 
@@ -726,10 +726,10 @@ class QueryBuilder
 
     /**
      * Sets the values for a `select` query
-     * @param array<int, string|Raw|QueryBuilder> $columns One or more values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ> $columns One or more values
+     * @return SharQ
      */
-    public function select(...$columns): QueryBuilder
+    public function select(...$columns): SharQ
     {// 2023-05-15
         $this->iSingle->columnMethod = Columns::TYPE_PLUCK;
 
@@ -738,10 +738,10 @@ class QueryBuilder
 
     /**
      * Sets the values for a `select` query, informing that only the first row should be returned (limit 1).
-     * @param array<int, string|Raw|QueryBuilder> $columns One or more values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ> $columns One or more values
+     * @return SharQ
      */
-    public function first(...$columns): QueryBuilder
+    public function first(...$columns): SharQ
     {// 2023-05-15
         $this->method = self::METHOD_FIRST;
 
@@ -750,7 +750,7 @@ class QueryBuilder
         return $this->limit(1);
     }
 
-    private function _join(string $joinFlag, $table, $first=null, ...$args): QueryBuilder
+    private function _join(string $joinFlag, $table, $first=null, ...$args): SharQ
     {// 2023-08-18
         $iJoin = null;
 
@@ -794,99 +794,99 @@ class QueryBuilder
      * join(string $table, \Closure $first)
      *
      * @param string|Raw $table
-     * @param string|Raw|QueryBuilder|\Closure $first on statement [column]
-     * @param array<int,string|Raw|QueryBuilder> $args on statement [operator, value]
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $first on statement [column]
+     * @param array<int,string|Raw|SharQ> $args on statement [operator, value]
+     * @return SharQ
      */
-    public function join($table, $first=null, ...$args): QueryBuilder
+    public function join($table, $first=null, ...$args): SharQ
     {
         return $this->_join(Join::TYPE_INNER, $table, $first, ...$args);
     }
 
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int,string|Raw|SharQ> $args on statement [column, operator, value]
+     * @return SharQ
      */
-    public function innerJoin(...$args): QueryBuilder
+    public function innerJoin(...$args): SharQ
     {// 2023-05-09
         return $this->_join(Join::TYPE_INNER, ...$args);
     }
 
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int,string|Raw|SharQ> $args on statement [column, operator, value]
+     * @return SharQ
      */
-    public function leftJoin(...$args): QueryBuilder
+    public function leftJoin(...$args): SharQ
     {// 2023-05-09
         return $this->_join(Join::TYPE_LEFT, ...$args);
     }
 
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int,string|Raw|SharQ> $args on statement [column, operator, value]
+     * @return SharQ
      */
-    public function leftOuterJoin(...$args): QueryBuilder
+    public function leftOuterJoin(...$args): SharQ
     {// 2023-05-09
         return $this->_join(Join::TYPE_LEFT_OUTER, ...$args);
     }
 
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int,string|Raw|SharQ> $args on statement [column, operator, value]
+     * @return SharQ
      */
-    public function rightJoin(...$args): QueryBuilder
+    public function rightJoin(...$args): SharQ
     {// 2023-05-09
         return $this->_join(Join::TYPE_RIGHT, ...$args);
     }
 
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int,string|Raw|SharQ> $args on statement [column, operator, value]
+     * @return SharQ
      */
-    public function rightOuterJoin(...$args): QueryBuilder
+    public function rightOuterJoin(...$args): SharQ
     {// 2023-05-09
         return $this->_join(Join::TYPE_RIGHT_OUTER, ...$args);
     }
 
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int,string|Raw|SharQ> $args on statement [column, operator, value]
+     * @return SharQ
      */
-    public function outerJoin(...$args): QueryBuilder
+    public function outerJoin(...$args): SharQ
     {// 2023-05-09
         return $this->_join(Join::TYPE_OUTER, ...$args);
     }
 
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int,string|Raw|SharQ> $args on statement [column, operator, value]
+     * @return SharQ
      */
-    public function fullOuterJoin(...$args): QueryBuilder
+    public function fullOuterJoin(...$args): SharQ
     {// 2023-05-09
         return $this->_join(Join::TYPE_FULL_OUTER, ...$args);
     }
 
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int,string|Raw|SharQ> $args on statement [column, operator, value]
+     * @return SharQ
      */
-    public function crossJoin(...$args): QueryBuilder
+    public function crossJoin(...$args): SharQ
     {// 2023-05-09
         return $this->_join(Join::TYPE_CROSS, ...$args);
     }
 
     /**
-     * @param array<int,string|Raw|QueryBuilder> $args on statement [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int,string|Raw|SharQ> $args on statement [column, operator, value]
+     * @return SharQ
      */
-    public function joinRaw(...$args): QueryBuilder
+    public function joinRaw(...$args): SharQ
     {// 2023-05-09
         return $this->_join(Join::TYPE_RAW, ...$args);
     }
 
     /**
      * Where modifier. Changes bool type to OR
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function or(): self
     {// 2023-05-09
@@ -896,7 +896,7 @@ class QueryBuilder
 
     /**
      * Where modifier. Changes not type
-     * @return QueryBuilder
+     * @return SharQ
      */
     public function not(): self
     {// 2023-05-09
@@ -904,7 +904,7 @@ class QueryBuilder
         return $this;
     }
 
-    public function _where(?string $whereFlag, ?string $boolType, ?bool $isNot, ...$args): QueryBuilder
+    public function _where(?string $whereFlag, ?string $boolType, ?bool $isNot, ...$args): SharQ
     {
         $boolType ??= $this->boolType;
         $isNot ??= $this->isNot;
@@ -1020,10 +1020,10 @@ class QueryBuilder
     }
 
     /**
-     * @param string|Raw|QueryBuilder|\Closure $args [column, operator, value]
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $args [column, operator, value]
+     * @return SharQ
      */
-    public function where(...$args): QueryBuilder
+    public function where(...$args): SharQ
     {// 2023-05-09
         return $this->_where(null, null, null, ...$args);
     
@@ -1139,10 +1139,10 @@ class QueryBuilder
     }
 
     /**
-     * @param string|Raw|QueryBuilder|\Closure $args [column, operator, value]
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $args [column, operator, value]
+     * @return SharQ
      */
-    public function whereColumn(...$args): QueryBuilder
+    public function whereColumn(...$args): SharQ
     {// 2023-06-01
         // $this->whereFlag = Where::TYPE_COLUMN;
         // return $this->where(...$args);
@@ -1156,10 +1156,10 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $args [column, operator, value]
+     * @return SharQ
      */
-    public function andWhere(...$args): QueryBuilder
+    public function andWhere(...$args): SharQ
     {// 2023-05-09
         // $this->whereFlag = Where::TYPE_BASIC;
         // $this->boolType = self::BOOL_TYPE_AND;
@@ -1174,10 +1174,10 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $args [column, operator, value]
+     * @return SharQ
      */
-    public function orWhere(...$args): QueryBuilder
+    public function orWhere(...$args): SharQ
     {// 2023-05-09
         // $this->whereFlag = Where::TYPE_BASIC;
         // $this->boolType = self::BOOL_TYPE_OR;
@@ -1188,10 +1188,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $args [column, operator, value]
+     * @return SharQ
      */
-    public function whereNot(...$args): QueryBuilder
+    public function whereNot(...$args): SharQ
     {// 2023-05-09
         // $this->whereFlag = Where::TYPE_BASIC;
         // $this->isNot = true;
@@ -1202,10 +1202,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [column, operator, value]
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $args [column, operator, value]
+     * @return SharQ
      */
-    public function orWhereNot(...$args): QueryBuilder
+    public function orWhereNot(...$args): SharQ
     {// 2023-05-09
         // $this->whereFlag = Where::TYPE_BASIC;
         // $this->boolType = self::BOOL_TYPE_OR;
@@ -1215,7 +1215,7 @@ class QueryBuilder
         return $this->_where(Where::TYPE_BASIC, self::BOOL_TYPE_OR, true, ...$args);
     }
 
-    private function _whereRaw(?string $boolType, ?bool $isNot, string $sql, ...$bindings): QueryBuilder
+    private function _whereRaw(?string $boolType, ?bool $isNot, string $sql, ...$bindings): SharQ
     {
         $iRaw = new Raw($sql, ...$bindings);
         $iWhere = new Where(null, null, $iRaw, $boolType ?? $this->boolType, $isNot ?? $this->isNot, Where::TYPE_RAW);
@@ -1227,17 +1227,17 @@ class QueryBuilder
 
     /**
      * @param array<int,mixed> $bindings
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function whereRaw(string $sql, ...$bindings): QueryBuilder
+    public function whereRaw(string $sql, ...$bindings): SharQ
     {// 2023-05-09
         return $this->_whereRaw(null, null, $sql, ...$bindings);
     }
 
-    public function _whereWrapped(?string $boolType, ?bool $isNot, \Closure $callback): QueryBuilder
+    public function _whereWrapped(?string $boolType, ?bool $isNot, \Closure $callback): SharQ
     {
-        $iQueryBuilder = new QueryBuilder($this->iClient, $this->schema);
-        $callback($iQueryBuilder);
+        $iSharQ = new SharQ($this->iClient, $this->schema);
+        $callback($iSharQ);
 
         $iWhere = new Where(null, null, $callback, $boolType ?? $this->boolType, $isNot ?? $this->isNot, Where::TYPE_WRAPPED);
 
@@ -1248,18 +1248,18 @@ class QueryBuilder
 
     /**
      * @param \Closure $callback
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function whereWrapped(\Closure $callback): QueryBuilder
+    public function whereWrapped(\Closure $callback): SharQ
     {// 2023-05-09
         return $this->_whereWrapped(null, null, $callback);
     }
 
     /**
-     * @param string|Raw|QueryBuilder|\Closure $value
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $value
+     * @return SharQ
      */
-    private function _whereExists($value): QueryBuilder
+    private function _whereExists($value): SharQ
     {// 2023-06-02
         $iWhere = new Where(null, null, $value, $this->boolType, $this->isNot, Where::TYPE_EXISTS);
 
@@ -1269,10 +1269,10 @@ class QueryBuilder
     }
 
     /**
-     * @param \Closure|QueryBuilder $callback
-     * @return QueryBuilder
+     * @param \Closure|SharQ $callback
+     * @return SharQ
      */
-    public function whereExists($callback): QueryBuilder
+    public function whereExists($callback): SharQ
     {// 2023-05-09
         $this->isNot = false;
         $this->boolType = self::BOOL_TYPE_AND;
@@ -1280,10 +1280,10 @@ class QueryBuilder
     }
 
     /**
-     * @param \Closure|QueryBuilder $callback
-     * @return QueryBuilder
+     * @param \Closure|SharQ $callback
+     * @return SharQ
      */
-    public function whereNotExists($callback): QueryBuilder
+    public function whereNotExists($callback): SharQ
     {// 2023-05-09
         $this->isNot = true;
         $this->boolType = self::BOOL_TYPE_AND;
@@ -1292,9 +1292,9 @@ class QueryBuilder
 
     /**
      * @param \Closure $callback
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orWhereExists(\Closure $callback): QueryBuilder
+    public function orWhereExists(\Closure $callback): SharQ
     {// 2023-05-07
         $this->isNot = false;
         $this->boolType = self::BOOL_TYPE_OR;
@@ -1303,9 +1303,9 @@ class QueryBuilder
 
     /**
      * @param Closure $callback
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orWhereNotExists(\Closure $callback): QueryBuilder
+    public function orWhereNotExists(\Closure $callback): SharQ
     {// 2023-05-09
         $this->isNot = true;
         $this->boolType = self::BOOL_TYPE_OR;
@@ -1348,20 +1348,20 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function whereIn($column, $values): QueryBuilder
+    public function whereIn($column, $values): SharQ
     {// 2023-05-09
         return $this->_whereIn($column, $values, null, null);
     }
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function whereNotIn($column, $values): QueryBuilder
+    public function whereNotIn($column, $values): SharQ
     {// 2023-05-09
         // $this->isNot = true;
         // return $this->whereIn($column, $values);
@@ -1371,10 +1371,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function andWhereIn($column, $values): QueryBuilder
+    public function andWhereIn($column, $values): SharQ
     {// 2023-05-09
         // $this->whereFlag = Where::TYPE_IN;
         // $this->boolType = self::BOOL_TYPE_AND;
@@ -1385,10 +1385,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function andWhereNotIn($column, $values): QueryBuilder
+    public function andWhereNotIn($column, $values): SharQ
     {// 2023-05-09
         // $this->isNot = true;
         // return $this->andWhereIn($column, $values);
@@ -1398,10 +1398,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function orWhereIn($column, $values): QueryBuilder
+    public function orWhereIn($column, $values): SharQ
     {// 2023-05-09
         // $this->whereFlag = Where::TYPE_IN;
         // $this->boolType = self::BOOL_TYPE_OR;
@@ -1412,10 +1412,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function orWhereNotIn($column, $values): QueryBuilder
+    public function orWhereNotIn($column, $values): SharQ
     {// 2023-05-09
         // $this->isNot = true;
         // return $this->orWhereIn($column, $values);
@@ -1425,9 +1425,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    private function _whereNull(?string $boolType, ?bool $isNot, $column): QueryBuilder
+    private function _whereNull(?string $boolType, ?bool $isNot, $column): SharQ
     {// 2023-06-02
         $iWhere = new Where($column, null, null, $boolType ?? $this->boolType, $isNot ?? $this->isNot, Where::TYPE_NULL);
 
@@ -1438,9 +1438,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function whereNull($column): QueryBuilder
+    public function whereNull($column): SharQ
     {// 2023-05-09
         // $this->isNot = false;
         // $this->boolType = self::BOOL_TYPE_AND;
@@ -1449,9 +1449,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function whereNotNull($column): QueryBuilder
+    public function whereNotNull($column): SharQ
     {// 2023-05-09
         // $this->isNot = true;
         // $this->boolType = self::BOOL_TYPE_AND;
@@ -1460,9 +1460,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orWhereNull($column): QueryBuilder
+    public function orWhereNull($column): SharQ
     {// 2023-05-09
         // $this->isNot = false;
         // $this->boolType = self::BOOL_TYPE_OR;
@@ -1471,9 +1471,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orWhereNotNull($column): QueryBuilder
+    public function orWhereNotNull($column): SharQ
     {// 2023-05-09
         // $this->isNot = true;
         // $this->boolType = self::BOOL_TYPE_OR;
@@ -1482,11 +1482,11 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|\Closure $value
-     * @param string|Raw|QueryBuilder|\Closure $type
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $value
+     * @param string|Raw|SharQ|\Closure $type
+     * @return SharQ
      */
-    private function _whereLike($column, $value, $type): QueryBuilder
+    private function _whereLike($column, $value, $type): SharQ
     {// 2023-06-01
         $iWhere = new Where($column, null, $value, $this->boolType, $this->isNot, $type);
 
@@ -1497,20 +1497,20 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|\Closure $value
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $value
+     * @return SharQ
      */
-    public function whereLike($column, $value): QueryBuilder
+    public function whereLike($column, $value): SharQ
     {// 2023-06-01
         return $this->_whereLike($column, $value, Where::TYPE_LIKE);
     }
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|\Closure $value
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $value
+     * @return SharQ
      */
-    public function andWhereLike($column, $value): QueryBuilder
+    public function andWhereLike($column, $value): SharQ
     {// 2023-06-01
         $this->boolType = self::BOOL_TYPE_AND;
         return $this->_whereLike($column, $value, Where::TYPE_LIKE);
@@ -1518,10 +1518,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|\Closure $value
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $value
+     * @return SharQ
      */
-    public function orWhereLike($column, $value): QueryBuilder
+    public function orWhereLike($column, $value): SharQ
     {// 2023-06-01
         $this->boolType = self::BOOL_TYPE_OR;
         return $this->_whereLike($column, $value, Where::TYPE_LIKE);
@@ -1529,20 +1529,20 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|\Closure $value
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $value
+     * @return SharQ
      */
-    public function whereILike($column, $value): QueryBuilder
+    public function whereILike($column, $value): SharQ
     {// 2023-06-01
         return $this->_whereLike($column, $value, Where::TYPE_ILIKE);
     }
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|\Closure $value
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $value
+     * @return SharQ
      */
-    public function andWhereILike($column, $value): QueryBuilder
+    public function andWhereILike($column, $value): SharQ
     {// 2023-06-01
         $this->boolType = self::BOOL_TYPE_AND;
         return $this->_whereLike($column, $value, Where::TYPE_ILIKE);
@@ -1550,10 +1550,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|\Closure $value
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure $value
+     * @return SharQ
      */
-    public function orWhereILike($column, $value): QueryBuilder
+    public function orWhereILike($column, $value): SharQ
     {// 2023-06-01
         $this->boolType = self::BOOL_TYPE_OR;
         return $this->_whereLike($column, $value, Where::TYPE_ILIKE);
@@ -1561,10 +1561,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    private function _whereBetween(?string $boolType, ?bool $isNot, $column, $values): QueryBuilder
+    private function _whereBetween(?string $boolType, ?bool $isNot, $column, $values): SharQ
     {// 2023-06-01
         if(count($values) !== 2) throw new \InvalidArgumentException('whereBetween() expects exactly 2 values');
 
@@ -1577,60 +1577,60 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function whereBetween($column, $values): QueryBuilder
+    public function whereBetween($column, $values): SharQ
     {// 2023-06-01
         return $this->_whereBetween(null, null, $column, $values);
     }
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function whereNotBetween($column, $values): QueryBuilder
+    public function whereNotBetween($column, $values): SharQ
     {// 2023-06-01
         return $this->_whereBetween(null, true, $column, $values);
     }
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function andWhereBetween($column, $values): QueryBuilder
+    public function andWhereBetween($column, $values): SharQ
     {// 2023-06-01
         return $this->_whereBetween(self::BOOL_TYPE_AND, null, $column, $values);
     }
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function andWhereNotBetween($column, $values): QueryBuilder
+    public function andWhereNotBetween($column, $values): SharQ
     {// 2023-06-01
         return $this->_whereBetween(self::BOOL_TYPE_AND, true, $column, $values);
     }
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function orWhereBetween($column, $values): QueryBuilder
+    public function orWhereBetween($column, $values): SharQ
     {// 2023-06-01
         return $this->_whereBetween(self::BOOL_TYPE_OR, null, $column, $values);
     }
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ|\Closure> $values
+     * @return SharQ
      */
-    public function orWhereNotBetween($column, $values): QueryBuilder
+    public function orWhereNotBetween($column, $values): SharQ
     {// 2023-06-01
         return $this->_whereBetween(self::BOOL_TYPE_OR, true, $column, $values);
     }
@@ -1640,9 +1640,9 @@ class QueryBuilder
      * @param string|Raw $method
      * @param string|Raw $column
      * @param array<string, mixed> $options
-     * @return QueryBuilder
+     * @return SharQ
      */
-    private function aggregate($method, $column, array $options=[]): QueryBuilder
+    private function aggregate($method, $column, array $options=[]): SharQ
     {// 2023-05-26
         $type = Columns::TYPE_AGGREGATE;
         if($column instanceof Raw) $type = Columns::TYPE_AGGREGATE_RAW;
@@ -1663,18 +1663,18 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<string, mixed> $options
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function count($column=null, array $options=[]): QueryBuilder
+    public function count($column=null, array $options=[]): SharQ
     {// 2023-05-26
         return $this->aggregate('COUNT', $column ?? '*', $options);
     }
 
     /**
      * @param array<int, string|Raw|array<string, mixed> $columns [...column, options]
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function countDistinct(...$columns): QueryBuilder
+    public function countDistinct(...$columns): SharQ
     {// 2023-05-26
         $options = [];
         if(count($columns) > 1 && is_array(end($columns)) && is_string(key(end($columns)))) $options = array_pop($columns);
@@ -1688,9 +1688,9 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<string, mixed> $options
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function min($column, $options=[]): QueryBuilder
+    public function min($column, $options=[]): SharQ
     {// 2023-05-26
         return $this->aggregate('MIN', $column, $options);
     }
@@ -1698,9 +1698,9 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<string, mixed> $options
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function max($column, $options=[]): QueryBuilder
+    public function max($column, $options=[]): SharQ
     {// 2023-05-26
         return $this->aggregate('MAX', $column, $options);
     }
@@ -1708,18 +1708,18 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<string, mixed> $options
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function sum($column, $options=[]): QueryBuilder
+    public function sum($column, $options=[]): SharQ
     {// 2023-05-26
         return $this->aggregate('SUM', $column, $options);
     }
 
     /**
      * @param array<int, string|Raw|array<string, mixed> $columns [...column, options]
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function sumDistinct(...$columns): QueryBuilder
+    public function sumDistinct(...$columns): SharQ
     {// 2023-05-26
         $options = [];
         if(is_array(end($columns))) $options = array_pop($columns);
@@ -1733,18 +1733,18 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<string, mixed> $options
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function avg($column, $options=[]): QueryBuilder
+    public function avg($column, $options=[]): SharQ
     {// 2023-05-26
         return $this->aggregate('AVG', $column, $options);
     }
 
     /**
      * @param array<int, string|Raw|array<string, mixed> $columns [...column, options]
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function avgDistinct(...$columns): QueryBuilder
+    public function avgDistinct(...$columns): SharQ
     {// 2023-05-26
         $options = [];
         if(is_array(end($columns))) $options = array_pop($columns);
@@ -1758,10 +1758,10 @@ class QueryBuilder
     /**
      * see Union::TYPE_* constants
      * @param string $type Union::TYPE_* constant
-     * @param array<int, \Closure|QueryBuilder> $args
-     * @return QueryBuilder
+     * @param array<int, \Closure|SharQ> $args
+     * @return SharQ
      */
-    private function _union(string $type, ...$args): QueryBuilder
+    private function _union(string $type, ...$args): SharQ
     {// 2023-06-02
         $wrap = array_pop($args);
 
@@ -1785,40 +1785,40 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, \Closure|QueryBuilder> $args
-     * @return QueryBuilder
+     * @param array<int, \Closure|SharQ> $args
+     * @return SharQ
      */
-    public function union(...$args): QueryBuilder
+    public function union(...$args): SharQ
     {// 2023-06-02
         return $this->_union(Union::TYPE_BASIC, ...$args);
     }
 
     /**
-     * @param array<int, \Closure|QueryBuilder> $args
-     * @return QueryBuilder
+     * @param array<int, \Closure|SharQ> $args
+     * @return SharQ
      */
-    public function unionAll(...$args): QueryBuilder
+    public function unionAll(...$args): SharQ
     {// 2023-06-02
         return $this->_union(Union::TYPE_ALL, ...$args);
     }
 
     /**
-     * @param array<int, \Closure|QueryBuilder> $args
-     * @return QueryBuilder
+     * @param array<int, \Closure|SharQ> $args
+     * @return SharQ
      */
-    public function intersect(...$args): QueryBuilder
+    public function intersect(...$args): SharQ
     {// 2023-06-02
         return $this->_union(Union::TYPE_INTERSECT, ...$args);
     }
 
     /**
-     * @param int|Raw|QueryBuilder $value
+     * @param int|Raw|SharQ $value
      * @param array<int,mixed> $options
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function offset($value, ...$options): QueryBuilder
+    public function offset($value, ...$options): SharQ
     {// 2023-05-26
-        if($value === null || $value instanceof Raw || $value instanceof QueryBuilder)
+        if($value === null || $value instanceof Raw || $value instanceof SharQ)
         {
             $this->iSingle->offset = $value;
         }
@@ -1836,11 +1836,11 @@ class QueryBuilder
     }
 
     /**
-     * @param int|Raw|QueryBuilder $value
+     * @param int|Raw|SharQ $value
      * @param array<int,mixed> $options
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function limit($value, ...$options): QueryBuilder
+    public function limit($value, ...$options): SharQ
     {// 2023-05-26
         $this->iSingle->limit = $value;
         // this._setSkipBinding('limit', options);
@@ -1849,18 +1849,18 @@ class QueryBuilder
     }
 
     /**
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function clone(): QueryBuilder
+    public function clone(): SharQ
     {// 2023-06-02j
         return clone $this;
     }
 
     /**
      * Sets method to DELETE
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function delete(): QueryBuilder
+    public function delete(): SharQ
     {// 2023-06-02
         $this->method = self::METHOD_DELETE;
 
@@ -1871,9 +1871,9 @@ class QueryBuilder
      * see Group::TYPE_* constants
      * @param string $type Group::TYPE_* constant
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    private function _groupBy(string $type, $column): QueryBuilder
+    private function _groupBy(string $type, $column): SharQ
     {// 2023-06-05
         $iGroupBy = new Group($type, $column);
 
@@ -1884,9 +1884,9 @@ class QueryBuilder
 
     /**
      * @param array<int, string|Raw> $columns
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function groupBy(...$columns): QueryBuilder
+    public function groupBy(...$columns): SharQ
     {// 2023-06-05
         foreach($columns as $column)
         {
@@ -1899,9 +1899,9 @@ class QueryBuilder
 
     /**
      * @param array<int, string> $columns
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function groupByRaw(...$columns): QueryBuilder
+    public function groupByRaw(...$columns): SharQ
     {// 2023-06-05
         if(count($columns) === 0) throw new \InvalidArgumentException('groupByRaw() requires at least one argument.');
 
@@ -1923,9 +1923,9 @@ class QueryBuilder
      * @param string|Raw $column
      * @param string|null $direction Order::DIRECTION_* constant
      * @param string|null $nullsPosition Order::NULLS_POSITION_* constants
-     * @return QueryBuilder
+     * @return SharQ
      */
-    private function _orderBy(string $type, $column, $direction=null, $nullsPosition=null): QueryBuilder
+    private function _orderBy(string $type, $column, $direction=null, $nullsPosition=null): SharQ
     {// 2023-06-05
         $iOrderBy = new Order($type, $column, $direction, $nullsPosition);
 
@@ -1941,13 +1941,13 @@ class QueryBuilder
      * @param string|Raw $column
      * @param string|null $direction Order::DIRECTION_* constant
      * @param string|null $nullsPosition Order::NULLS_POSITION_* constants
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orderBy($column, $direction=Order::DIRECTION_ASC, $nullsPosition=null): QueryBuilder
+    public function orderBy($column, $direction=Order::DIRECTION_ASC, $nullsPosition=null): SharQ
     {// 2023-06-05
         if($column instanceof Raw) return $this->orderByRaw($column, $direction);
 
-        if(is_string($column) || $column instanceof QueryBuilder) return $this->_orderBy(Order::TYPE_BASIC, $column, $direction, $nullsPosition);
+        if(is_string($column) || $column instanceof SharQ) return $this->_orderBy(Order::TYPE_BASIC, $column, $direction, $nullsPosition);
 
         if(is_array($column))
         {
@@ -1974,9 +1974,9 @@ class QueryBuilder
      * @param string|Raw $column
      * @param string|null $direction Order::NULLS_POSITION_* constants
      *
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orderByRaw($column, $direction=null): QueryBuilder
+    public function orderByRaw($column, $direction=null): SharQ
     {// 2023-06-05
         if(!($column instanceof Raw)) $column = new Raw($column);
 
@@ -1985,17 +1985,17 @@ class QueryBuilder
 
     /**
      * see Having::TYPE_* constants
-     * see QueryBuilder::BOOL_TYPE_* constants
+     * see SharQ::BOOL_TYPE_* constants
      *
      * @param string $type Having::TYPE_* constant
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|\Closure $operator
-     * @param string|Raw|QueryBuilder|\Closure $value
-     * @param string $boolean QueryBuilder::BOOL_TYPE_* constant
+     * @param string|Raw|SharQ|\Closure $operator
+     * @param string|Raw|SharQ|\Closure $value
+     * @param string $boolean SharQ::BOOL_TYPE_* constant
      * @param bool $isNot
-     * @return QueryBuilder
+     * @return SharQ
      */
-    private function _having(string $type, $column, $operator, $value, $boolean, $isNot): QueryBuilder
+    private function _having(string $type, $column, $operator, $value, $boolean, $isNot): SharQ
     {// 2023-06-05
         $iHaving = new Having($type, $column, $operator, $value, $boolean, $isNot);
 
@@ -2006,11 +2006,11 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|\Closure|null $operator
-     * @param string|Raw|QueryBuilder|\Closure|null $value
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure|null $operator
+     * @param string|Raw|SharQ|\Closure|null $value
+     * @return SharQ
      */
-    public function having($column, $operator=null, $value=null): QueryBuilder
+    public function having($column, $operator=null, $value=null): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = false;
@@ -2024,11 +2024,11 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param string|Raw|QueryBuilder|\Closure|null $operator
-     * @param string|Raw|QueryBuilder|\Closure|null $value
-     * @return QueryBuilder
+     * @param string|Raw|SharQ|\Closure|null $operator
+     * @param string|Raw|SharQ|\Closure|null $value
+     * @return SharQ
      */
-    public function orHaving($column, $operator=null, $value=null): QueryBuilder
+    public function orHaving($column, $operator=null, $value=null): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = false;
@@ -2042,9 +2042,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function havingNull($column): QueryBuilder
+    public function havingNull($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = false;
@@ -2054,9 +2054,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orHavingNull($column): QueryBuilder
+    public function orHavingNull($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = false;
@@ -2066,9 +2066,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function havingNotNull($column): QueryBuilder
+    public function havingNotNull($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = true;
@@ -2078,9 +2078,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orHavingNotNull($column): QueryBuilder
+    public function orHavingNotNull($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = true;
@@ -2090,9 +2090,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function havingExists($column): QueryBuilder
+    public function havingExists($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = false;
@@ -2102,9 +2102,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orHavingExists($column): QueryBuilder
+    public function orHavingExists($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = false;
@@ -2114,9 +2114,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function havingNotExists($column): QueryBuilder
+    public function havingNotExists($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = true;
@@ -2126,9 +2126,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orHavingNotExists($column): QueryBuilder
+    public function orHavingNotExists($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = true;
@@ -2138,10 +2138,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ> $values
+     * @return SharQ
      */
-    private function _havingBetween($column, array $values): QueryBuilder
+    private function _havingBetween($column, array $values): SharQ
     {// 2023-06-05
         if(count($values) !== 2) throw new \InvalidArgumentException('You must specify 2 values for the havingBetween clause');
 
@@ -2150,9 +2150,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function havingBetween($column, array $values): QueryBuilder
+    public function havingBetween($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = false;
@@ -2162,9 +2162,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orHavingBetween($column, array $values): QueryBuilder
+    public function orHavingBetween($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = false;
@@ -2174,10 +2174,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ> $values
+     * @return SharQ
      */
-    public function havingNotBetween($column, array $values): QueryBuilder
+    public function havingNotBetween($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = true;
@@ -2187,10 +2187,10 @@ class QueryBuilder
 
     /**
      * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder> $values
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ> $values
+     * @return SharQ
      */
-    public function orHavingNotBetween($column, array $values): QueryBuilder
+    public function orHavingNotBetween($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = true;
@@ -2200,9 +2200,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $value
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function havingRaw($value): QueryBuilder
+    public function havingRaw($value): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = false;
@@ -2216,9 +2216,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $value
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orHavingRaw($value): QueryBuilder
+    public function orHavingRaw($value): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = false;
@@ -2233,9 +2233,9 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw> $values
-     * @return QueryBuilder
+     * @return SharQ
      */
-    private function _havingIn($column, array $values): QueryBuilder
+    private function _havingIn($column, array $values): SharQ
     {// 2023-06-05
         if(count($values) === 0) return $this;
 
@@ -2245,9 +2245,9 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw> $values
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function havingIn($column, array $values): QueryBuilder
+    public function havingIn($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = false;
@@ -2258,9 +2258,9 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw> $values
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orHavingIn($column, array $values): QueryBuilder
+    public function orHavingIn($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = false;
@@ -2271,9 +2271,9 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw> $values
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function havingNotIn($column, array $values): QueryBuilder
+    public function havingNotIn($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = true;
@@ -2284,9 +2284,9 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param array<int, string|Raw> $values
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orHavingNotIn($column, array $values): QueryBuilder
+    public function orHavingNotIn($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = true;
@@ -2296,9 +2296,9 @@ class QueryBuilder
 
     /**
      * @param \Closure $callback
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function havingWrapped(\Closure $callback): QueryBuilder
+    public function havingWrapped(\Closure $callback): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
         $this->isNot = false;
@@ -2308,9 +2308,9 @@ class QueryBuilder
 
     /**
      * @param \Closure $callback
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function orHavingWrapped(\Closure $callback): QueryBuilder
+    public function orHavingWrapped(\Closure $callback): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
         $this->isNot = false;
@@ -2322,10 +2322,10 @@ class QueryBuilder
      * Sets the values for an `update`, allowing for both
      * Support for `.update(key, value, [returning])` and `.update(obj, [returning])` syntaxes.
      *
-     * @param array<int, string|Raw|QueryBuilder>|string $args [values, returning, options]
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ>|string $args [values, returning, options]
+     * @return SharQ
      */
-    public function update(...$args): QueryBuilder
+    public function update(...$args): SharQ
     {// 2023-06-05
         $values = $args[0] ?? null;
         $returning = $args[1] ?? null;
@@ -2359,10 +2359,10 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, string|Raw|QueryBuilder> $args [values, returning, options]
-     * @return QueryBuilder
+     * @param array<int, string|Raw|SharQ> $args [values, returning, options]
+     * @return SharQ
      */
-    public function insert(...$args): QueryBuilder
+    public function insert(...$args): SharQ
     {// 2023-06-06
         $values = $args[0] ?? null;
         $returning = $args[1] ?? null;
@@ -2395,9 +2395,9 @@ class QueryBuilder
      * Not supported in MySQL, and will have no effect
      * @param string|Raw|array<int, string|Raw> $returning
      * @param array<string, mixed> $options
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function returning($returning, $options=[]): QueryBuilder
+    public function returning($returning, $options=[]): SharQ
     {// 2023-06-05
         if(!is_array($returning)) $returning = [$returning];
 
@@ -2410,9 +2410,9 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param int|float $amount
-     * @return QueryBuilder
+     * @return SharQ
      */
-    private function _counter($column, $amount): QueryBuilder
+    private function _counter($column, $amount): SharQ
     {// 2023-06-05
         $this->method = self::METHOD_UPDATE;
 
@@ -2426,9 +2426,9 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param int|float $amount
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function increment($column, $amount=null): QueryBuilder
+    public function increment($column, $amount=null): SharQ
     {// 2023-06-05
         if(is_array($column))
         {
@@ -2446,9 +2446,9 @@ class QueryBuilder
     /**
      * @param string|Raw $column
      * @param int|float $amount
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function decrement($column, $amount=null): QueryBuilder
+    public function decrement($column, $amount=null): SharQ
     {// 2023-06-05
         if(is_array($column))
         {
@@ -2465,9 +2465,9 @@ class QueryBuilder
 
     /**
      * @param string|Raw $table
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function truncate($table=null): QueryBuilder
+    public function truncate($table=null): SharQ
     {// 2023-06-06
         $this->method = self::METHOD_TRUNCATE;
 
@@ -2478,9 +2478,9 @@ class QueryBuilder
 
     /**
      * @param array<int, string|Raw> $tables
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function forUpdate(...$tables): QueryBuilder
+    public function forUpdate(...$tables): SharQ
     {// 2023-06-07
         $this->iSingle->lock = self::LOCK_MODE_FOR_UPDATE;
 
@@ -2491,9 +2491,9 @@ class QueryBuilder
 
     /**
      * @param array<int, string|Raw> $tables
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function forShare(...$tables): QueryBuilder
+    public function forShare(...$tables): SharQ
     {// 2023-06-07
         $this->iSingle->lock = self::LOCK_MODE_FOR_SHARE;
 
@@ -2504,9 +2504,9 @@ class QueryBuilder
 
     /**
      * @param array<int, string|Raw> $tables
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function forNoKeyUpdate(...$tables): QueryBuilder
+    public function forNoKeyUpdate(...$tables): SharQ
     {// 2023-06-07
         $this->iSingle->lock = self::LOCK_MODE_FOR_NO_KEY_UPDATE;
 
@@ -2517,9 +2517,9 @@ class QueryBuilder
 
     /**
      * @param array<int, string|Raw> $tables
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function forKeyShare(...$tables): QueryBuilder
+    public function forKeyShare(...$tables): SharQ
     {// 2023-06-07
         $this->iSingle->lock = self::LOCK_MODE_FOR_KEY_SHARE;
 
@@ -2539,9 +2539,9 @@ class QueryBuilder
 
     /**
      * Skips locked rows when using a lock constraint.
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function skipLocked(): QueryBuilder
+    public function skipLocked(): SharQ
     {// 2023-06-07
         if(!$this->isSelectQuery()) throw new \LogicException("Cannot chain ->skipLocked() on \"{$this->getMethod()}\" query!");
 
@@ -2556,9 +2556,9 @@ class QueryBuilder
 
     /**
      * Causes error when acessing a locked row instead of waiting for it to be released.
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function noWait(): QueryBuilder
+    public function noWait(): SharQ
     {// 2023-06-07
         if(!$this->isSelectQuery()) throw new \LogicException("Cannot chain ->noWait() on \"{$this->getMethod()}\" query!");
 
@@ -2575,21 +2575,21 @@ class QueryBuilder
      * @param \Closure $callback
      * @param array<int, mixed> $args
      */
-    public function modify(\Closure $callback, ...$args): QueryBuilder
+    public function modify(\Closure $callback, ...$args): SharQ
     {// 2023-06-07
         $callback($this, ...$args);
 
         return $this;
     }
 
-    public function transacting(?Transaction &$iTransaction=null): QueryBuilder
+    public function transacting(?Transaction &$iTransaction=null): SharQ
     {// 2023-06-07
         $this->iSingle->transaction = &$iTransaction;
 
         return $this;
     }
 
-    public function raw(string $raw, ...$bindings): QueryBuilder
+    public function raw(string $raw, ...$bindings): SharQ
     {// 2023-06-07
         $this->method = self::METHOD_RAW;
 
@@ -2600,7 +2600,7 @@ class QueryBuilder
         return $this;
     }
 
-    public function fetchMode(int $fetchMode): QueryBuilder
+    public function fetchMode(int $fetchMode): SharQ
     {// 2023-08-03
         static $validFetchModes =
         [
@@ -2645,9 +2645,9 @@ class QueryBuilder
 
     public function toQuery(): Query
     {// 2023-06-12
-        $iQueryCompiler = new QueryCompiler($this->iClient, $this, []);
+        $iSharQCompiler = new SharQCompiler($this->iClient, $this, []);
 
-        return $iQueryCompiler->toQuery();
+        return $iSharQCompiler->toQuery();
     }
 
     public function __clone()

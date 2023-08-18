@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder;
+namespace Sharksmedia\SharQ;
 
 class Query
 {
@@ -64,15 +64,15 @@ class Query
         return $this->method;
     }
 
-    public function toString(bool $isParameter, QueryCompiler $iQueryCompiler): string
+    public function toString(bool $isParameter, SharQCompiler $iSharQCompiler): string
     {// 2023-05-15
         $sql = $this->getSQL();
 
-        if(in_array($this->getMethod(), [QueryBuilder::METHOD_SELECT, QueryBuilder::METHOD_FIRST, QueryBuilder::METHOD_UPDATE, QueryBuilder::METHOD_DELETE]) && ($isParameter || $this->hasAs()))
+        if(in_array($this->getMethod(), [SharQ::METHOD_SELECT, SharQ::METHOD_FIRST, SharQ::METHOD_UPDATE, SharQ::METHOD_DELETE]) && ($isParameter || $this->hasAs()))
         {
             $sql = "({$sql})";
 
-            if($this->hasAs()) $sql = $sql . ' AS ' . $iQueryCompiler->wrap($this->getAs());
+            if($this->hasAs()) $sql = $sql . ' AS ' . $iSharQCompiler->wrap($this->getAs());
         }
 
         return $sql;

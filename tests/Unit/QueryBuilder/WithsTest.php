@@ -3,12 +3,12 @@
 namespace Tests\Unit;
 
 // use Tests\Support\;
-use Sharksmedia\QueryBuilder\QueryBuilder;
-use Sharksmedia\QueryBuilder\Client\MySQL;
-use Sharksmedia\QueryBuilder\Config;
+use Sharksmedia\SharQ\SharQ;
+use Sharksmedia\SharQ\Client\MySQL;
+use Sharksmedia\SharQ\Config;
 
-use Sharksmedia\QueryBuilder\QueryCompiler;
-use Sharksmedia\QueryBuilder\Statement\Raw;
+use Sharksmedia\SharQ\SharQCompiler;
+use Sharksmedia\SharQ\Statement\Raw;
 
 class WithsTest extends \Codeception\Test\Unit
 {
@@ -29,11 +29,11 @@ class WithsTest extends \Codeception\Test\Unit
         return $iRaw;
     }
 
-    private static function qb(): QueryBuilder
+    private static function qb(): SharQ
     {// 2023-07-31
         $iClient = self::getClient();
 
-        return new QueryBuilder($iClient, 'my_schema');
+        return new SharQ($iClient, 'my_schema');
     }
 
     public function caseProvider()
@@ -291,11 +291,11 @@ class WithsTest extends \Codeception\Test\Unit
 	/**
 	 * @dataProvider caseProvider
 	 */
-    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
-        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+        $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iQueryCompiler->toQuery('select');
+        $iQuery = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
             'sql'=>$iQuery->getSQL(),

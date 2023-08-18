@@ -7,12 +7,12 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder\Client;
+namespace Sharksmedia\SharQ\Client;
 
-use \Sharksmedia\QueryBuilder\CustomPDO;
-use \Sharksmedia\QueryBuilder\Config;
-use \Sharksmedia\QueryBuilder\Client;
-use \Sharksmedia\QueryBuilder\Query;
+use \Sharksmedia\SharQ\CustomPDO;
+use \Sharksmedia\SharQ\Config;
+use \Sharksmedia\SharQ\Client;
+use \Sharksmedia\SharQ\Query;
 
 class MySQL extends Client
 {

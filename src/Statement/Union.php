@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder\Statement;
+namespace Sharksmedia\SharQ\Statement;
 
-use Sharksmedia\QueryBuilder\Statement\IStatement;
+use Sharksmedia\SharQ\Statement\IStatement;
 
 class Union implements IStatement
 {
@@ -42,7 +42,7 @@ class Union implements IStatement
         return $types;
     }
     /**
-     * @param \Closure|\Sharksmedia\QueryBuilder\QueryBuilder $statement
+     * @param \Closure|\Sharksmedia\SharQ\SharQ $statement
      */
     public function __construct(string $type, $statement, bool $wrap)
     {// 2023-05-08
@@ -52,7 +52,7 @@ class Union implements IStatement
     }
 
     /**
-     * @return \Closure|\Sharksmedia\QueryBuilder\QueryBuilder
+     * @return \Closure|\Sharksmedia\SharQ\SharQ
      */
     public function getStatement()
     {// 2023-05-08

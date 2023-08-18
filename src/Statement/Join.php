@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder\Statement;
+namespace Sharksmedia\SharQ\Statement;
 
-use Sharksmedia\QueryBuilder\Statement\Clause;
+use Sharksmedia\SharQ\Statement\Clause;
 
 class Join implements IStatement, IAliasable
 {
@@ -59,7 +59,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * This is the iClient property.
-     * @var string QueryBuilder::BOOL_TYPE_* constants
+     * @var string SharQ::BOOL_TYPE_* constants
      */
     private string $boolType;
 
@@ -145,8 +145,8 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string $onType Join::ON_TYPE_* constants
-     * @param string $boolType QueryBuilder::BOOL_TYPE_* constants
-     * @param array<int, string|Raw|QueryBuilder> $args [first, $operator, $second]
+     * @param string $boolType SharQ::BOOL_TYPE_* constants
+     * @param array<int, string|Raw|SharQ> $args [first, $operator, $second]
      * @return Clause
      */
     private function getClauseFromArguments(string $onType, string $boolType, ...$args): Clause
@@ -201,7 +201,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string|Raw|\Closure $first
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
+     * @param array<int, string|Raw|SharQ|\Closure> $args [operator, $second]
      * @return Join
      */
     public function on($first, ...$args): Join
@@ -215,7 +215,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string|Raw|\Closure $first
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
+     * @param array<int, string|Raw|SharQ|\Closure> $args [operator, $second]
      * @return Join
      */
     public function andOn($first, ...$args): Join
@@ -228,7 +228,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string|Raw|\Closure $first
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
+     * @param array<int, string|Raw|SharQ|\Closure> $args [operator, $second]
      * @return Join
      */
     public function orOn($first, ...$args): Join
@@ -257,7 +257,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string|Raw|\Closure $first
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
+     * @param array<int, string|Raw|SharQ|\Closure> $args [operator, $second]
      * @return Join
      */
     public function onVal($first, ...$args): Join
@@ -271,7 +271,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string|Raw|\Closure $first
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
+     * @param array<int, string|Raw|SharQ|\Closure> $args [operator, $second]
      * @return Join
      */
     public function andOnVal($first, ...$args): Join
@@ -284,7 +284,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string|Raw|\Closure $first
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $args [operator, $second]
+     * @param array<int, string|Raw|SharQ|\Closure> $args [operator, $second]
      * @return Join
      */
     public function orOnVal($first, ...$args): Join
@@ -351,7 +351,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string $column
-     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @param array<int, int|float|string|Raw>|SharQ $values
      * @param bool $isNot
      * @return Join
      */
@@ -373,7 +373,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string $column
-     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @param array<int, int|float|string|Raw>|SharQ $values
      * @return Join
      */
     public function onNotIn(string $column, $values): Join
@@ -384,7 +384,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string $column
-     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @param array<int, int|float|string|Raw>|SharQ $values
      * @return Join
      */
     public function andOnIn(string $column, $values): Join
@@ -395,7 +395,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string $column
-     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @param array<int, int|float|string|Raw>|SharQ $values
      * @return Join
      */
     public function andOnNotIn(string $column, $values): Join
@@ -406,7 +406,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string $column
-     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @param array<int, int|float|string|Raw>|SharQ $values
      * @return Join
      */
     public function orOnIn(string $column, $values): Join
@@ -417,7 +417,7 @@ class Join implements IStatement, IAliasable
 
     /**
      * @param string $column
-     * @param array<int, int|float|string|Raw>|QueryBuilder $values
+     * @param array<int, int|float|string|Raw>|SharQ $values
      * @return Join
      */
     public function orOnNotIn(string $column, $values): Join

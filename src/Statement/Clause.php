@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder\Statement;
+namespace Sharksmedia\SharQ\Statement;
 
 /**
  * // 2023-05-09
@@ -30,7 +30,7 @@ class Clause
 
     /**
      * This is the type value.
-     * @var string|Raw|QueryBuilder|\Closure
+     * @var string|Raw|SharQ|\Closure
      */
     public                  $value;
 
@@ -42,7 +42,7 @@ class Clause
 
     /**
      * This is the type boolType.
-     * @see QueryBuilder::BOOL_TYPE_* constants
+     * @see SharQ::BOOL_TYPE_* constants
      * @var string
      */
     public string           $boolType;
@@ -61,7 +61,7 @@ class Clause
 
     /**
      * This is the type columnSecond.
-     * @see QueryBuilder::BOOL_TYPE_* constants
+     * @see SharQ::BOOL_TYPE_* constants
      * @return string
      */
     public function getBoolFunction(): string
@@ -118,7 +118,7 @@ class Clause
 
     /**
      * Get the value of the clause
-     * @return string|Raw|QueryBuilder|\Closure
+     * @return string|Raw|SharQ|\Closure
      */
     public function getValue()
     {// 2023-05-31

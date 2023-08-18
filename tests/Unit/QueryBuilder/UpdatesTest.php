@@ -4,12 +4,12 @@
 namespace Tests\Unit;
 
 // use Tests\Support\;
-use Sharksmedia\QueryBuilder\QueryCompiler;
-use Sharksmedia\QueryBuilder\QueryBuilder;
-use Sharksmedia\QueryBuilder\Client\MySQL;
-use Sharksmedia\QueryBuilder\Config;
+use Sharksmedia\SharQ\SharQCompiler;
+use Sharksmedia\SharQ\SharQ;
+use Sharksmedia\SharQ\Client\MySQL;
+use Sharksmedia\SharQ\Config;
 
-use Sharksmedia\QueryBuilder\Statement\Raw;
+use Sharksmedia\SharQ\Statement\Raw;
 
 class UpdatesTest extends \Codeception\Test\Unit
 {
@@ -30,11 +30,11 @@ class UpdatesTest extends \Codeception\Test\Unit
         return $iRaw;
     }
 
-    private static function qb(): QueryBuilder
+    private static function qb(): SharQ
     {// 2023-05-16
         $iClient = self::getClient();
 
-        return new QueryBuilder($iClient, 'my_schema');
+        return new SharQ($iClient, 'my_schema');
     }
 
     public function caseProvider()
@@ -514,11 +514,11 @@ class UpdatesTest extends \Codeception\Test\Unit
 	/**
 	 * @dataProvider caseProvider
 	 */
-    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
-        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+        $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iQueryCompiler->toQuery('update');
+        $iQuery = $iSharQCompiler->toQuery('update');
         $sqlAndBindings =
         [
             'sql'=>$iQuery->getSQL(),

@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder\Statement;
+namespace Sharksmedia\SharQ\Statement;
 
-use Sharksmedia\QueryBuilder\Statement\IStatement;
-use Sharksmedia\QueryBuilder\Statement\IAliasable;
+use Sharksmedia\SharQ\Statement\IStatement;
+use Sharksmedia\SharQ\Statement\IAliasable;
 
 /**
  * 2023-05-08
@@ -39,7 +39,7 @@ class Columns implements IStatement, IAliasable
 
     /**
      * This is the columns property.
-     * @var array<int|string, string|Raw|QueryBuilder>
+     * @var array<int|string, string|Raw|SharQ>
      */
     private array $columns;
 
@@ -109,7 +109,7 @@ class Columns implements IStatement, IAliasable
 
     /**
      * get the columns
-     * @return array<int|string, string|\Closure|Raw|QueryBuilder>
+     * @return array<int|string, string|\Closure|Raw|SharQ>
      */
     public function getColumns(): array
     {// 2023-05-10
@@ -118,7 +118,7 @@ class Columns implements IStatement, IAliasable
 
     /**
      * set the columns
-     * @param array<int|string, string|\Closure|Raw|QueryBuilder> $columns
+     * @param array<int|string, string|\Closure|Raw|SharQ> $columns
      * @return Columns
      */
     public function setColumns(array $columns): self

@@ -7,22 +7,22 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder;
+namespace Sharksmedia\SharQ;
 
-use Sharksmedia\QueryBuilder\Single;
+use Sharksmedia\SharQ\Single;
 
-use Sharksmedia\QueryBuilder\Formatter\WrappingFormatter;
-use Sharksmedia\QueryBuilder\Statement\Columns;
-use Sharksmedia\QueryBuilder\Statement\Clause;
-use Sharksmedia\QueryBuilder\Statement\Having;
-use Sharksmedia\QueryBuilder\Statement\Join;
-use Sharksmedia\QueryBuilder\Statement\Where;
-use Sharksmedia\QueryBuilder\Statement\Order;
-use Sharksmedia\QueryBuilder\Statement\Raw;
-use Sharksmedia\QueryBuilder\Statement\With;
-use Sharksmedia\QueryBuilder\Utilities;
+use Sharksmedia\SharQ\Formatter\WrappingFormatter;
+use Sharksmedia\SharQ\Statement\Columns;
+use Sharksmedia\SharQ\Statement\Clause;
+use Sharksmedia\SharQ\Statement\Having;
+use Sharksmedia\SharQ\Statement\Join;
+use Sharksmedia\SharQ\Statement\Where;
+use Sharksmedia\SharQ\Statement\Order;
+use Sharksmedia\SharQ\Statement\Raw;
+use Sharksmedia\SharQ\Statement\With;
+use Sharksmedia\SharQ\Utilities;
 
-class QueryCompiler
+class SharQCompiler
 {
 
     /**
@@ -32,10 +32,10 @@ class QueryCompiler
     private Client           $iClient;
 
     /**
-     * This is the iQueryBuilder property.
-     * @var QueryBuilder
+     * This is the iSharQ property.
+     * @var SharQ
      */
-    private QueryBuilder     $iQueryBuilder;
+    private SharQ     $iSharQ;
 
     /**
      * This is the bindings property.
@@ -192,20 +192,20 @@ class QueryCompiler
 
     /**
      * @param Client $iClient
-     * @param QueryBuilder $iQueryBuilder
+     * @param SharQ $iSharQ
      * @param array<int,mixed> $bindings
      */
-    public function __construct(Client $iClient, QueryBuilder $iQueryBuilder, array $bindings=[])
+    public function __construct(Client $iClient, SharQ $iSharQ, array $bindings=[])
     {// 2023-05-10
         $this->iClient = $iClient;
-        $this->iQueryBuilder = $iQueryBuilder;
+        $this->iSharQ = $iSharQ;
         $this->bindings = $bindings;
 
-        $this->iSingle = $iQueryBuilder->getSingle();
+        $this->iSingle = $iSharQ->getSingle();
 
         // $this->iFormatter = $iClient->getFormatter();
 
-        $this->iStatementsGroupedOnType = array_reduce($iQueryBuilder->getStatements(), function($curr, $next)
+        $this->iStatementsGroupedOnType = array_reduce($iSharQ->getStatements(), function($curr, $next)
         {
             $curr[$next->getClass()][] = $next;
             return $curr;
@@ -227,7 +227,7 @@ class QueryCompiler
      */
     public function toQuery(?string $method=null): Query
     {// 2023-05-15
-        $method = $method ?? $this->iQueryBuilder->getMethod();
+        $method = $method ?? $this->iSharQ->getMethod();
 
         // FIXME: Generate UUID
         $iQuery = new Query($method, $this->options, $this->timeout, $this->cancelOnTimeout, $this->bindings, '<UUID>');
@@ -242,7 +242,7 @@ class QueryCompiler
 
     /**
      * Take a value and processes it to a string
-     * @param string|Raw|QueryBuilder|null $value
+     * @param string|Raw|SharQ|null $value
      * @param array<int, mixed> $bindings
      * @return string
      */
@@ -313,13 +313,13 @@ class QueryCompiler
             return $sql;
         }
 
-        if($value instanceof QueryBuilder)
+        if($value instanceof SharQ)
         {
-            $iQueryCompiler = new QueryCompiler($this->iClient, $value, []);
+            $iSharQCompiler = new SharQCompiler($this->iClient, $value, []);
 
-            $sql = $iQueryCompiler->toQuery()->toString(false, $this);
+            $sql = $iSharQCompiler->toQuery()->toString(false, $this);
 
-            $this->bindings = array_merge($this->bindings, $iQueryCompiler->getBindings());
+            $this->bindings = array_merge($this->bindings, $iSharQCompiler->getBindings());
 
             return $sql;
         }
@@ -350,36 +350,36 @@ class QueryCompiler
         if(count($this->iStatementsGroupedOnType['Columns'] ?? []) !== 0) return false;
         if(count($this->iStatementsGroupedOnType['Union'] ?? []) === 0) return false;
         if($this->iSingle->table !== null) return false;
-        // if($this->iQueryBuilder->getTableName() !== null) return false;
+        // if($this->iSharQ->getTableName() !== null) return false;
         
         return true;
     }
 
     /**
      * @param \Closure $callback
-     * @param string|null $method QueryBuilder::TYPE_* constant
+     * @param string|null $method SharQ::TYPE_* constant
      * @param Client|null $iClient
      * @param array<int,mixed> $bindings
      */
     private function compileCallback(\Closure $callback, ?string $method=null, ?Client $iClient=null, array &$bindings=[]): Query
     {// 2023-05-10
-        $iQueryBuilder = new QueryBuilder($this->iClient, $this->iQueryBuilder->getSchema());
+        $iSharQ = new SharQ($this->iClient, $this->iSharQ->getSchema());
 
-        $callback($iQueryBuilder);
+        $callback($iSharQ);
 
-        $iQueryCompiler = new QueryCompiler($iClient ?? $this->iClient, $iQueryBuilder, []);
+        $iSharQCompiler = new SharQCompiler($iClient ?? $this->iClient, $iSharQ, []);
 
-        $iQuery = $iQueryCompiler->toQuery($method);
+        $iQuery = $iSharQCompiler->toQuery($method);
 
         $bindings = array_merge($bindings, $iQuery->getBindings());
 
-        if($iQueryBuilder->getSingle()->alias !== null) $iQuery->as($iQueryBuilder->getSingle()->alias);
+        if($iSharQ->getSingle()->alias !== null) $iQuery->as($iSharQ->getSingle()->alias);
 
         return $iQuery;
     }
 
     /**
-     * @param array<int, string|Raw|QueryBuilder>|null $tables
+     * @param array<int, string|Raw|SharQ>|null $tables
      * @return string
      */
     public function tables(?array $tables=null): string
@@ -403,7 +403,7 @@ class QueryCompiler
     }
 
     /**
-     * @param array<int, string|Raw|QueryBuilder>|null $tables
+     * @param array<int, string|Raw|SharQ>|null $tables
      * @return string
      */
     public function compileFrom($tables): string
@@ -805,13 +805,13 @@ class QueryCompiler
 
     /**
      * Wraps a value in quotes appropriately. Queries and callbacks are wrapped.
-     * @param int|float|string|Raw|QueryBuilder|\Closure $value
+     * @param int|float|string|Raw|SharQ|\Closure $value
      * @return string
      */
     public function wrap($value): string
     {// 2023-05-15
         if($value instanceof Raw) return $this->unwrapRaw($value, $this->bindings);
-        if($value instanceof QueryBuilder)
+        if($value instanceof SharQ)
         {
             $sql = '('.$this->unwrapRaw($value, $this->bindings).')';
 
@@ -826,12 +826,12 @@ class QueryCompiler
     }
 
     /**
-     * @param string|Raw|QueryBuilder $value
+     * @param string|Raw|SharQ $value
      * @return string
      */
     private function operator($value): string
     {// 2023-05-15
-        if($value instanceof Raw || $value instanceof QueryBuilder) return $this->unwrapRaw($value, $this->bindings);
+        if($value instanceof Raw || $value instanceof SharQ) return $this->unwrapRaw($value, $this->bindings);
 
         $operator = self::QUERY_OPERATORS[trim(strtolower($value ?? ''))] ?? null;
 
@@ -848,8 +848,8 @@ class QueryCompiler
     {// 2023-05-15
         if($this->hasOnlyUnions()) return null;
 
-        if($this->iQueryBuilder->getMethod() === QueryBuilder::METHOD_UPDATE) return $this->sets();
-        if($this->iQueryBuilder->getMethod() === QueryBuilder::METHOD_INSERT) return $this->_insertBody($this->iSingle->insert);
+        if($this->iSharQ->getMethod() === SharQ::METHOD_UPDATE) return $this->sets();
+        if($this->iSharQ->getMethod() === SharQ::METHOD_INSERT) return $this->_insertBody($this->iSingle->insert);
         
         $hints = $this->hintComments();
         $isDistinct = false;
@@ -900,18 +900,18 @@ class QueryCompiler
 
     private function getMethodFunction(?string $method=null)
     {
-        $method = $method ?? $this->iQueryBuilder->getMethod();
+        $method = $method ?? $this->iSharQ->getMethod();
 
         $methodMap =
         [
-            QueryBuilder::METHOD_RAW=>'',
-            QueryBuilder::METHOD_SELECT=>'SELECT',
-            QueryBuilder::METHOD_FIRST=>'SELECT',
-            QueryBuilder::METHOD_PLUCK=>'SELECT',
-            QueryBuilder::METHOD_INSERT=>'INSERT',
-            QueryBuilder::METHOD_UPDATE=>'UPDATE',
-            QueryBuilder::METHOD_DELETE=>'DELETE',
-            QueryBuilder::METHOD_TRUNCATE=>'TRUNCATE',
+            SharQ::METHOD_RAW=>'',
+            SharQ::METHOD_SELECT=>'SELECT',
+            SharQ::METHOD_FIRST=>'SELECT',
+            SharQ::METHOD_PLUCK=>'SELECT',
+            SharQ::METHOD_INSERT=>'INSERT',
+            SharQ::METHOD_UPDATE=>'UPDATE',
+            SharQ::METHOD_DELETE=>'DELETE',
+            SharQ::METHOD_TRUNCATE=>'TRUNCATE',
         ];
 
         return $methodMap[$method];
@@ -919,7 +919,7 @@ class QueryCompiler
 
     /**
      * Creates alist of appropriately wrapped columns or queries, which can be used in ex. a select statement
-     * @param array<int|string, string|Raw|QueryBuilder|\Closure> $columns
+     * @param array<int|string, string|Raw|SharQ|\Closure> $columns
      * @return string
      */
     public function columnize(array $columns): string
@@ -940,7 +940,7 @@ class QueryCompiler
                 $alias = $i;
 
                 if(is_array($column)) $columnStr = $this->columnize($column);
-                else if($column instanceof QueryBuilder) $columnStr = "{$this->wrap($column)}";
+                else if($column instanceof SharQ) $columnStr = "{$this->wrap($column)}";
                 else $columnStr = $this->wrap($column);
 
                 $query .= "{$columnStr} AS {$this->wrap($alias)}";
@@ -957,7 +957,7 @@ class QueryCompiler
 
             $query .= $this->wrap($column);
 
-            // if($column instanceof QueryBuilder && $column->hasAlias()) $query .= " AS {$this->wrap($column->getAlias())}";
+            // if($column instanceof SharQ && $column->hasAlias()) $query .= " AS {$this->wrap($column->getAlias())}";
         }
 
         return $query;
@@ -1088,7 +1088,7 @@ class QueryCompiler
             'RAW'=>self::RAW_COMPONENTS,
         ];
 
-        $components = $componentsMap[$this->iQueryBuilder->getMethod()] ?? self::QUERY_COMPONENTS;
+        $components = $componentsMap[$this->iSharQ->getMethod()] ?? self::QUERY_COMPONENTS;
 
         $index = array_search($method, $components);
         $components = array_slice($components, (int)$index);
@@ -1175,7 +1175,7 @@ class QueryCompiler
             'TRUNCATE'=>'truncate',
         ];
 
-        return call_user_func([$this, $methodMap[$this->iQueryBuilder->getMethod()]]);
+        return call_user_func([$this, $methodMap[$this->iSharQ->getMethod()]]);
     }
 
     public function raw(): string
@@ -1284,7 +1284,7 @@ class QueryCompiler
     }
 
     /**
-     * @param array<int, string|Raw|QueryBuilder> $values
+     * @param array<int, string|Raw|SharQ> $values
      * @return string
      */
     private function _buildInsertValues($values): string
@@ -1301,12 +1301,12 @@ class QueryCompiler
         return $sql;
     }
     /**
-     * @param array<int, string|Raw|QueryBuilder> $insertValues
+     * @param array<int, string|Raw|SharQ> $insertValues
      * @return string
      */
     private function _insertBody($insertValues): string
     {// 2023-06-06
-        if($insertValues instanceof QueryBuilder) return $this->unwrapRaw($insertValues, $this->bindings);
+        if($insertValues instanceof SharQ) return $this->unwrapRaw($insertValues, $this->bindings);
         if($insertValues instanceof \Closure) return $this->compileCallback($insertValues, null, null, $this->bindings)->toString(false, $this);
 
         if(is_array($insertValues) && count($insertValues) === 0) return '';
@@ -1335,7 +1335,7 @@ class QueryCompiler
     }
 
     /**
-     * @param array<int, string|Raw|QueryBuilder> $data
+     * @param array<int, string|Raw|SharQ> $data
      * @return array<string,array<int, string>>
      */
     private function _prepInsert($data): array
@@ -1375,8 +1375,8 @@ class QueryCompiler
     }
 
     /**
-     * @param array<int, string|Raw|QueryBuilder> $updates
-     * @param array<int, string|Raw|QueryBuilder> $insert
+     * @param array<int, string|Raw|SharQ> $updates
+     * @param array<int, string|Raw|SharQ> $insert
      * @return string
      */
     private function _merge($updates, $insert): string
@@ -1576,7 +1576,7 @@ class QueryCompiler
      */
     private function onBasic(Clause $iClause): string
     {// 2023-05-31
-        // $wrap = $iClause->getValue() instanceof QueryBuilder;
+        // $wrap = $iClause->getValue() instanceof SharQ;
 
         $column = $this->wrap($iClause->getColumn());
         $operator = $this->operator($iClause->getOperator());
@@ -1828,7 +1828,7 @@ class QueryCompiler
 
     /**
      * Compiles group by statement
-     * @param string|Raw|QueryBuilder $value
+     * @param string|Raw|SharQ $value
      * @param Order::TYPE_NULLS_POSITION_* $nullsPosition
      * @return string
      */
@@ -1842,9 +1842,9 @@ class QueryCompiler
 
         if(is_string($value)) $value = [$value];
 
-        if($value instanceof QueryBuilder || $nullsPosition !== null)
+        if($value instanceof SharQ || $nullsPosition !== null)
         {
-            if($value instanceof QueryBuilder) $value = [$value];
+            if($value instanceof SharQ) $value = [$value];
 
             $orderBy = $this->columnize($value).$nullOrder;
 
@@ -1858,7 +1858,7 @@ class QueryCompiler
 
     /**
      * Compiles the `group by` statements.
-     * @param string|Raw|QueryBuilder $value
+     * @param string|Raw|SharQ $value
      * @return string
      */
     private function _groupBy($value): string
@@ -1973,10 +1973,10 @@ class QueryCompiler
     {// 2023-05-15
         if($this->iSingle->lock === null) return '';
 
-        if($this->iSingle->lock === QueryBuilder::LOCK_MODE_FOR_UPDATE) return $this->forUpdate();
-        if($this->iSingle->lock === QueryBuilder::LOCK_MODE_FOR_SHARE) return $this->forShare();
-        if($this->iSingle->lock === QueryBuilder::LOCK_MODE_FOR_NO_KEY_UPDATE) return $this->forNoKeyUpdate();
-        if($this->iSingle->lock === QueryBuilder::LOCK_MODE_FOR_KEY_SHARE) return $this->forKeyShare();
+        if($this->iSingle->lock === SharQ::LOCK_MODE_FOR_UPDATE) return $this->forUpdate();
+        if($this->iSingle->lock === SharQ::LOCK_MODE_FOR_SHARE) return $this->forShare();
+        if($this->iSingle->lock === SharQ::LOCK_MODE_FOR_NO_KEY_UPDATE) return $this->forNoKeyUpdate();
+        if($this->iSingle->lock === SharQ::LOCK_MODE_FOR_KEY_SHARE) return $this->forKeyShare();
 
         throw new \Exception('Invalid lock mode "'.$this->iSingle->lock.'"');
     }
@@ -2030,8 +2030,8 @@ class QueryCompiler
     {// 2023-06-07
         if($this->iSingle->waitMode === null) return '';
 
-        if($this->iSingle->waitMode === QueryBuilder::WAIT_MODE_SKIP_LOCKED) return $this->skipLocked();
-        if($this->iSingle->waitMode === QueryBuilder::WAIT_MODE_NO_WAIT) return $this->noWait();
+        if($this->iSingle->waitMode === SharQ::WAIT_MODE_SKIP_LOCKED) return $this->skipLocked();
+        if($this->iSingle->waitMode === SharQ::WAIT_MODE_NO_WAIT) return $this->noWait();
 
         throw new \Exception('Invalid wait mode "'.$this->iSingle->waitMode.'"');
     }
@@ -2066,7 +2066,7 @@ class QueryCompiler
     private function parameter($value, array &$bindings, bool $wrap=false): string
     {// 2023-05-31
         if($value instanceof \Closure) return $this->compileCallback($value, null, null, $bindings)->toString($wrap, $this);
-        if($value instanceof QueryBuilder) return $this->unwrapRaw($value, $this->bindings);
+        if($value instanceof SharQ) return $this->unwrapRaw($value, $this->bindings);
 
         return $this->unwrapRaw($value, $bindings) ?? '?';
     }
@@ -2092,7 +2092,7 @@ class QueryCompiler
 
             $parameter = $this->parameter($value, $bindings);
 
-            if($value instanceof QueryBuilder)
+            if($value instanceof SharQ)
             {
                 $parameter = '('.$parameter.')';
 
@@ -2115,13 +2115,13 @@ class QueryCompiler
 	 * knex('table')		   -> '(select * from "table")'
      * knex.raw('select ?', 1) -> '(select ?)'
      *
-     * @param array<int, mixed>|QueryBuilder|Raw $values
+     * @param array<int, mixed>|SharQ|Raw $values
      * @param array<int, mixed> $bindings
      * @return string
      */
     private function values($values, array &$bindings): string
     {// 2023-06-02
-        if($values instanceof Raw || $values instanceof QueryBuilder) return "({$this->parameter($values, $bindings)})";
+        if($values instanceof Raw || $values instanceof SharQ) return "({$this->parameter($values, $bindings)})";
 
         if(is_array($values))
         {

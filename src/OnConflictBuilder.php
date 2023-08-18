@@ -8,57 +8,57 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder;
+namespace Sharksmedia\SharQ;
 
 class OnConflictBuilder
 {
     /**
-     * This is the QueryBuilder property.
-     * @var QueryBuilder
+     * This is the SharQ property.
+     * @var SharQ
      */
-    private QueryBuilder $iQueryBuilder;
+    private SharQ $iSharQ;
 
     /**
      * This is the schema property.
-     * @var array<int|string, string|Raw|QueryBuilder>
+     * @var array<int|string, string|Raw|SharQ>
      */
     private              $columns;
 
     /**
-     * @param QueryBuilder $iQueryBuilder
-     * @param array<int|string, string|Raw|QueryBuilder> $columns
+     * @param SharQ $iSharQ
+     * @param array<int|string, string|Raw|SharQ> $columns
      */
-    public function __construct(QueryBuilder $iQueryBuilder, $columns)
+    public function __construct(SharQ $iSharQ, $columns)
     {// 2023-06-06
-        $this->iQueryBuilder = $iQueryBuilder;
+        $this->iSharQ = $iSharQ;
         $this->columns = $columns;
     }
 
     /**
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function ignore(): QueryBuilder
+    public function ignore(): SharQ
     {// 2023-06-06
-        $iSingle = &$this->iQueryBuilder->getSingle();
+        $iSingle = &$this->iSharQ->getSingle();
 
         $iSingle->onConflict = $this->columns;
         $iSingle->ignore = true;
 
-        return $this->iQueryBuilder;
+        return $this->iSharQ;
     }
 
     /**
      * @param array<int, mixed> $updates
-     * @return QueryBuilder
+     * @return SharQ
      */
-    public function merge($updates=[]): QueryBuilder
+    public function merge($updates=[]): SharQ
     {// 2023-06-06
-        $iSingle = &$this->iQueryBuilder->getSingle();
+        $iSingle = &$this->iSharQ->getSingle();
 
         $iSingle->onConflict = $this->columns;
         $iSingle->merge = $updates;
 
-        return $this->iQueryBuilder;
+        return $this->iSharQ;
     }
 
     /**

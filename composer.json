@@ -1,6 +1,6 @@
 {
-    "name": "sharksmedia/query-builder",
-    "description": "A query builder for PHP, inspired by KnexJS query builder.",
+    "name": "sharksmedia/sharq",
+    "description": "A query builder for PHP, heavely inspired by KnexJS.",
     "type": "library",
     "version": "0.1.2",
     "license": "MIT",
@@ -18,7 +18,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Sharksmedia\\QueryBuilder\\": "src/"
+            "Sharksmedia\\SharQ\\": "src/"
         }
     },
     "require-dev": {

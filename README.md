@@ -1,4 +1,4 @@
-# QueryBuilder
+# SharQ
 A query builder for PHP
 
 ### Usage

@@ -43,7 +43,7 @@ with
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder\Statement;
+namespace Sharksmedia\SharQ\Statement;
 
 interface IStatement
 {

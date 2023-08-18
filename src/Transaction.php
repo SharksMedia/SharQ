@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 // 2023-06-12
 
-namespace Sharksmedia\QueryBuilder;
+namespace Sharksmedia\SharQ;
 
 use function PHPUnit\Framework\throwException;
 
@@ -26,7 +26,7 @@ class Transaction
 
     /**
      * 2023-06-12
-     * @var array<int, QueryBuilder>
+     * @var array<int, SharQ>
      */
     private array $queries = [];
 

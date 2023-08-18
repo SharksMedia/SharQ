@@ -7,11 +7,11 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder\Statement;
+namespace Sharksmedia\SharQ\Statement;
 
-use Sharksmedia\QueryBuilder\QueryBuilder;
-use Sharksmedia\QueryBuilder\Statement\IStatement;
-use Sharksmedia\QueryBuilder\Statement\IAliasable;
+use Sharksmedia\SharQ\SharQ;
+use Sharksmedia\SharQ\Statement\IStatement;
+use Sharksmedia\SharQ\Statement\IAliasable;
 
 /**
  * 2023-05-08
@@ -55,7 +55,7 @@ class Where implements IStatement, IAliasable
      * @param string $boolType
      * @param bool $isNot
      */
-    public function __construct($column, ?string $operator, $value, string $boolType=QueryBuilder::BOOL_TYPE_AND, bool $isNot=false, string $type=self::TYPE_BASIC)
+    public function __construct($column, ?string $operator, $value, string $boolType=SharQ::BOOL_TYPE_AND, bool $isNot=false, string $type=self::TYPE_BASIC)
     {// 2023-05-08
         $this->column   = $column;
         $this->operator = $operator;

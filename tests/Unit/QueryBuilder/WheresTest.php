@@ -3,12 +3,12 @@
 namespace Tests\Unit;
 
 // use Tests\Support\;
-use Sharksmedia\QueryBuilder\QueryBuilder;
-use Sharksmedia\QueryBuilder\Client\MySQL;
-use Sharksmedia\QueryBuilder\Config;
+use Sharksmedia\SharQ\SharQ;
+use Sharksmedia\SharQ\Client\MySQL;
+use Sharksmedia\SharQ\Config;
 
-use Sharksmedia\QueryBuilder\QueryCompiler;
-use Sharksmedia\QueryBuilder\Statement\Raw;
+use Sharksmedia\SharQ\SharQCompiler;
+use Sharksmedia\SharQ\Statement\Raw;
 
 class WheresTest extends \Codeception\Test\Unit
 {
@@ -29,18 +29,18 @@ class WheresTest extends \Codeception\Test\Unit
         return $iRaw;
     }
 
-    private static function qb(): QueryBuilder
+    private static function qb(): SharQ
     {// 2023-05-16
         $iClient = self::getClient();
 
-        return new QueryBuilder($iClient, 'my_schema');
+        return new SharQ($iClient, 'my_schema');
     }
 
-    public function _testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected): void
+    public function _testSharQ(SharQ $iSharQ, array $iExpected): void
     {
-        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+        $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iQueryCompiler->toQuery('select');
+        $iQuery = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
             'sql'=>$iQuery->getSQL(),
@@ -59,9 +59,9 @@ class WheresTest extends \Codeception\Test\Unit
 
         // codecept_debug($qb);
 
-        $iQueryCompiler = new QueryCompiler(self::getClient(), $qb, []);
+        $iSharQCompiler = new SharQCompiler(self::getClient(), $qb, []);
 
-        $iQuery = $iQueryCompiler->toQuery('select');
+        $iQuery = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
             'sql'=>$iQuery->getSQL(),
@@ -92,7 +92,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testUsesWherelike2265(): void
@@ -112,7 +112,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testUsesWhereilike2265(): void
@@ -132,7 +132,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testUsesAndwherelikeOrwherelike2265(): void
@@ -154,7 +154,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testUsesAndwhereilikeOrwhereilike2265(): void
@@ -176,7 +176,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereColumn(): void
@@ -196,7 +196,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereNot(): void
@@ -216,7 +216,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testGroupedOrWhereNot(): void
@@ -240,7 +240,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testGroupedOrWhereNotAlternate(): void
@@ -264,7 +264,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereNotObject(): void
@@ -284,7 +284,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereBool(): void
@@ -304,7 +304,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereBetweens(): void
@@ -324,7 +324,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testAndWhereBetweens(): void
@@ -345,7 +345,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testAndWhereNotBetweens(): void
@@ -366,7 +366,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereBetweensAlternate(): void
@@ -386,7 +386,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereNotBetween(): void
@@ -406,7 +406,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereNotBetweenAlternate(): void
@@ -426,7 +426,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testBasicOrWheres(): void
@@ -447,7 +447,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testChainedOrWheres(): void
@@ -469,7 +469,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testRawColumnWheres(): void
@@ -489,7 +489,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testRawWheres(): void
@@ -509,7 +509,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testRawOrWheres(): void
@@ -530,7 +530,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testChainedRawOrWheres(): void
@@ -552,7 +552,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testBasicWhereIns(): void
@@ -572,7 +572,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testMultiColumnWhereIns(): void
@@ -599,7 +599,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrWhereIn(): void
@@ -620,7 +620,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testBasicWhereNotIns(): void
@@ -640,7 +640,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testChainedOrWhereNotIn(): void
@@ -663,7 +663,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrWhereIn2(): void
@@ -685,7 +685,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testChainedBasicWhereNotIns(): void
@@ -706,7 +706,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testChainedOrWhereNotIn2(): void
@@ -729,7 +729,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereInWithEmptyArray477(): void
@@ -751,7 +751,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWherenotinWithEmptyArray477(): void
@@ -773,7 +773,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testShouldAllowAFunctionAsTheFirstArgumentForAGroupedWhereClause(): void
@@ -802,7 +802,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testShouldAcceptAFunctionAsTheValueForASubSelect(): void
@@ -830,7 +830,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testShouldAcceptAFunctionAsTheValueForASubSelectWhenChained(): void
@@ -858,7 +858,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testShouldNotDoWherenullOnWhereFooSpaceshipNull(): void
@@ -876,7 +876,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testShouldExpandWhereFooNotWhereId(): void
@@ -896,7 +896,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testSubSelectWhereIns(): void
@@ -922,7 +922,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function subSelectMultiColumnWhereIns(): void
@@ -948,7 +948,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function subSelectWhereNotIns(): void
@@ -973,7 +973,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testBasicWhereNulls(): void
@@ -993,7 +993,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testBasicOrWhereNulls(): void
@@ -1014,7 +1014,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testBasicWhereNotNulls(): void
@@ -1034,7 +1034,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testBasicOrWhereNotNulls(): void
@@ -1055,7 +1055,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereShortcut(): void
@@ -1076,7 +1076,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testNestedWheres(): void
@@ -1101,7 +1101,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testClearNestedWheres(): void
@@ -1127,7 +1127,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testClearWhereAndNestedWheres(): void
@@ -1153,7 +1153,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereExists(): void
@@ -1178,7 +1178,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereExistsWithBuilder(): void
@@ -1202,7 +1202,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereNotExists(): void
@@ -1227,7 +1227,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrWhereExists(): void
@@ -1253,7 +1253,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrWhereNotExists(): void
@@ -1279,7 +1279,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testProvidingNullOrFalseAsSecondParameterBuildsCorrectly(): void
@@ -1299,7 +1299,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOneAllowsPassingBuilderIntoWhereClause162(): void
@@ -1321,7 +1321,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testTwoAllowsPassingBuilderIntoWhereClause162(): void
@@ -1343,7 +1343,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testThreeAllowsPassingBuilderIntoWhereClause162(): void
@@ -1365,7 +1365,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testSupportsCapitalizedOperators(): void
@@ -1385,7 +1385,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testAllowsForEmptyWhere749(): void
@@ -1405,7 +1405,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testWhereWithDateObject(): void
@@ -1426,7 +1426,7 @@ class WheresTest extends \Codeception\Test\Unit
                 ]
             ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testRawWhereWithDateObject(): void
@@ -1447,7 +1447,7 @@ class WheresTest extends \Codeception\Test\Unit
                 ]
             ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testRawAcceptsArrayAndNonArrayBindings1(): void
@@ -1467,7 +1467,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testRawAcceptsArrayAndNonArrayBindings2(): void
@@ -1487,7 +1487,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testRawAcceptsArrayAndNonArrayBindings3(): void
@@ -1508,7 +1508,7 @@ class WheresTest extends \Codeception\Test\Unit
                 ]
             ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrwheregeneratesOrAnd(): void
@@ -1532,7 +1532,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testNamedBindings(): void
@@ -1552,7 +1552,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testMultipleNamedBindings(): void
@@ -1572,7 +1572,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testRawShouldTakeNotIntoConsiderationInQuerybuilder(): void
@@ -1591,7 +1591,7 @@ class WheresTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 }
 

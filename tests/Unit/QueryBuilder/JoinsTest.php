@@ -4,12 +4,12 @@
 namespace Tests\Unit;
 
 // use Tests\Support\;
-use Sharksmedia\QueryBuilder\QueryBuilder;
-use Sharksmedia\QueryBuilder\Client\MySQL;
-use Sharksmedia\QueryBuilder\Config;
+use Sharksmedia\SharQ\SharQ;
+use Sharksmedia\SharQ\Client\MySQL;
+use Sharksmedia\SharQ\Config;
 
-use Sharksmedia\QueryBuilder\QueryCompiler;
-use Sharksmedia\QueryBuilder\Statement\Raw;
+use Sharksmedia\SharQ\SharQCompiler;
+use Sharksmedia\SharQ\Statement\Raw;
 
 class JoinsTest extends \Codeception\Test\Unit
 {
@@ -35,23 +35,23 @@ class JoinsTest extends \Codeception\Test\Unit
         return $iRaw;
     }
 
-    private static function qb(): QueryBuilder
+    private static function qb(): SharQ
     {// 2023-05-16
         $iClient = self::getClient();
 
-        return new QueryBuilder($iClient, 'my_schema');
+        return new SharQ($iClient, 'my_schema');
     }
 
     /**
-     * @param QueryBuilder $iQueryBuilder
+     * @param SharQ $iSharQ
      * @param array<string, array> $iExpected
      * @return void
      */
-    public function _testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected): void
+    public function _testSharQ(SharQ $iSharQ, array $iExpected): void
     {
-        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+        $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iQueryCompiler->toQuery('select');
+        $iQuery = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
             'sql'=>$iQuery->getSQL(),
@@ -79,7 +79,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testCrossJoinOn(): void
@@ -99,7 +99,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testBasicJoins(): void
@@ -120,7 +120,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testRightOuterJoins(): void
@@ -141,7 +141,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testComplexJoin(): void
@@ -165,7 +165,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testComplexJoinWithNestConditionalStatements(): void
@@ -192,7 +192,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testComplexJoinWithEmptyIn(): void
@@ -216,7 +216,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function joinsWithRaw(): void
@@ -238,7 +238,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function joinsWithSchema(): void
@@ -260,7 +260,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOnNull(): void
@@ -284,7 +284,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrOnNull(): void
@@ -309,7 +309,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOnNotNull(): void
@@ -333,7 +333,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrOnNotNull(): void
@@ -358,7 +358,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOnExists(): void
@@ -386,7 +386,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrOnExists(): void
@@ -419,7 +419,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOnNotExists(): void
@@ -447,7 +447,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrOnNotExists(): void
@@ -480,7 +480,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOnBetween(): void
@@ -504,7 +504,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrOnBetween(): void
@@ -529,7 +529,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOnNotBetween(): void
@@ -553,7 +553,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrOnNotBetween(): void
@@ -578,7 +578,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOnIn(): void
@@ -602,7 +602,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrOnIn(): void
@@ -627,7 +627,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrOnInWithRaw(): void
@@ -657,7 +657,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOnNotIn(): void
@@ -681,7 +681,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testOrOnNotIn(): void
@@ -706,7 +706,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testAllowsLeftOuterJoinWithRawValues(): void
@@ -730,7 +730,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testHasJoinrawForArbitraryJoinClauses(): void
@@ -751,7 +751,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testAllowsARawQueryInTheSecondParam(): void
@@ -771,7 +771,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testAllowsJoinUsing1(): void
@@ -794,7 +794,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testAllowsJoinUsing2(): void
@@ -817,7 +817,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function allowsForRawValuesInJoin441(): void
@@ -842,7 +842,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function allowsJoinWithoutOperatorAndWithValue0953(): void
@@ -862,7 +862,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testAllowsJoinWithOperatorAndWithValue0953(): void
@@ -882,7 +882,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testJoinWithAlias(): void
@@ -902,7 +902,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testJoinOnQuery(): void
@@ -928,7 +928,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function testLeftJoinFollowedByNormalJoin(): void
@@ -949,7 +949,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     

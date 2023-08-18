@@ -4,12 +4,12 @@
 namespace Tests\Unit;
 
 // use Tests\Support\;
-use Sharksmedia\QueryBuilder\QueryBuilder;
-use Sharksmedia\QueryBuilder\Client\MySQL;
-use Sharksmedia\QueryBuilder\Config;
+use Sharksmedia\SharQ\SharQ;
+use Sharksmedia\SharQ\Client\MySQL;
+use Sharksmedia\SharQ\Config;
 
-use Sharksmedia\QueryBuilder\QueryCompiler;
-use Sharksmedia\QueryBuilder\Statement\Raw;
+use Sharksmedia\SharQ\SharQCompiler;
+use Sharksmedia\SharQ\Statement\Raw;
 
 class UnionsTest extends \Codeception\Test\Unit
 {
@@ -30,21 +30,21 @@ class UnionsTest extends \Codeception\Test\Unit
         return $iRaw;
     }
 
-    private static function qb(): QueryBuilder
+    private static function qb(): SharQ
     {// 2023-05-16
         $iClient = self::getClient();
 
-        return new QueryBuilder($iClient, 'my_schema');
+        return new SharQ($iClient, 'my_schema');
     }
 
 	/**
 	 * @dataProvider caseProvider
 	 */
-    public function _testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    public function _testSharQ(SharQ $iSharQ, array $iExpected)
     {
-        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+        $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iQueryCompiler->toQuery();
+        $iQuery = $iSharQCompiler->toQuery();
         $sqlAndBindings =
         [
             'sql'=>$iQuery->getSQL(),
@@ -77,7 +77,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function unionsMultipleArgumentsChain()
@@ -110,7 +110,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function unionsArgumentArrayChain()
@@ -144,7 +144,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function wrapsUnionsBasic()
@@ -173,7 +173,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function wrapsUnionsMultipleArgumentsChain()
@@ -205,7 +205,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function wrapsUnionsArgumentsArrayChain()
@@ -239,7 +239,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function wrapsUnionAllsBasic()
@@ -268,7 +268,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function wrapsUnionAllsMultipleArgumentsChain()
@@ -300,7 +300,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function wrapsUnionAllsArgumentsArrayChain()
@@ -334,7 +334,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function unionAllsBasic()
@@ -360,7 +360,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function unionAllsMultipleArgumentsChain()
@@ -392,7 +392,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function unionAllsArgumentArrayChain()
@@ -426,7 +426,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function withArrayOfCallbacksIssue4364()
@@ -458,7 +458,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function withArrayOfCallbacksIssue5030()
@@ -486,7 +486,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function multipleUnionsBasic()
@@ -513,7 +513,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function multipleUnionsMultipleArgumentsChain()
@@ -537,7 +537,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function multipleUnionsAgumentArrayChain()
@@ -561,7 +561,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function multipleUnionAllsBasic()
@@ -583,7 +583,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function multipleUnionAllsMultipleArgumentsChain()
@@ -607,7 +607,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 
     public function multipleUnionAllsArgumentArrayChain()
@@ -631,7 +631,7 @@ class UnionsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        $this->_testQueryBuilder(...$case);
+        $this->_testSharQ(...$case);
     }
 }
 

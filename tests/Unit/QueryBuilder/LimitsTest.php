@@ -4,12 +4,12 @@
 namespace Tests\Unit;
 
 // use Tests\Support\;
-use Sharksmedia\QueryBuilder\QueryBuilder;
-use Sharksmedia\QueryBuilder\Client\MySQL;
-use Sharksmedia\QueryBuilder\Config;
+use Sharksmedia\SharQ\SharQ;
+use Sharksmedia\SharQ\Client\MySQL;
+use Sharksmedia\SharQ\Config;
 
-use Sharksmedia\QueryBuilder\QueryCompiler;
-use Sharksmedia\QueryBuilder\Statement\Raw;
+use Sharksmedia\SharQ\SharQCompiler;
+use Sharksmedia\SharQ\Statement\Raw;
 use Throwable;
 
 class TestLimits extends \Codeception\Test\Unit
@@ -31,11 +31,11 @@ class TestLimits extends \Codeception\Test\Unit
         return $iRaw;
     }
 
-    private static function qb(): QueryBuilder
+    private static function qb(): SharQ
     {// 2023-05-16
         $iClient = self::getClient();
 
-        return new QueryBuilder($iClient, 'my_schema');
+        return new SharQ($iClient, 'my_schema');
     }
 
     public function caseProvider()
@@ -339,11 +339,11 @@ class TestLimits extends \Codeception\Test\Unit
 	/**
 	 * @dataProvider caseProvider
 	 */
-    public function testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
-        $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
+        $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iQueryCompiler->toQuery('select');
+        $iQuery = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
             'sql'=>$iQuery->getSQL(),
@@ -370,7 +370,7 @@ class TestLimits extends \Codeception\Test\Unit
 	/**
 	 * @dataProvider negativeCaseProvider
 	 */
-    public function testQueryBuilderThrows($callback, array $iExpected)
+    public function testSharQThrows($callback, array $iExpected)
     {// 2023-06-05
         $this->assertEquals($this->seeExceptionThrown($callback), $iExpected['exception']);
     }

@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder\Statement;
+namespace Sharksmedia\SharQ\Statement;
 
-use Sharksmedia\QueryBuilder\Statement\IStatement;
+use Sharksmedia\SharQ\Statement\IStatement;
 
 /**
  * // 2023-05-09

@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder;
+namespace Sharksmedia\SharQ;
 
 class Single
 {
@@ -20,7 +20,7 @@ class Single
 
     /**
      * This is the table property.
-     * @var array<int|string, string|Raw|QueryBuilder|\Closure>|null
+     * @var array<int|string, string|Raw|SharQ|\Closure>|null
      */
     public ?array $table = null;
 
@@ -94,14 +94,14 @@ class Single
 
     /**
      * This is the lock property.
-     * QueryBuilder::LOCK_MODE_*
+     * SharQ::LOCK_MODE_*
      * @var string|null
      */
     public ?string       $lock = null;
 
     /**
      * This is the waitMode property.
-     * QueryBuilder::WAIT_MODE_*
+     * SharQ::WAIT_MODE_*
      * @var string|null
      */
     public ?string       $waitMode = null;

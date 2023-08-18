@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Sharksmedia\QueryBuilder\Statement;
+namespace Sharksmedia\SharQ\Statement;
 
-use Sharksmedia\QueryBuilder\QueryBuilder;
-use Sharksmedia\QueryBuilder\Statement\IStatement;
+use Sharksmedia\SharQ\SharQ;
+use Sharksmedia\SharQ\Statement\IStatement;
 
 class Having implements IStatement
 {
@@ -36,19 +36,19 @@ class Having implements IStatement
 
     /**
      * This is the operator property.
-     * @var string|Raw|QueryBuilder|\Closure|null
+     * @var string|Raw|SharQ|\Closure|null
      */
     private ?string $operator;
 
     /**
      * This is the value property.
-     * @var string|Raw|QueryBuilder|\Closure|null
+     * @var string|Raw|SharQ|\Closure|null
      */
     private         $value;
 
     /**
      * This is the boolType property.
-     * @see QueryBuilder::BOOL_TYPE_* constants
+     * @see SharQ::BOOL_TYPE_* constants
      * @var string
      */
     private string  $boolType;
@@ -84,7 +84,7 @@ class Having implements IStatement
      * @param string $boolType
      * @param bool $isNot
      */
-    public function __construct(string $type, $column, ?string $operator, $value, string $boolType=QueryBuilder::BOOL_TYPE_AND, bool $isNot=false)
+    public function __construct(string $type, $column, ?string $operator, $value, string $boolType=SharQ::BOOL_TYPE_AND, bool $isNot=false)
     {// 2023-05-08
         $this->column   = $column;
         $this->operator = $operator;
@@ -105,7 +105,7 @@ class Having implements IStatement
 
     /**
      * This method returns the column property.
-     * @return string|Raw|QueryBuilder|\Closure|null
+     * @return string|Raw|SharQ|\Closure|null
      */
     public function getOperator()
     {// 2023-05-15
@@ -114,7 +114,7 @@ class Having implements IStatement
 
     /**
      * This method returns the column property.
-     * @return string|Raw|QueryBuilder|\Closure|null
+     * @return string|Raw|SharQ|\Closure|null
      */
     public function getValue()
     {// 2023-05-15
@@ -132,7 +132,7 @@ class Having implements IStatement
 
     /**
      * This method returns the column property.
-     * @see QueryBuilder::BOOL_TYPE_* constants
+     * @see SharQ::BOOL_TYPE_* constants
      * @return string
      */
     public function getBoolType(): string
