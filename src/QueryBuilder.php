@@ -750,6 +750,43 @@ class QueryBuilder
         return $this->limit(1);
     }
 
+    private function _join(string $joinFlag, $table, $first=null, ...$args): QueryBuilder
+    {// 2023-08-18
+        $iJoin = null;
+
+        $tableParts = is_string($table)
+            ? preg_split('/ AS /i', $table)
+            : [$table];
+
+        $table = array_shift($tableParts);
+        $alias = array_shift($tableParts);
+        
+        if($first instanceof \Closure)
+        {
+            $iJoin = new Join($table, $joinFlag, $this->schema);
+            $first($iJoin);
+        }
+        else if($joinFlag === Join::TYPE_RAW)
+        {
+            $iJoin = new Join(new Raw($table, $first), Join::TYPE_RAW);
+        }
+        // else if($this->joinFlag === Join::TYPE_CROSS)
+        // {
+        //     $iJoin = new Join($table, Join::TYPE_CROSS, $this->schema);
+        // }
+        else
+        {
+            $iJoin = new Join($table, $joinFlag, $this->schema);
+            if($first) $iJoin->on($first, ...$args);
+        }
+
+        if($alias) $iJoin->as($alias);
+
+        $this->iStatements[] = $iJoin;
+
+        return $this;
+    }
+
     /**
      * 2023-05-08
      *
@@ -762,40 +799,8 @@ class QueryBuilder
      * @return QueryBuilder
      */
     public function join($table, $first=null, ...$args): QueryBuilder
-    {// 2023-05-09
-        $iJoin = null;
-
-        $tableParts = is_string($table)
-            ? preg_split('/ AS /i', $table)
-            : [$table];
-
-        $table = array_shift($tableParts);
-        $alias = array_shift($tableParts);
-        
-        if($first instanceof \Closure)
-        {
-            $iJoin = new Join($table, $this->joinFlag, $this->schema);
-            $first($iJoin);
-        }
-        else if($this->joinFlag === Join::TYPE_RAW)
-        {
-            $iJoin = new Join(new Raw($table, $first), Join::TYPE_RAW);
-        }
-        // else if($this->joinFlag === Join::TYPE_CROSS)
-        // {
-        //     $iJoin = new Join($table, Join::TYPE_CROSS, $this->schema);
-        // }
-        else
-        {
-            $iJoin = new Join($table, $this->joinFlag, $this->schema);
-            if($first) $iJoin->on($first, ...$args);
-        }
-
-        if($alias) $iJoin->as($alias);
-
-        $this->iStatements[] = $iJoin;
-
-        return $this;
+    {
+        return $this->_join(Join::TYPE_INNER, $table, $first, ...$args);
     }
 
     /**
@@ -804,8 +809,7 @@ class QueryBuilder
      */
     public function innerJoin(...$args): QueryBuilder
     {// 2023-05-09
-        $this->joinFlag = Join::TYPE_INNER;
-        return $this->join(...$args);
+        return $this->_join(Join::TYPE_INNER, ...$args);
     }
 
     /**
@@ -814,8 +818,7 @@ class QueryBuilder
      */
     public function leftJoin(...$args): QueryBuilder
     {// 2023-05-09
-        $this->joinFlag = Join::TYPE_LEFT;
-        return $this->join(...$args);
+        return $this->_join(Join::TYPE_LEFT, ...$args);
     }
 
     /**
@@ -824,8 +827,7 @@ class QueryBuilder
      */
     public function leftOuterJoin(...$args): QueryBuilder
     {// 2023-05-09
-        $this->joinFlag = Join::TYPE_LEFT_OUTER;
-        return $this->join(...$args);
+        return $this->_join(Join::TYPE_LEFT_OUTER, ...$args);
     }
 
     /**
@@ -834,8 +836,7 @@ class QueryBuilder
      */
     public function rightJoin(...$args): QueryBuilder
     {// 2023-05-09
-        $this->joinFlag = Join::TYPE_RIGHT;
-        return $this->join(...$args);
+        return $this->_join(Join::TYPE_RIGHT, ...$args);
     }
 
     /**
@@ -844,8 +845,7 @@ class QueryBuilder
      */
     public function rightOuterJoin(...$args): QueryBuilder
     {// 2023-05-09
-        $this->joinFlag = Join::TYPE_RIGHT_OUTER;
-        return $this->join(...$args);
+        return $this->_join(Join::TYPE_RIGHT_OUTER, ...$args);
     }
 
     /**
@@ -854,8 +854,7 @@ class QueryBuilder
      */
     public function outerJoin(...$args): QueryBuilder
     {// 2023-05-09
-        $this->joinFlag = Join::TYPE_OUTER;
-        return $this->join(...$args);
+        return $this->_join(Join::TYPE_OUTER, ...$args);
     }
 
     /**
@@ -864,8 +863,7 @@ class QueryBuilder
      */
     public function fullOuterJoin(...$args): QueryBuilder
     {// 2023-05-09
-        $this->joinFlag = Join::TYPE_FULL_OUTER;
-        return $this->join(...$args);
+        return $this->_join(Join::TYPE_FULL_OUTER, ...$args);
     }
 
     /**
@@ -874,8 +872,7 @@ class QueryBuilder
      */
     public function crossJoin(...$args): QueryBuilder
     {// 2023-05-09
-        $this->joinFlag = Join::TYPE_CROSS;
-        return $this->join(...$args);
+        return $this->_join(Join::TYPE_CROSS, ...$args);
     }
 
     /**
@@ -884,8 +881,7 @@ class QueryBuilder
      */
     public function joinRaw(...$args): QueryBuilder
     {// 2023-05-09
-        $this->joinFlag = Join::TYPE_RAW;
-        return $this->join(...$args);
+        return $this->_join(Join::TYPE_RAW, ...$args);
     }
 
     /**
