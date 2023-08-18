@@ -8,10 +8,10 @@ A query builder for PHP
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-use \Sharksmedia\QueryBuilder\Config;
-use \Sharksmedia\QueryBuilder\Client;
+use \Sharksmedia\SharQ\Config;
+use \Sharksmedia\SharQ\Client;
 
-use \Sharksmedia\QueryBuilder\QueryBuilder;
+use \Sharksmedia\SharQ\SharQ;
 
 function getClient(): Client
 {
@@ -28,13 +28,13 @@ function getClient(): Client
     return $iClient;
 }
 
-function qb(?Client $iClient=null): QueryBuilder
+function qb(?Client $iClient=null): SharQ
 {
     $iClient = $iClient ?? getClient();
 
-    $iQueryBuilder = new QueryBuilder($iClient);
+    $iSharQ = new SharQ($iClient);
 
-    return $iQueryBuilder;
+    return $iSharQ;
 }
 
 // SELECT `name` FROM `users` WHERE `id` = ?
@@ -60,12 +60,12 @@ print_r($bindings);
 ### Installation
 Add Sharksmedia repository
 ```bash
-composer config repositories.sharksmedia/query-builder vcs git@github.com:SharkMagnus/QueryBuilder.git
+composer config repositories.sharksmedia/sharq vcs git@github.com:SharkMagnus/SharQ.git
 ```
 
-Require the QueryBuilder
+Require SharQ
 ```bash
-composer require sharksmedia/query-builder:master
+composer require sharksmedia/sharq:master
 ```
 
 ### Documentation
