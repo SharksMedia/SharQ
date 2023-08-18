@@ -908,23 +908,20 @@ class QueryBuilder
         return $this;
     }
 
-    /**
-     * @param string|Raw|QueryBuilder|\Closure $args [column, operator, value]
-     * @return QueryBuilder
-     */
-    public function where(...$args): QueryBuilder
-    {// 2023-05-09
+    public function _where(?string $whereFlag, ?string $boolType, ?bool $isNot, ...$args): QueryBuilder
+    {
+        $boolType ??= $this->boolType;
+        $isNot ??= $this->isNot;
+
         $column = $args[0] ?? null;
         $operator = $args[1] ?? null;
         $value = $args[2] ?? null;
 
-        $argCount = func_num_args();
-        // $args = array_filter(func_get_args(), fn($value) => !is_null($value));
-        // $argCount = count($args);
+        $argCount = func_num_args() - 3;
 
         // Check if the column is a function, in which case it's
         // a where statement wrapped in parens.
-        if($column instanceof \Closure) return $this->whereWrapped($column);
+        if($column instanceof \Closure) return $this->_whereWrapped($boolType, $isNot, $column);
 
         // Check if the column is an array, in which case it's multiple wheres
         if(is_array($column))
@@ -937,26 +934,26 @@ class QueryBuilder
                 // the developer wants to run a where-in statement with a basic SQL
                 // clause. The values in the array will be the only values placed
                 // in the "IN" clause, while the columns are specified in SQL.
-                return $this->where($col, '=', $value);
+                return $this->_where($whereFlag, $boolType, $isNot, $col, '=', $value);
             }
 
-            if($this->boolType === self::BOOL_TYPE_AND)
+            if($boolType === self::BOOL_TYPE_AND)
             {
                 foreach($column as $columnName=>$value)
                 {
                     // $this->andWhere($columnName, '=', $value);
-                    $this->andWhere($columnName, '=', $value);
+                    $this->_andWhere($isNot, $columnName, '=', $value);
                 }
 
                 return $this;
             }
             
-            $this->where(function($q) use($column)
+            $this->_whereWrapped($boolType, $isNot, function($q) use($column, $isNot)
             {
                 foreach($column as $columnName=>$value)
                 {
                     // $this->andWhere($columnName, '=', $value);
-                    $q->andWhere($columnName, '=', $value);
+                    $q->_andWhere($isNot, $columnName, '=', $value);
                 }
             });
 
@@ -966,10 +963,10 @@ class QueryBuilder
         if($argCount === 1)
         {
             // Allow a raw statement to be passed along to the query.
-            if($column instanceof Raw) return $this->whereRaw($column->getSQL(), ...$column->getBindings());
+            if($column instanceof Raw) return $this->_whereRaw($boolType, $isNot, $column->getSQL(), ...$column->getBindings());
 
             // Support "where true || where false"
-            if(is_bool($column)) return $this->whereRaw(($column ? '1' : '0').' = 1');
+            if(is_bool($column)) return $this->_whereRaw($boolType, $isNot, ($column ? '1' : '0').' = 1');
         }
 
         if($argCount === 2)
@@ -978,10 +975,10 @@ class QueryBuilder
             // operator is assumed to be value
             // $iWhere = new Where($column, null, $operator, $this->boolType, $this->isNot, Where::TYPE_BASIC);
 
-            if(is_null($operator)) return $this->_whereNull($column);
+            if(is_null($operator)) return $this->_whereNull($boolType, $isNot, $column);
             if(is_bool($operator)) $operator = (int)$operator;
 
-            $iWhere = new Where($column, null, $operator, $this->boolType, $this->isNot, $this->whereFlag ?? Where::TYPE_BASIC);
+            $iWhere = new Where($column, null, $operator, $boolType ?? $this->boolType, $isNot ?? $this->isNot, $whereFlag ?? Where::TYPE_BASIC);
 
             $this->iStatements[] = $iWhere;
 
@@ -995,14 +992,14 @@ class QueryBuilder
 
             if(in_array($checkOperator, ['in', 'not in']))
             {
-                $this->isNot = $checkOperator === 'not in';
-                return $this->whereIn($column, $value);
+                $isNot = $checkOperator === 'not in';
+                return $this->_whereIn($boolType, $isNot, $column, $value);
             }
 
             if(in_array($checkOperator, ['between', 'not between']))
             {
-                $this->isNot = $checkOperator === 'not between';
-                return $this->_whereBetween($column, $value);
+                $isNot = $checkOperator === 'not between';
+                return $this->_whereBetween($boolType, $isNot, $column, $value);
             }
         }
 
@@ -1012,12 +1009,14 @@ class QueryBuilder
             if(in_array($operator, ['is', 'is not', '=', '!=']))
             {
                 $this->isNot = $checkOperator === 'is not' || $checkOperator === '!=';
-                return $this->whereNull($column);
+                return $this->_whereNull($boolType, $isNot, $column);
             }
         }
 
+        $whereFlag ??= Where::TYPE_BASIC;
+
         // Push onto the where statement stack.
-        $iWhere = new Where($column, $operator, $value, $this->boolType, $this->isNot, $this->whereFlag ?? Where::TYPE_BASIC);
+        $iWhere = new Where($column, $operator, $value, $boolType ?? $this->boolType, $isNot ?? $this->isNot, $whereFlag);
 
         $this->iStatements[] = $iWhere;
 
@@ -1028,10 +1027,136 @@ class QueryBuilder
      * @param string|Raw|QueryBuilder|\Closure $args [column, operator, value]
      * @return QueryBuilder
      */
+    public function where(...$args): QueryBuilder
+    {// 2023-05-09
+        return $this->_where(null, null, null, ...$args);
+    
+    //     $column = $args[0] ?? null;
+    //     $operator = $args[1] ?? null;
+    //     $value = $args[2] ?? null;
+    //
+    //     $argCount = func_num_args();
+    //
+    //     // $args = array_filter(func_get_args(), fn($value) => !is_null($value));
+    //     // $argCount = count($args);
+    //
+    //     // Check if the column is a function, in which case it's
+    //     // a where statement wrapped in parens.
+    //     if($column instanceof \Closure) return $this->whereWrapped($column);
+    //
+    //     // Check if the column is an array, in which case it's multiple wheres
+    //     if(is_array($column))
+    //     {
+    //         if(count($column) === 1)
+    //         {
+    //             $col = key($column);
+    //             $value = reset($column);
+    //             // If the first value in the array is an integer, we will assume that
+    //             // the developer wants to run a where-in statement with a basic SQL
+    //             // clause. The values in the array will be the only values placed
+    //             // in the "IN" clause, while the columns are specified in SQL.
+    //             return $this->where($col, '=', $value);
+    //         }
+    //
+    //         if($this->boolType === self::BOOL_TYPE_AND)
+    //         {
+    //             foreach($column as $columnName=>$value)
+    //             {
+    //                 // $this->andWhere($columnName, '=', $value);
+    //                 $this->andWhere($columnName, '=', $value);
+    //             }
+    //
+    //             return $this;
+    //         }
+    //         
+    //         $this->where(function($q) use($column)
+    //         {
+    //             foreach($column as $columnName=>$value)
+    //             {
+    //                 // $this->andWhere($columnName, '=', $value);
+    //                 $q->andWhere($columnName, '=', $value);
+    //             }
+    //         });
+    //
+    //         return $this;
+    //     }
+    //
+    //     if($argCount === 1)
+    //     {
+    //         // Allow a raw statement to be passed along to the query.
+    //         if($column instanceof Raw) return $this->whereRaw($column->getSQL(), ...$column->getBindings());
+    //
+    //         // Support "where true || where false"
+    //         if(is_bool($column)) return $this->whereRaw(($column ? '1' : '0').' = 1');
+    //     }
+    //
+    //     if($argCount === 2)
+    //     {
+    //         // Push onto the where statement stack.
+    //         // operator is assumed to be value
+    //         // $iWhere = new Where($column, null, $operator, $this->boolType, $this->isNot, Where::TYPE_BASIC);
+    //
+    //         if(is_null($operator)) return $this->whereNull($column);
+    //         if(is_bool($operator)) $operator = (int)$operator;
+    //
+    //         $iWhere = new Where($column, null, $operator, $this->boolType, $this->isNot, $this->whereFlag ?? Where::TYPE_BASIC);
+    //
+    //         $this->iStatements[] = $iWhere;
+    //
+    //         return $this;
+    //     }
+    //
+    //     if($argCount === 3)
+    //     {
+    //         // lower case the operator for comparison purposes
+    //         $checkOperator = strtolower(trim($operator ?? ''));
+    //
+    //         if(in_array($checkOperator, ['in', 'not in']))
+    //         {
+    //             $this->isNot = $checkOperator === 'not in';
+    //             return $this->whereIn($column, $value);
+    //         }
+    //
+    //         if(in_array($checkOperator, ['between', 'not between']))
+    //         {
+    //             $this->isNot = $checkOperator === 'not between';
+    //             return $this->_whereBetween($column, $value);
+    //         }
+    //     }
+    //
+    //     // If the value is still null, check whether they're meaning, where value is null
+    //     if($value === null)
+    //     {
+    //         if(in_array($operator, ['is', 'is not', '=', '!=']))
+    //         {
+    //             $this->isNot = $checkOperator === 'is not' || $checkOperator === '!=';
+    //             return $this->whereNull($column);
+    //         }
+    //     }
+    //
+    //     // Push onto the where statement stack.
+    //     $iWhere = new Where($column, $operator, $value, $this->boolType, $this->isNot, Where::TYPE_BASIC);
+    //
+    //     $this->iStatements[] = $iWhere;
+    //
+    //     return $this;
+    }
+
+    /**
+     * @param string|Raw|QueryBuilder|\Closure $args [column, operator, value]
+     * @return QueryBuilder
+     */
     public function whereColumn(...$args): QueryBuilder
     {// 2023-06-01
-        $this->whereFlag = Where::TYPE_COLUMN;
-        return $this->where(...$args);
+        // $this->whereFlag = Where::TYPE_COLUMN;
+        // return $this->where(...$args);
+
+        return $this->_where(Where::TYPE_COLUMN, null, null, ...$args);
+    }
+
+    private function _andWhere(?bool $isNot, ...$args)
+    {
+        return $this->_where(Where::TYPE_BASIC, self::BOOL_TYPE_AND, $isNot, ...$args);
     }
 
     /**
@@ -1040,9 +1165,16 @@ class QueryBuilder
      */
     public function andWhere(...$args): QueryBuilder
     {// 2023-05-09
-        $this->whereFlag = Where::TYPE_BASIC;
-        $this->boolType = self::BOOL_TYPE_AND;
-        return $this->where(...$args);
+        // $this->whereFlag = Where::TYPE_BASIC;
+        // $this->boolType = self::BOOL_TYPE_AND;
+        // return $this->where(...$args);
+
+        return $this->_andWhere(null, ...$args);
+    }
+
+    private function _orWhere(?bool $isNot, ...$args)
+    {
+        return $this->_where(Where::TYPE_BASIC, self::BOOL_TYPE_OR, $isNot, ...$args);
     }
 
     /**
@@ -1051,9 +1183,11 @@ class QueryBuilder
      */
     public function orWhere(...$args): QueryBuilder
     {// 2023-05-09
-        $this->whereFlag = Where::TYPE_BASIC;
-        $this->boolType = self::BOOL_TYPE_OR;
-        return $this->where(...$args);
+        // $this->whereFlag = Where::TYPE_BASIC;
+        // $this->boolType = self::BOOL_TYPE_OR;
+        // return $this->where(...$args);
+
+        return $this->_orWhere(null, ...$args);
     }
 
     /**
@@ -1063,9 +1197,11 @@ class QueryBuilder
      */
     public function whereNot(...$args): QueryBuilder
     {// 2023-05-09
-        $this->whereFlag = Where::TYPE_BASIC;
-        $this->isNot = true;
-        return $this->where(...$args);
+        // $this->whereFlag = Where::TYPE_BASIC;
+        // $this->isNot = true;
+        // return $this->where(...$args);
+
+        return $this->_where(Where::TYPE_BASIC, null, true, ...$args);
     }
 
     /**
@@ -1075,10 +1211,22 @@ class QueryBuilder
      */
     public function orWhereNot(...$args): QueryBuilder
     {// 2023-05-09
-        $this->whereFlag = Where::TYPE_BASIC;
-        $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = true;
-        return $this->where(...$args);
+        // $this->whereFlag = Where::TYPE_BASIC;
+        // $this->boolType = self::BOOL_TYPE_OR;
+        // $this->isNot = true;
+        // return $this->where(...$args);
+
+        return $this->_where(Where::TYPE_BASIC, self::BOOL_TYPE_OR, true, ...$args);
+    }
+
+    private function _whereRaw(?string $boolType, ?bool $isNot, string $sql, ...$bindings): QueryBuilder
+    {
+        $iRaw = new Raw($sql, ...$bindings);
+        $iWhere = new Where(null, null, $iRaw, $boolType ?? $this->boolType, $isNot ?? $this->isNot, Where::TYPE_RAW);
+
+        $this->iStatements[] = $iWhere;
+
+        return $this;
     }
 
     /**
@@ -1087,29 +1235,28 @@ class QueryBuilder
      */
     public function whereRaw(string $sql, ...$bindings): QueryBuilder
     {// 2023-05-09
-        $this->whereFlag = Where::TYPE_RAW;
+        return $this->_whereRaw(null, null, $sql, ...$bindings);
+    }
 
-        $iRaw = new Raw($sql, ...$bindings);
-        $iWhere = new Where(null, null, $iRaw, $this->boolType, $this->isNot, Where::TYPE_RAW);
+    public function _whereWrapped(?string $boolType, ?bool $isNot, \Closure $callback): QueryBuilder
+    {
+        $iQueryBuilder = new QueryBuilder($this->iClient, $this->schema);
+        $callback($iQueryBuilder);
+
+        $iWhere = new Where(null, null, $callback, $boolType ?? $this->boolType, $isNot ?? $this->isNot, Where::TYPE_WRAPPED);
 
         $this->iStatements[] = $iWhere;
 
         return $this;
     }
+
     /**
      * @param \Closure $callback
      * @return QueryBuilder
      */
     public function whereWrapped(\Closure $callback): QueryBuilder
     {// 2023-05-09
-        $iQueryBuilder = new QueryBuilder($this->iClient, $this->schema);
-        $callback($iQueryBuilder);
-
-        $iWhere = new Where(null, null, $callback, $this->boolType, $this->isNot, Where::TYPE_WRAPPED);
-
-        $this->iStatements[] = $iWhere;
-
-        return $this;
+        return $this->_whereWrapped(null, null, $callback);
     }
 
     /**
@@ -1169,25 +1316,34 @@ class QueryBuilder
         return $this->_whereExists($callback);
     }
 
-    /**
-     * @param string|Raw $column
-     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
-     * @return QueryBuilder
-     */
-    public function whereIn($column, $values): QueryBuilder
-    {// 2023-05-09
+    private function _whereIn($column, $values, ?string $boolType, ?bool $isNot)
+    {
+        // if(is_array($values) && count($values) === 0)
+        // {
+        //     $bool = $this->isNot;
+        //     $this->isNot = false;
+        //
+        //     return $this->where($bool);
+        // }
+        // // if(is_array($column) && count($column) !== count($values[0])) throw new \Exception('The number of columns does not match the number of values');
+        //
+        // $this->whereFlag = Where::TYPE_IN;
+        //
+        // $iWhere = new Where($column, null, $values, $this->boolType, $this->isNot, Where::TYPE_IN);
+        //
+        // $this->iStatements[] = $iWhere;
+        //
+        // return $this;
+
+
         if(is_array($values) && count($values) === 0)
         {
-            $bool = $this->isNot;
-            $this->isNot = false;
-
-            return $this->where($bool);
+            return $this->_whereRaw($boolType, false, ($isNot ? '1' : '0').' = 1');
         }
-        // if(is_array($column) && count($column) !== count($values[0])) throw new \Exception('The number of columns does not match the number of values');
 
-        $this->whereFlag = Where::TYPE_IN;
+        // return $this->_where(Where::TYPE_IN, $boolType, $isNot, $column, $values);
 
-        $iWhere = new Where($column, null, $values, $this->boolType, $this->isNot, Where::TYPE_IN);
+        $iWhere = new Where($column, null, $values, $boolType ?? $this->boolType, $isNot ?? $this->isNot, Where::TYPE_IN);
 
         $this->iStatements[] = $iWhere;
 
@@ -1199,10 +1355,22 @@ class QueryBuilder
      * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
+    public function whereIn($column, $values): QueryBuilder
+    {// 2023-05-09
+        return $this->_whereIn($column, $values, null, null);
+    }
+
+    /**
+     * @param string|Raw $column
+     * @param array<int, string|Raw|QueryBuilder|\Closure> $values
+     * @return QueryBuilder
+     */
     public function whereNotIn($column, $values): QueryBuilder
     {// 2023-05-09
-        $this->isNot = true;
-        return $this->whereIn($column, $values);
+        // $this->isNot = true;
+        // return $this->whereIn($column, $values);
+
+        return $this->_whereIn($column, $values, null, true);
     }
 
     /**
@@ -1212,9 +1380,11 @@ class QueryBuilder
      */
     public function andWhereIn($column, $values): QueryBuilder
     {// 2023-05-09
-        $this->whereFlag = Where::TYPE_IN;
-        $this->boolType = self::BOOL_TYPE_AND;
-        return $this->whereIn($column, $values);
+        // $this->whereFlag = Where::TYPE_IN;
+        // $this->boolType = self::BOOL_TYPE_AND;
+        // return $this->whereIn($column, $values);
+
+        return $this->_whereIn($column, $values, self::BOOL_TYPE_AND, null);
     }
 
     /**
@@ -1224,8 +1394,10 @@ class QueryBuilder
      */
     public function andWhereNotIn($column, $values): QueryBuilder
     {// 2023-05-09
-        $this->isNot = true;
-        return $this->andWhereIn($column, $values);
+        // $this->isNot = true;
+        // return $this->andWhereIn($column, $values);
+
+        return $this->_whereIn($column, $values, self::BOOL_TYPE_AND, true);
     }
 
     /**
@@ -1235,9 +1407,11 @@ class QueryBuilder
      */
     public function orWhereIn($column, $values): QueryBuilder
     {// 2023-05-09
-        $this->whereFlag = Where::TYPE_IN;
-        $this->boolType = self::BOOL_TYPE_OR;
-        return $this->whereIn($column, $values);
+        // $this->whereFlag = Where::TYPE_IN;
+        // $this->boolType = self::BOOL_TYPE_OR;
+        // return $this->whereIn($column, $values);
+
+        return $this->_whereIn($column, $values, self::BOOL_TYPE_OR, null);
     }
 
     /**
@@ -1247,17 +1421,19 @@ class QueryBuilder
      */
     public function orWhereNotIn($column, $values): QueryBuilder
     {// 2023-05-09
-        $this->isNot = true;
-        return $this->orWhereIn($column, $values);
+        // $this->isNot = true;
+        // return $this->orWhereIn($column, $values);
+        //
+        return $this->_whereIn($column, $values, self::BOOL_TYPE_OR, true);  
     }
 
     /**
      * @param string|Raw $column
      * @return QueryBuilder
      */
-    private function _whereNull($column): QueryBuilder
+    private function _whereNull(?string $boolType, ?bool $isNot, $column): QueryBuilder
     {// 2023-06-02
-        $iWhere = new Where($column, null, null, $this->boolType, $this->isNot, Where::TYPE_NULL);
+        $iWhere = new Where($column, null, null, $boolType ?? $this->boolType, $isNot ?? $this->isNot, Where::TYPE_NULL);
 
         $this->iStatements[] = $iWhere;
 
@@ -1270,9 +1446,9 @@ class QueryBuilder
      */
     public function whereNull($column): QueryBuilder
     {// 2023-05-09
-        $this->isNot = false;
-        $this->boolType = self::BOOL_TYPE_AND;
-        return $this->_whereNull($column);
+        // $this->isNot = false;
+        // $this->boolType = self::BOOL_TYPE_AND;
+        return $this->_whereNull(self::BOOL_TYPE_AND, false, $column);
     }
 
     /**
@@ -1281,9 +1457,9 @@ class QueryBuilder
      */
     public function whereNotNull($column): QueryBuilder
     {// 2023-05-09
-        $this->isNot = true;
-        $this->boolType = self::BOOL_TYPE_AND;
-        return $this->_whereNull($column);
+        // $this->isNot = true;
+        // $this->boolType = self::BOOL_TYPE_AND;
+        return $this->_whereNull(self::BOOL_TYPE_AND, true, $column);
     }
 
     /**
@@ -1292,9 +1468,9 @@ class QueryBuilder
      */
     public function orWhereNull($column): QueryBuilder
     {// 2023-05-09
-        $this->isNot = false;
-        $this->boolType = self::BOOL_TYPE_OR;
-        return $this->_whereNull($column);
+        // $this->isNot = false;
+        // $this->boolType = self::BOOL_TYPE_OR;
+        return $this->_whereNull(self::BOOL_TYPE_OR, false, $column);
     }
 
     /**
@@ -1303,9 +1479,9 @@ class QueryBuilder
      */
     public function orWhereNotNull($column): QueryBuilder
     {// 2023-05-09
-        $this->isNot = true;
-        $this->boolType = self::BOOL_TYPE_OR;
-        return $this->_whereNull($column);
+        // $this->isNot = true;
+        // $this->boolType = self::BOOL_TYPE_OR;
+        return $this->_whereNull(self::BOOL_TYPE_OR, true, $column);
     }
 
     /**
@@ -1392,11 +1568,11 @@ class QueryBuilder
      * @param array<int, string|Raw|QueryBuilder|\Closure> $values
      * @return QueryBuilder
      */
-    private function _whereBetween($column, $values): QueryBuilder
+    private function _whereBetween(?string $boolType, ?bool $isNot, $column, $values): QueryBuilder
     {// 2023-06-01
         if(count($values) !== 2) throw new \InvalidArgumentException('whereBetween() expects exactly 2 values');
 
-        $iWhere = new Where($column, null, $values, $this->boolType, $this->isNot, Where::TYPE_BETWEEN);
+        $iWhere = new Where($column, null, $values, $boolType ?? $this->boolType, $isNot ?? $this->isNot, Where::TYPE_BETWEEN);
 
         $this->iStatements[] = $iWhere;
 
@@ -1410,8 +1586,7 @@ class QueryBuilder
      */
     public function whereBetween($column, $values): QueryBuilder
     {// 2023-06-01
-        $this->isNot = false;
-        return $this->_whereBetween($column, $values);
+        return $this->_whereBetween(null, null, $column, $values);
     }
 
     /**
@@ -1421,8 +1596,7 @@ class QueryBuilder
      */
     public function whereNotBetween($column, $values): QueryBuilder
     {// 2023-06-01
-        $this->isNot = true;
-        return $this->_whereBetween($column, $values);
+        return $this->_whereBetween(null, true, $column, $values);
     }
 
     /**
@@ -1432,9 +1606,7 @@ class QueryBuilder
      */
     public function andWhereBetween($column, $values): QueryBuilder
     {// 2023-06-01
-        $this->isNot = false;
-        $this->boolType = self::BOOL_TYPE_AND;
-        return $this->_whereBetween($column, $values);
+        return $this->_whereBetween(self::BOOL_TYPE_AND, null, $column, $values);
     }
 
     /**
@@ -1444,9 +1616,7 @@ class QueryBuilder
      */
     public function andWhereNotBetween($column, $values): QueryBuilder
     {// 2023-06-01
-        $this->isNot = true;
-        $this->boolType = self::BOOL_TYPE_AND;
-        return $this->_whereBetween($column, $values);
+        return $this->_whereBetween(self::BOOL_TYPE_AND, true, $column, $values);
     }
 
     /**
@@ -1456,9 +1626,7 @@ class QueryBuilder
      */
     public function orWhereBetween($column, $values): QueryBuilder
     {// 2023-06-01
-        $this->isNot = false;
-        $this->boolType = self::BOOL_TYPE_OR;
-        return $this->_whereBetween($column, $values);
+        return $this->_whereBetween(self::BOOL_TYPE_OR, null, $column, $values);
     }
 
     /**
@@ -1468,9 +1636,7 @@ class QueryBuilder
      */
     public function orWhereNotBetween($column, $values): QueryBuilder
     {// 2023-06-01
-        $this->isNot = true;
-        $this->boolType = self::BOOL_TYPE_OR;
-        return $this->_whereBetween($column, $values);
+        return $this->_whereBetween(self::BOOL_TYPE_OR, true, $column, $values);
     }
 
     /**

@@ -11,7 +11,7 @@ use Sharksmedia\QueryBuilder\Config;
 use Sharksmedia\QueryBuilder\QueryCompiler;
 use Sharksmedia\QueryBuilder\Statement\Raw;
 
-class WheresTest extends \Codeception\Test\Unit
+class MiscTest extends \Codeception\Test\Unit
 {
     public static function getClient()
     {// 2023-05-16
