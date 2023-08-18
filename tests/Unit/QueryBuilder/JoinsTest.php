@@ -13,7 +13,7 @@ use Sharksmedia\QueryBuilder\Statement\Raw;
 
 class JoinsTest extends \Codeception\Test\Unit
 {
-    public static function getClient()
+    public static function getClient(): MySQL
     {// 2023-05-16
         $iConfig = new Config('mysql');
         $iClient = new MySQL($iConfig);
@@ -21,7 +21,12 @@ class JoinsTest extends \Codeception\Test\Unit
         return $iClient;
     }
 
-    public static function raw(string $query, ...$bindings)
+    /**
+     * @param string $query
+     * @param mixed $bindings
+     * @return Raw
+     */
+    public static function raw(string $query, ...$bindings): Raw
     {
         $iClient = self::getClient();
 
@@ -37,7 +42,12 @@ class JoinsTest extends \Codeception\Test\Unit
         return new QueryBuilder($iClient, 'my_schema');
     }
 
-    public function _testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected)
+    /**
+     * @param QueryBuilder $iQueryBuilder
+     * @param array<string, array> $iExpected
+     * @return void
+     */
+    public function _testQueryBuilder(QueryBuilder $iQueryBuilder, array $iExpected): void
     {
         $iQueryCompiler = new QueryCompiler(self::getClient(), $iQueryBuilder, []);
 
@@ -51,7 +61,7 @@ class JoinsTest extends \Codeception\Test\Unit
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);
     }
 
-    public function testCrossJoin()
+    public function testCrossJoin(): void
     {
         $case =
         [
@@ -69,10 +79,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testCrossJoinOn()
+    public function testCrossJoinOn(): void
     {
         $case =
         [
@@ -89,10 +99,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testBasicJoins()
+    public function testBasicJoins(): void
     {
         $case =
         [
@@ -110,10 +120,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testRightOuterJoins()
+    public function testRightOuterJoins(): void
     {
         $case =
         [
@@ -131,10 +141,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testComplexJoin()
+    public function testComplexJoin(): void
     {
         $case =
         [
@@ -155,10 +165,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testComplexJoinWithNestConditionalStatements()
+    public function testComplexJoinWithNestConditionalStatements(): void
     {
         $case =
         [
@@ -182,10 +192,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testComplexJoinWithEmptyIn()
+    public function testComplexJoinWithEmptyIn(): void
     {
         $case =
         [
@@ -206,10 +216,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function joinsWithRaw()
+    public function joinsWithRaw(): void
     {
         $case =
         [
@@ -228,12 +238,12 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function joinsWithSchema()
+    public function joinsWithSchema(): void
     {
-        $testCase =
+        $case =
         [
             self::qb()
             ->withSchema('myschema')
@@ -250,10 +260,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOnNull()
+    public function testOnNull(): void
     {
         $case =
         [
@@ -274,10 +284,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOrOnNull()
+    public function testOrOnNull(): void
     {
         $case =
         [
@@ -299,10 +309,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOnNotNull()
+    public function testOnNotNull(): void
     {
         $case =
         [
@@ -323,10 +333,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOrOnNotNull()
+    public function testOrOnNotNull(): void
     {
         $case =
         [
@@ -348,10 +358,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOnExists()
+    public function testOnExists(): void
     {
         $case =
         [
@@ -376,10 +386,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOrOnExists()
+    public function testOrOnExists(): void
     {
         $case =
         [
@@ -409,10 +419,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOnNotExists()
+    public function testOnNotExists(): void
     {
         $case =
         [
@@ -437,10 +447,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOrOnNotExists()
+    public function testOrOnNotExists(): void
     {
         $case =
         [
@@ -470,10 +480,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOnBetween()
+    public function testOnBetween(): void
     {
         $case =
         [
@@ -494,10 +504,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOrOnBetween()
+    public function testOrOnBetween(): void
     {
         $case =
         [
@@ -519,10 +529,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOnNotBetween()
+    public function testOnNotBetween(): void
     {
         $case =
         [
@@ -543,10 +553,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOrOnNotBetween()
+    public function testOrOnNotBetween(): void
     {
         $case =
         [
@@ -568,10 +578,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOnIn()
+    public function testOnIn(): void
     {
         $case =
         [
@@ -592,10 +602,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOrOnIn()
+    public function testOrOnIn(): void
     {
         $case =
         [
@@ -617,10 +627,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOrOnInWithRaw()
+    public function testOrOnInWithRaw(): void
     {
         $case =
         [
@@ -647,10 +657,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOnNotIn()
+    public function testOnNotIn(): void
     {
         $case =
         [
@@ -671,10 +681,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testOrOnNotIn()
+    public function testOrOnNotIn(): void
     {
         $case =
         [
@@ -696,10 +706,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testAllowsLeftOuterJoinWithRawValues()
+    public function testAllowsLeftOuterJoinWithRawValues(): void
     {
         $case =
         [
@@ -720,10 +730,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testHasJoinrawForArbitraryJoinClauses()
+    public function testHasJoinrawForArbitraryJoinClauses(): void
     {
         $case =
         [
@@ -741,10 +751,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testAllowsARawQueryInTheSecondParam()
+    public function testAllowsARawQueryInTheSecondParam(): void
     {
         $case =
         [
@@ -761,10 +771,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testAllowsJoinUsing1()
+    public function testAllowsJoinUsing1(): void
     {
         $case =
         [
@@ -784,10 +794,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testAllowsJoinUsing2()
+    public function testAllowsJoinUsing2(): void
     {
         $case =
         [
@@ -807,10 +817,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function allowsForRawValuesInJoin441()
+    public function allowsForRawValuesInJoin441(): void
     {
         $case =
         [
@@ -832,10 +842,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function allowsJoinWithoutOperatorAndWithValue0953()
+    public function allowsJoinWithoutOperatorAndWithValue0953(): void
     {
         $case =
         [
@@ -852,10 +862,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testAllowsJoinWithOperatorAndWithValue0953()
+    public function testAllowsJoinWithOperatorAndWithValue0953(): void
     {
         $case =
         [
@@ -872,10 +882,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testJoinWithAlias()
+    public function testJoinWithAlias(): void
     {
         $case =
         [
@@ -892,10 +902,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testJoinOnQuery()
+    public function testJoinOnQuery(): void
     {
         $qb = self::qb()
                 ->select('userID')
@@ -918,10 +928,10 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
-    public function testLeftJoinFollowedByNormalJoin()
+    public function testLeftJoinFollowedByNormalJoin(): void
     {
         $case =
         [
@@ -939,7 +949,7 @@ class JoinsTest extends \Codeception\Test\Unit
             ]
         ];
 
-        return $this->_testQueryBuilder(...$case);
+        $this->_testQueryBuilder(...$case);
     }
 
     
