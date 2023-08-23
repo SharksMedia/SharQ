@@ -60,7 +60,7 @@ print_r($bindings);
 ### Installation
 Add Sharksmedia repository
 ```bash
-composer config repositories.sharksmedia/sharq vcs git@github.com:Sharksmedia/SharQ.git
+composer config repositories.sharksmedia/sharq vcs git@github.com:SharksMedia/SharQ.git
 ```
 
 Require SharQ
