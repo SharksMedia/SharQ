@@ -1004,7 +1004,7 @@ class SharQ
         {
             if(in_array($operator, ['is', 'is not', '=', '!=']))
             {
-                $this->isNot = $checkOperator === 'is not' || $checkOperator === '!=';
+                $isNot = $checkOperator === 'is not' || $checkOperator === '!=';
                 return $this->_whereNull($boolType, $isNot, $column);
             }
         }
@@ -2658,4 +2658,3 @@ class SharQ
         }
     }
 }
-
