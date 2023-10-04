@@ -959,8 +959,24 @@ class SelectsTest extends \Codeception\Test\Unit
         $this->_testSharQ(...$case);
     }
 
+    public function testRawAggregateWithAlias()
+    {
+        $case =
+        [
+            self::qb()
+                ->select('productID')
+                ->sum(self::raw('price * quantity'), ['as' => 'totalPrice'])
+                ->from('products'),
+            [
+                'mysql' =>
+                [
+                    'sql'      => 'SELECT `productID`, SUM(price * quantity) AS `totalPrice` FROM `products`',
+                    'bindings' => []
+                ]
+            ]
+        ];
 
-        return $cases;
+        $this->_testSharQ(...$case);
     }
 
     public function _testSharQ(SharQ $iSharQ, array $iExpected): void
