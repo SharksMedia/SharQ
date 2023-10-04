@@ -3,11 +3,12 @@
 require_once __DIR__.'/vendor/autoload.php';
 
 $finder = PhpCsFixer\Finder::create()
-    ->in('Libraries');
+    ->in('src')
+    ->in('tests');
 
 return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
-    ->registerCustomFixers([new Sharksmedia\SharQ\Fixer\SquareBracketNewLineFixer()])
+    // ->registerCustomFixers([new Sharksmedia\SharQ\Fixer\SquareBracketNewLineFixer()])
     ->registerCustomFixers(new PhpCsFixerCustomFixers\Fixers())
     ->setRules([
         'indentation_type'                    => true,
@@ -40,7 +41,7 @@ return (new PhpCsFixer\Config())
             'operators' => ['=>' => 'align_single_space']
         ],
         'array_indentation'                     => true,
-        Fixer\SquareBracketNewLineFixer::name() => true,
+        // Fixer\SquareBracketNewLineFixer::name() => true,
         // PhpCsFixerCustomFixers\Fixer\NoDuplicatedArrayKeyFixer::name() => true,
         // PhpCsFixerCustomFixers\Fixer\NoDuplicatedImportsFixer::name() => true,
 
