@@ -2849,7 +2849,7 @@ class SharQ
 
         $statement = $this->iClient->query($iQuery);
 
-        $result = ($this->getSelectMethod() === self::METHOD_FIRST)
+        $result = ($this->getMethod() === self::METHOD_FIRST)
             ? $statement->fetch($this->fetchMode)
             : $statement->fetchAll($this->fetchMode);
 

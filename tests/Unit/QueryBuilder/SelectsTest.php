@@ -7,16 +7,38 @@ namespace Tests\Unit;
 use Sharksmedia\SharQ\SharQ;
 use Sharksmedia\SharQ\Client\MySQL;
 use Sharksmedia\SharQ\Config;
-
+use Sharksmedia\SharQ\Query;
 use Sharksmedia\SharQ\SharQCompiler;
 use Sharksmedia\SharQ\Statement\Raw;
+use Tests\Support\MockMySQLClient;
+use Tests\Support\MockPDOStatement;
 
 class SelectsTest extends \Codeception\Test\Unit
 {
-    public static function getClient()
+    public static function getClient(array $results = [])
     {// 2023-05-16
         $iConfig = new Config('mysql');
-        $iClient = new MySQL($iConfig);
+        // $iClient = new MySQL($iConfig);
+
+        $iClient = new MockMySQLClient($iConfig, function(Query $iQuery) use ($results)
+        {
+            // $sql      = $iQuery->getSQL();
+            // $bindings = $iQuery->getBindings();
+
+            $iPDOStatement = new MockPDOStatement();
+
+            $iPDOStatement->setResults($results ?? []);
+
+            // $this->executedQueries[] =
+            // [
+            //     'sql'      => $sql,
+            //     'bindings' => $bindings
+            // ];
+
+            return $iPDOStatement;
+        });
+
+        $iClient->initializeDriver();
 
         return $iClient;
     }
@@ -35,9 +57,9 @@ class SelectsTest extends \Codeception\Test\Unit
         return $iRaw;
     }
 
-    private static function qb(): SharQ
+    private static function qb(array $results = []): SharQ
     {// 2023-05-16
-        $iClient = self::getClient();
+        $iClient = self::getClient($results);
 
         return new SharQ($iClient, 'my_schema');
     }
@@ -991,5 +1013,42 @@ class SelectsTest extends \Codeception\Test\Unit
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);
+    }
+
+    public function testFirstMethod()
+    {
+        // Insert a sample user into the database
+
+        $results = [ [
+            'id'         => 1,
+            'name'       => 'John Doe',
+            'email'      => 'john.doe@example.com',
+            'password'   => '123456',
+            'created_at' => '2020-01-01 00:00:00',
+            'updated_at' => '2020-01-01 00:00:00',
+            'deleted_at' => null,
+        ]];
+
+        // Execute the query
+        $qb = self::qb($results)->select('*')
+            ->from('users')
+            ->where('id', 1)
+            ->first();
+
+        $user = $qb->run();
+
+        // The expected result
+        $expected = [
+            'id'         => 1,
+            'name'       => 'John Doe',
+            'email'      => 'john.doe@example.com',
+            'password'   => '123456',
+            'created_at' => '2020-01-01 00:00:00',
+            'updated_at' => '2020-01-01 00:00:00',
+            'deleted_at' => null,
+        ];
+
+        // Actual test assertion
+        $this->assertEquals($expected, $user);
     }
 }
