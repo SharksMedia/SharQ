@@ -32,24 +32,24 @@ use Sharksmedia\SharQ\Statement\Raw;
 class SharQ
 {
     public const BOOL_TYPE_AND = 'AND';
-    public const BOOL_TYPE_OR = 'OR';
+    public const BOOL_TYPE_OR  = 'OR';
     
-    public const METHOD_RAW = 'RAW';
-    public const METHOD_SELECT = 'SELECT';
-    public const METHOD_FIRST = 'FIRST';
-    public const METHOD_PLUCK = 'PLUCK';
-    public const METHOD_INSERT = 'INSERT';
-    public const METHOD_UPDATE = 'UPDATE';
-    public const METHOD_DELETE = 'DELETE';
+    public const METHOD_RAW      = 'RAW';
+    public const METHOD_SELECT   = 'SELECT';
+    public const METHOD_FIRST    = 'FIRST';
+    public const METHOD_PLUCK    = 'PLUCK';
+    public const METHOD_INSERT   = 'INSERT';
+    public const METHOD_UPDATE   = 'UPDATE';
+    public const METHOD_DELETE   = 'DELETE';
     public const METHOD_TRUNCATE = 'TRUNCATE';
 
-    public const LOCK_MODE_FOR_UPDATE = 'FOR UPDATE';
-    public const LOCK_MODE_FOR_SHARE = 'FOR SHARE';
+    public const LOCK_MODE_FOR_UPDATE        = 'FOR UPDATE';
+    public const LOCK_MODE_FOR_SHARE         = 'FOR SHARE';
     public const LOCK_MODE_FOR_NO_KEY_UPDATE = 'FOR NO KEY UPDATE';
-    public const LOCK_MODE_FOR_KEY_SHARE = 'FOR KEY SHARE';
+    public const LOCK_MODE_FOR_KEY_SHARE     = 'FOR KEY SHARE';
 
     public const WAIT_MODE_SKIP_LOCKED = 'SKIP LOCKED';
-    public const WAIT_MODE_NO_WAIT = 'NO WAIT';
+    public const WAIT_MODE_NO_WAIT     = 'NO WAIT';
 
     /**
      * returns an array indexed by column name as returned in your result set.
@@ -160,10 +160,10 @@ class SharQ
      */
     private bool   $isNot = false;
 
-    public function __construct(Client $iClient, ?string $schema=null)
+    public function __construct(Client $iClient, ?string $schema = null)
     {// 2023-05-08
         $this->iClient = $iClient;
-        $this->schema = $schema ?? $iClient->getConfig()->getDatabase();
+        $this->schema  = $schema ?? $iClient->getConfig()->getDatabase();
         $this->iSingle = new Single();
     }
 
@@ -213,7 +213,7 @@ class SharQ
      */
     private function clearGrouping(string $type): self
     {// 2023-05-15
-        $this->iStatements = array_filter($this->iStatements, function($statement) use($type)
+        $this->iStatements = array_filter($this->iStatements, function($statement) use ($type)
         {
             return !($statement instanceof $type);
         });
@@ -282,6 +282,7 @@ class SharQ
     public function clearCounters(): self
     {// 2023-06-01
         $this->iSingle->counter = null;
+
         return $this;
     }
 
@@ -319,6 +320,7 @@ class SharQ
     public function clearLimit(): self
     {// 2023-06-01
         $this->iSingle->limit = null;
+
         return $this;
     }
 
@@ -329,6 +331,7 @@ class SharQ
     public function clearOffset(): self
     {// 2023-06-01
         $this->iSingle->offset = null;
+
         return $this;
     }
 
@@ -343,25 +346,28 @@ class SharQ
     {// 2023-06-07
         $statementMap =
         [
-            'with'=>'clearWith',
-            'select'=>'clearSelect',
-            'columns'=>'clearSelect',
-            'hintComments'=>'clearHintComments',
-            'where'=>'clearWhere',
-            'union'=>'clearUnion',
-            'join'=>'clearJoin',
-            'group'=>'clearGroup',
-            'order'=>'clearOrder',
-            'having'=>'clearHaving',
-            'limit'=>'clearLimit',
-            'offset'=>'clearOffset',
-            'counter'=>'clearCounters',
-            'counters'=>'clearCounters'
+            'with'         => 'clearWith',
+            'select'       => 'clearSelect',
+            'columns'      => 'clearSelect',
+            'hintComments' => 'clearHintComments',
+            'where'        => 'clearWhere',
+            'union'        => 'clearUnion',
+            'join'         => 'clearJoin',
+            'group'        => 'clearGroup',
+            'order'        => 'clearOrder',
+            'having'       => 'clearHaving',
+            'limit'        => 'clearLimit',
+            'offset'       => 'clearOffset',
+            'counter'      => 'clearCounters',
+            'counters'     => 'clearCounters'
         ];
 
         $statementClearingFunction = $statementMap[$statementName] ?? null;
 
-        if($statementClearingFunction === null) throw new \Exception('Unknown statement: '.$statementName);
+        if ($statementClearingFunction === null)
+        {
+            throw new \Exception('Unknown statement: '.$statementName);
+        }
 
         $this->{$statementClearingFunction}();
 
@@ -394,10 +400,16 @@ class SharQ
     private function validateWithArgs(string $alias, ...$args): void
     {// 2023-06-07
         $statementOrColumnList = $args[0] ?? null;
-        $nothingOrStatement = $args[1] ?? null;
-        $method = $args[2] ?? null;
+        $nothingOrStatement    = $args[1] ?? null;
+        $method                = $args[2] ?? null;
 
-        if(func_num_args() === 2) if($this->isValidStatementArg($statementOrColumnList)) return;
+        if (func_num_args() === 2)
+        {
+            if ($this->isValidStatementArg($statementOrColumnList))
+            {
+                return;
+            }
+        }
 
         $isNonEmptyList = is_array($statementOrColumnList)
                           &&
@@ -405,9 +417,15 @@ class SharQ
                           &&
                           array_reduce($statementOrColumnList, fn($carry, $item) => $carry && is_string($item), true);
 
-        if(!$isNonEmptyList) throw new \Exception('Invalid with statement arguments');
+        if (!$isNonEmptyList)
+        {
+            throw new \Exception('Invalid with statement arguments');
+        }
 
-        if($this->isValidStatementArg($nothingOrStatement)) return;
+        if ($this->isValidStatementArg($nothingOrStatement))
+        {
+            return;
+        }
 
         throw new \Exception("{$method}() third argument must be a function / SharQ or a raw when its second argument is a column name list");
     }
@@ -421,7 +439,7 @@ class SharQ
         $this->validateWithArgs($alias, ...$args);
 
         $statementOrColumnList = $args[0] ?? null;
-        $nothingOrStatement = $args[1] ?? null;
+        $nothingOrStatement    = $args[1] ?? null;
         // $method = $args[2] ?? null;
 
         return $this->withWrapped($alias, $statementOrColumnList, $nothingOrStatement);
@@ -470,19 +488,19 @@ class SharQ
     private function _withWrapped(string $type, string $alias, ...$args): SharQ
     {// 2023-05-15
         $statementOrColumnList = $args[0] ?? null;
-        $nothingOrStatement = $args[1] ?? null;
+        $nothingOrStatement    = $args[1] ?? null;
 
-        $statement = null;
+        $statement  = null;
         $columnList = null;
 
-        if($this->isValidStatementArg($statementOrColumnList))
+        if ($this->isValidStatementArg($statementOrColumnList))
         {
             $statement = $statementOrColumnList;
         }
         else
         {
             $columnList = $statementOrColumnList;
-            $statement = $nothingOrStatement;
+            $statement  = $nothingOrStatement;
         }
 
         $iWith = new With($type, $alias, $columnList, $statement);
@@ -505,7 +523,10 @@ class SharQ
      */
     public function table($tableName): SharQ
     {// 2023-05-15
-        if(!is_array($tableName)) $tableName = [$tableName];
+        if (!is_array($tableName))
+        {
+            $tableName = [$tableName];
+        }
 
         $tableName = $this->_normalizeColumns([$tableName]);
 
@@ -544,6 +565,7 @@ class SharQ
     public function withSchema($schemaName): SharQ
     {// 2023-05-26
         $this->iSingle->schema = $schemaName;
+
         return $this;
     }
 
@@ -555,10 +577,13 @@ class SharQ
      * @throws Exception\QueryTimeoutException
      * @return self
      */
-    public function timeout(int $milliSeconds, bool $cancel=false): SharQ
+    public function timeout(int $milliSeconds, bool $cancel = false): SharQ
     {// 2023-05-08
         // 2023-05-08 TODO: implement me
-        if($milliSeconds < 0) throw new \UnexpectedValueException('Timeout must be a positive integer');
+        if ($milliSeconds < 0)
+        {
+            throw new \UnexpectedValueException('Timeout must be a positive integer');
+        }
 
         return $this;
     }
@@ -588,25 +613,26 @@ class SharQ
      */
     private function _normalizeColumns(array $columns): array
     {
-        if(count($columns) === 1)
+        if (count($columns) === 1)
         {
             $col = reset($columns);
-            if(is_array($col) && is_integer(key($col)))
+
+            if (is_array($col) && is_integer(key($col)))
             {
                 $columns = $col;
             }
         }
         
-        foreach($columns as $i=>$column)
+        foreach ($columns as $i => $column)
         {
-            if(is_string($column) && is_integer($i))
+            if (is_string($column) && is_integer($i))
             {
                 // 2023-05-30 Handling cases where column is aliased in a string ie. ' foo  aS bar'
                 preg_match('/(\\S+)\\s+as\\s+(\\S+)/i', trim($column), $matches);
                 
-                if(count($matches) === 3)
+                if (count($matches) === 3)
                 {
-                    $columns[$i] = [$matches[2]=>$matches[1]];
+                    $columns[$i] = [$matches[2] => $matches[1]];
                 }
             }
         }
@@ -745,12 +771,15 @@ class SharQ
     {// 2023-05-15
         $this->method = self::METHOD_FIRST;
 
-        if(count($columns) !== 0) $this->_column($columns, Columns::TYPE_PLUCK);
+        if (count($columns) !== 0)
+        {
+            $this->_column($columns, Columns::TYPE_PLUCK);
+        }
 
         return $this->limit(1);
     }
 
-    private function _join(string $joinFlag, $table, $first=null, ...$args): SharQ
+    private function _join(string $joinFlag, $table, $first = null, ...$args): SharQ
     {// 2023-08-18
         $iJoin = null;
 
@@ -761,12 +790,12 @@ class SharQ
         $table = array_shift($tableParts);
         $alias = array_shift($tableParts);
         
-        if($first instanceof \Closure)
+        if ($first instanceof \Closure)
         {
             $iJoin = new Join($table, $joinFlag, $this->schema);
             $first($iJoin);
         }
-        else if($joinFlag === Join::TYPE_RAW)
+        else if ($joinFlag === Join::TYPE_RAW)
         {
             $iJoin = new Join(new Raw($table, $first), Join::TYPE_RAW);
         }
@@ -777,10 +806,17 @@ class SharQ
         else
         {
             $iJoin = new Join($table, $joinFlag, $this->schema);
-            if($first) $iJoin->on($first, ...$args);
+
+            if ($first)
+            {
+                $iJoin->on($first, ...$args);
+            }
         }
 
-        if($alias) $iJoin->as($alias);
+        if ($alias)
+        {
+            $iJoin->as($alias);
+        }
 
         $this->iStatements[] = $iJoin;
 
@@ -798,7 +834,7 @@ class SharQ
      * @param array<int,string|Raw|SharQ> $args on statement [operator, value]
      * @return SharQ
      */
-    public function join($table, $first=null, ...$args): SharQ
+    public function join($table, $first = null, ...$args): SharQ
     {
         return $this->_join(Join::TYPE_INNER, $table, $first, ...$args);
     }
@@ -891,6 +927,7 @@ class SharQ
     public function or(): self
     {// 2023-05-09
         $this->boolType = self::BOOL_TYPE_OR;
+
         return $this;
     }
 
@@ -901,31 +938,36 @@ class SharQ
     public function not(): self
     {// 2023-05-09
         $this->isNot = true;
+
         return $this;
     }
 
     public function _where(?string $whereFlag, ?string $boolType, ?bool $isNot, ...$args): SharQ
     {
         $boolType ??= $this->boolType;
-        $isNot ??= $this->isNot;
+        $isNot    ??= $this->isNot;
 
-        $column = $args[0] ?? null;
+        $column   = $args[0] ?? null;
         $operator = $args[1] ?? null;
-        $value = $args[2] ?? null;
+        $value    = $args[2] ?? null;
 
         $argCount = func_num_args() - 3;
 
         // Check if the column is a function, in which case it's
         // a where statement wrapped in parens.
-        if($column instanceof \Closure) return $this->_whereWrapped($boolType, $isNot, $column);
+        if ($column instanceof \Closure)
+        {
+            return $this->_whereWrapped($boolType, $isNot, $column);
+        }
 
         // Check if the column is an array, in which case it's multiple wheres
-        if(is_array($column))
+        if (is_array($column))
         {
-            if(count($column) === 1)
+            if (count($column) === 1)
             {
-                $col = key($column);
+                $col   = key($column);
                 $value = reset($column);
+
                 // If the first value in the array is an integer, we will assume that
                 // the developer wants to run a where-in statement with a basic SQL
                 // clause. The values in the array will be the only values placed
@@ -933,9 +975,9 @@ class SharQ
                 return $this->_where($whereFlag, $boolType, $isNot, $col, '=', $value);
             }
 
-            if($boolType === self::BOOL_TYPE_AND)
+            if ($boolType === self::BOOL_TYPE_AND)
             {
-                foreach($column as $columnName=>$value)
+                foreach ($column as $columnName => $value)
                 {
                     // $this->andWhere($columnName, '=', $value);
                     $this->_andWhere($isNot, $columnName, '=', $value);
@@ -944,9 +986,9 @@ class SharQ
                 return $this;
             }
             
-            $this->_whereWrapped($boolType, $isNot, function($q) use($column, $isNot)
+            $this->_whereWrapped($boolType, $isNot, function($q) use ($column, $isNot)
             {
-                foreach($column as $columnName=>$value)
+                foreach ($column as $columnName => $value)
                 {
                     // $this->andWhere($columnName, '=', $value);
                     $q->_andWhere($isNot, $columnName, '=', $value);
@@ -956,23 +998,36 @@ class SharQ
             return $this;
         }
 
-        if($argCount === 1)
+        if ($argCount === 1)
         {
             // Allow a raw statement to be passed along to the query.
-            if($column instanceof Raw) return $this->_whereRaw($boolType, $isNot, $column->getSQL(), ...$column->getBindings());
+            if ($column instanceof Raw)
+            {
+                return $this->_whereRaw($boolType, $isNot, $column->getSQL(), ...$column->getBindings());
+            }
 
             // Support "where true || where false"
-            if(is_bool($column)) return $this->_whereRaw($boolType, $isNot, ($column ? '1' : '0').' = 1');
+            if (is_bool($column))
+            {
+                return $this->_whereRaw($boolType, $isNot, ($column ? '1' : '0').' = 1');
+            }
         }
 
-        if($argCount === 2)
+        if ($argCount === 2)
         {
             // Push onto the where statement stack.
             // operator is assumed to be value
             // $iWhere = new Where($column, null, $operator, $this->boolType, $this->isNot, Where::TYPE_BASIC);
 
-            if(is_null($operator)) return $this->_whereNull($boolType, $isNot, $column);
-            if(is_bool($operator)) $operator = (int)$operator;
+            if (is_null($operator))
+            {
+                return $this->_whereNull($boolType, $isNot, $column);
+            }
+
+            if (is_bool($operator))
+            {
+                $operator = (int)$operator;
+            }
 
             $iWhere = new Where($column, null, $operator, $boolType ?? $this->boolType, $isNot ?? $this->isNot, $whereFlag ?? Where::TYPE_BASIC);
 
@@ -981,30 +1036,33 @@ class SharQ
             return $this;
         }
 
-        if($argCount === 3)
+        if ($argCount === 3)
         {
             // lower case the operator for comparison purposes
             $checkOperator = strtolower(trim($operator ?? ''));
 
-            if(in_array($checkOperator, ['in', 'not in']))
+            if (in_array($checkOperator, ['in', 'not in']))
             {
                 $isNot = $checkOperator === 'not in';
+
                 return $this->_whereIn($boolType, $isNot, $column, $value);
             }
 
-            if(in_array($checkOperator, ['between', 'not between']))
+            if (in_array($checkOperator, ['between', 'not between']))
             {
                 $isNot = $checkOperator === 'not between';
+
                 return $this->_whereBetween($boolType, $isNot, $column, $value);
             }
         }
 
         // If the value is still null, check whether they're meaning, where value is null
-        if($value === null)
+        if ($value === null)
         {
-            if(in_array($operator, ['is', 'is not', '=', '!=']))
+            if (in_array($operator, ['is', 'is not', '=', '!=']))
             {
                 $isNot = $checkOperator === 'is not' || $checkOperator === '!=';
+
                 return $this->_whereNull($boolType, $isNot, $column);
             }
         }
@@ -1217,7 +1275,7 @@ class SharQ
 
     private function _whereRaw(?string $boolType, ?bool $isNot, string $sql, ...$bindings): SharQ
     {
-        $iRaw = new Raw($sql, ...$bindings);
+        $iRaw   = new Raw($sql, ...$bindings);
         $iWhere = new Where(null, null, $iRaw, $boolType ?? $this->boolType, $isNot ?? $this->isNot, Where::TYPE_RAW);
 
         $this->iStatements[] = $iWhere;
@@ -1274,8 +1332,9 @@ class SharQ
      */
     public function whereExists($callback): SharQ
     {// 2023-05-09
-        $this->isNot = false;
+        $this->isNot    = false;
         $this->boolType = self::BOOL_TYPE_AND;
+
         return $this->_whereExists($callback);
     }
 
@@ -1285,8 +1344,9 @@ class SharQ
      */
     public function whereNotExists($callback): SharQ
     {// 2023-05-09
-        $this->isNot = true;
+        $this->isNot    = true;
         $this->boolType = self::BOOL_TYPE_AND;
+
         return $this->_whereExists($callback);
     }
 
@@ -1296,8 +1356,9 @@ class SharQ
      */
     public function orWhereExists(\Closure $callback): SharQ
     {// 2023-05-07
-        $this->isNot = false;
+        $this->isNot    = false;
         $this->boolType = self::BOOL_TYPE_OR;
+
         return $this->_whereExists($callback);
     }
 
@@ -1307,8 +1368,9 @@ class SharQ
      */
     public function orWhereNotExists(\Closure $callback): SharQ
     {// 2023-05-09
-        $this->isNot = true;
+        $this->isNot    = true;
         $this->boolType = self::BOOL_TYPE_OR;
+
         return $this->_whereExists($callback);
     }
 
@@ -1332,7 +1394,7 @@ class SharQ
         // return $this;
 
 
-        if(is_array($values) && count($values) === 0)
+        if (is_array($values) && count($values) === 0)
         {
             return $this->_whereRaw($boolType, false, ($isNot ? '1' : '0').' = 1');
         }
@@ -1420,7 +1482,7 @@ class SharQ
         // $this->isNot = true;
         // return $this->orWhereIn($column, $values);
         //
-        return $this->_whereIn($column, $values, self::BOOL_TYPE_OR, true);  
+        return $this->_whereIn($column, $values, self::BOOL_TYPE_OR, true);
     }
 
     /**
@@ -1513,6 +1575,7 @@ class SharQ
     public function andWhereLike($column, $value): SharQ
     {// 2023-06-01
         $this->boolType = self::BOOL_TYPE_AND;
+
         return $this->_whereLike($column, $value, Where::TYPE_LIKE);
     }
 
@@ -1524,6 +1587,7 @@ class SharQ
     public function orWhereLike($column, $value): SharQ
     {// 2023-06-01
         $this->boolType = self::BOOL_TYPE_OR;
+
         return $this->_whereLike($column, $value, Where::TYPE_LIKE);
     }
 
@@ -1545,6 +1609,7 @@ class SharQ
     public function andWhereILike($column, $value): SharQ
     {// 2023-06-01
         $this->boolType = self::BOOL_TYPE_AND;
+
         return $this->_whereLike($column, $value, Where::TYPE_ILIKE);
     }
 
@@ -1556,6 +1621,7 @@ class SharQ
     public function orWhereILike($column, $value): SharQ
     {// 2023-06-01
         $this->boolType = self::BOOL_TYPE_OR;
+
         return $this->_whereLike($column, $value, Where::TYPE_ILIKE);
     }
 
@@ -1566,7 +1632,10 @@ class SharQ
      */
     private function _whereBetween(?string $boolType, ?bool $isNot, $column, $values): SharQ
     {// 2023-06-01
-        if(count($values) !== 2) throw new \InvalidArgumentException('whereBetween() expects exactly 2 values');
+        if (count($values) !== 2)
+        {
+            throw new \InvalidArgumentException('whereBetween() expects exactly 2 values');
+        }
 
         $iWhere = new Where($column, null, $values, $boolType ?? $this->boolType, $isNot ?? $this->isNot, Where::TYPE_BETWEEN);
 
@@ -1642,12 +1711,19 @@ class SharQ
      * @param array<string, mixed> $options
      * @return SharQ
      */
-    private function aggregate($method, $column, array $options=[]): SharQ
+    private function aggregate($method, $column, array $options = []): SharQ
     {// 2023-05-26
         $type = Columns::TYPE_AGGREGATE;
-        if($column instanceof Raw) $type = Columns::TYPE_AGGREGATE_RAW;
 
-        if(!is_array($column)) $column = [$column];
+        if ($column instanceof Raw)
+        {
+            $type = Columns::TYPE_AGGREGATE_RAW;
+        }
+
+        if (!is_array($column))
+        {
+            $column = [$column];
+        }
 
         $column = $this->_normalizeColumns($column);
 
@@ -1665,7 +1741,7 @@ class SharQ
      * @param array<string, mixed> $options
      * @return SharQ
      */
-    public function count($column=null, array $options=[]): SharQ
+    public function count($column = null, array $options = []): SharQ
     {// 2023-05-26
         return $this->aggregate('COUNT', $column ?? '*', $options);
     }
@@ -1677,11 +1753,19 @@ class SharQ
     public function countDistinct(...$columns): SharQ
     {// 2023-05-26
         $options = [];
-        if(count($columns) > 1 && is_array(end($columns)) && is_string(key(end($columns)))) $options = array_pop($columns);
 
-        if(count($columns) === 0) $columns = ['*'];
+        if (count($columns) > 1 && is_array(end($columns)) && is_string(key(end($columns))))
+        {
+            $options = array_pop($columns);
+        }
+
+        if (count($columns) === 0)
+        {
+            $columns = ['*'];
+        }
 
         $options['distinct'] = true;
+
         return $this->aggregate('COUNT', $columns, $options);
     }
 
@@ -1690,7 +1774,7 @@ class SharQ
      * @param array<string, mixed> $options
      * @return SharQ
      */
-    public function min($column, $options=[]): SharQ
+    public function min($column, $options = []): SharQ
     {// 2023-05-26
         return $this->aggregate('MIN', $column, $options);
     }
@@ -1700,7 +1784,7 @@ class SharQ
      * @param array<string, mixed> $options
      * @return SharQ
      */
-    public function max($column, $options=[]): SharQ
+    public function max($column, $options = []): SharQ
     {// 2023-05-26
         return $this->aggregate('MAX', $column, $options);
     }
@@ -1710,7 +1794,7 @@ class SharQ
      * @param array<string, mixed> $options
      * @return SharQ
      */
-    public function sum($column, $options=[]): SharQ
+    public function sum($column, $options = []): SharQ
     {// 2023-05-26
         return $this->aggregate('SUM', $column, $options);
     }
@@ -1722,11 +1806,19 @@ class SharQ
     public function sumDistinct(...$columns): SharQ
     {// 2023-05-26
         $options = [];
-        if(is_array(end($columns))) $options = array_pop($columns);
 
-        if(count($columns) === 0) $columns = ['*'];
+        if (is_array(end($columns)))
+        {
+            $options = array_pop($columns);
+        }
+
+        if (count($columns) === 0)
+        {
+            $columns = ['*'];
+        }
 
         $options['distinct'] = true;
+
         return $this->aggregate('SUM', $columns, $options);
     }
 
@@ -1735,7 +1827,7 @@ class SharQ
      * @param array<string, mixed> $options
      * @return SharQ
      */
-    public function avg($column, $options=[]): SharQ
+    public function avg($column, $options = []): SharQ
     {// 2023-05-26
         return $this->aggregate('AVG', $column, $options);
     }
@@ -1747,11 +1839,19 @@ class SharQ
     public function avgDistinct(...$columns): SharQ
     {// 2023-05-26
         $options = [];
-        if(is_array(end($columns))) $options = array_pop($columns);
 
-        if(count($columns) === 0) $columns = ['*'];
+        if (is_array(end($columns)))
+        {
+            $options = array_pop($columns);
+        }
+
+        if (count($columns) === 0)
+        {
+            $columns = ['*'];
+        }
 
         $options['distinct'] = true;
+
         return $this->aggregate('AVG', $columns, $options);
     }
 
@@ -1765,19 +1865,22 @@ class SharQ
     {// 2023-06-02
         $wrap = array_pop($args);
 
-        if(!is_bool($wrap))
+        if (!is_bool($wrap))
         {
             $args[] = $wrap;
-            $wrap = false;
+            $wrap   = false;
         }
 
         $callbacks = $args;
 
-        if(is_array($args[0])) $callbacks = $args[0];
-
-        foreach($callbacks as $callback)
+        if (is_array($args[0]))
         {
-            $iUnion = new Union($type, $callback, $wrap ?? false);
+            $callbacks = $args[0];
+        }
+
+        foreach ($callbacks as $callback)
+        {
+            $iUnion              = new Union($type, $callback, $wrap ?? false);
             $this->iStatements[] = $iUnion;
         }
 
@@ -1818,14 +1921,21 @@ class SharQ
      */
     public function offset($value, ...$options): SharQ
     {// 2023-05-26
-        if($value === null || $value instanceof Raw || $value instanceof SharQ)
+        if ($value === null || $value instanceof Raw || $value instanceof SharQ)
         {
             $this->iSingle->offset = $value;
         }
         else
         {
-            if(!is_integer($value)) throw new \InvalidArgumentException('Offset must be an integer.');
-            if($value < 0) throw new \InvalidArgumentException('Offset must be greater than or equal to 0.');
+            if (!is_integer($value))
+            {
+                throw new \InvalidArgumentException('Offset must be an integer.');
+            }
+
+            if ($value < 0)
+            {
+                throw new \InvalidArgumentException('Offset must be greater than or equal to 0.');
+            }
 
             $this->iSingle->offset = $value;
         }
@@ -1888,10 +1998,16 @@ class SharQ
      */
     public function groupBy(...$columns): SharQ
     {// 2023-06-05
-        foreach($columns as $column)
+        foreach ($columns as $column)
         {
-            if(!($column instanceof Raw)) $this->_groupBy(Group::TYPE_BASIC, $column);
-            else $this->_groupBy(Group::TYPE_RAW, $column);
+            if (!($column instanceof Raw))
+            {
+                $this->_groupBy(Group::TYPE_BASIC, $column);
+            }
+            else
+            {
+                $this->_groupBy(Group::TYPE_RAW, $column);
+            }
         }
 
         return $this;
@@ -1903,12 +2019,21 @@ class SharQ
      */
     public function groupByRaw(...$columns): SharQ
     {// 2023-06-05
-        if(count($columns) === 0) throw new \InvalidArgumentException('groupByRaw() requires at least one argument.');
-
-        foreach($columns as $column)
+        if (count($columns) === 0)
         {
-            if(!($column instanceof Raw)) $this->_groupBy(Group::TYPE_RAW, new Raw($column));
-            else $this->_groupBy(Group::TYPE_RAW, $column);
+            throw new \InvalidArgumentException('groupByRaw() requires at least one argument.');
+        }
+
+        foreach ($columns as $column)
+        {
+            if (!($column instanceof Raw))
+            {
+                $this->_groupBy(Group::TYPE_RAW, new Raw($column));
+            }
+            else
+            {
+                $this->_groupBy(Group::TYPE_RAW, $column);
+            }
         }
 
         return $this;
@@ -1925,7 +2050,7 @@ class SharQ
      * @param string|null $nullsPosition Order::NULLS_POSITION_* constants
      * @return SharQ
      */
-    private function _orderBy(string $type, $column, $direction=null, $nullsPosition=null): SharQ
+    private function _orderBy(string $type, $column, $direction = null, $nullsPosition = null): SharQ
     {// 2023-06-05
         $iOrderBy = new Order($type, $column, $direction, $nullsPosition);
 
@@ -1943,24 +2068,36 @@ class SharQ
      * @param string|null $nullsPosition Order::NULLS_POSITION_* constants
      * @return SharQ
      */
-    public function orderBy($column, $direction=Order::DIRECTION_ASC, $nullsPosition=null): SharQ
+    public function orderBy($column, $direction = Order::DIRECTION_ASC, $nullsPosition = null): SharQ
     {// 2023-06-05
-        if($column instanceof Raw) return $this->orderByRaw($column, $direction);
-
-        if(is_string($column) || $column instanceof SharQ) return $this->_orderBy(Order::TYPE_BASIC, $column, $direction, $nullsPosition);
-
-        if(is_array($column))
+        if ($column instanceof Raw)
         {
-            foreach($column as $key=>$value)
+            return $this->orderByRaw($column, $direction);
+        }
+
+        if (is_string($column) || $column instanceof SharQ)
+        {
+            return $this->_orderBy(Order::TYPE_BASIC, $column, $direction, $nullsPosition);
+        }
+
+        if (is_array($column))
+        {
+            foreach ($column as $key => $value)
             {
-                if(is_string($key))
+                if (is_string($key))
                 {
                     $this->orderBy($key, $value, $nullsPosition);
                 }
                 else
                 {
-                    if(is_string($value)) $this->orderBy($value, $direction, $nullsPosition);
-                    else $this->orderBy($value['column'], $value['order'] ?? Order::DIRECTION_ASC, $value['nulls'] ?? null);
+                    if (is_string($value))
+                    {
+                        $this->orderBy($value, $direction, $nullsPosition);
+                    }
+                    else
+                    {
+                        $this->orderBy($value['column'], $value['order'] ?? Order::DIRECTION_ASC, $value['nulls'] ?? null);
+                    }
                 }
             }
         }
@@ -1976,9 +2113,12 @@ class SharQ
      *
      * @return SharQ
      */
-    public function orderByRaw($column, $direction=null): SharQ
+    public function orderByRaw($column, $direction = null): SharQ
     {// 2023-06-05
-        if(!($column instanceof Raw)) $column = new Raw($column);
+        if (!($column instanceof Raw))
+        {
+            $column = new Raw($column);
+        }
 
         return $this->_orderBy(Order::TYPE_RAW, $column, $direction);
     }
@@ -2010,14 +2150,20 @@ class SharQ
      * @param string|Raw|SharQ|\Closure|null $value
      * @return SharQ
      */
-    public function having($column, $operator=null, $value=null): SharQ
+    public function having($column, $operator = null, $value = null): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = false;
+        $this->isNot    = false;
 
-        if($column instanceof Raw) return $this->havingRaw($column);
+        if ($column instanceof Raw)
+        {
+            return $this->havingRaw($column);
+        }
 
-        if($column instanceof \Closure) return $this->havingWrapped($column);
+        if ($column instanceof \Closure)
+        {
+            return $this->havingWrapped($column);
+        }
 
         return $this->_having(Having::TYPE_BASIC, $column, $operator, $value, $this->boolType, $this->isNot);
     }
@@ -2028,14 +2174,20 @@ class SharQ
      * @param string|Raw|SharQ|\Closure|null $value
      * @return SharQ
      */
-    public function orHaving($column, $operator=null, $value=null): SharQ
+    public function orHaving($column, $operator = null, $value = null): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = false;
+        $this->isNot    = false;
 
-        if($column instanceof Raw) return $this->orHavingRaw($column);
+        if ($column instanceof Raw)
+        {
+            return $this->orHavingRaw($column);
+        }
 
-        if($column instanceof \Closure) return $this->orHavingWrapped($column);
+        if ($column instanceof \Closure)
+        {
+            return $this->orHavingWrapped($column);
+        }
 
         return $this->_having(Having::TYPE_BASIC, $column, $operator, $value, $this->boolType, $this->isNot);
     }
@@ -2047,7 +2199,7 @@ class SharQ
     public function havingNull($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         return $this->_having(Having::TYPE_NULL, $column, null, null, $this->boolType, $this->isNot);
     }
@@ -2059,7 +2211,7 @@ class SharQ
     public function orHavingNull($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         return $this->_having(Having::TYPE_NULL, $column, null, null, $this->boolType, $this->isNot);
     }
@@ -2071,7 +2223,7 @@ class SharQ
     public function havingNotNull($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = true;
+        $this->isNot    = true;
 
         return $this->_having(Having::TYPE_NULL, $column, null, null, $this->boolType, $this->isNot);
     }
@@ -2083,7 +2235,7 @@ class SharQ
     public function orHavingNotNull($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = true;
+        $this->isNot    = true;
 
         return $this->_having(Having::TYPE_NULL, $column, null, null, $this->boolType, $this->isNot);
     }
@@ -2095,7 +2247,7 @@ class SharQ
     public function havingExists($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         return $this->_having(Having::TYPE_EXISTS, $column, null, null, $this->boolType, $this->isNot);
     }
@@ -2107,7 +2259,7 @@ class SharQ
     public function orHavingExists($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         return $this->_having(Having::TYPE_EXISTS, $column, null, null, $this->boolType, $this->isNot);
     }
@@ -2119,7 +2271,7 @@ class SharQ
     public function havingNotExists($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = true;
+        $this->isNot    = true;
 
         return $this->_having(Having::TYPE_EXISTS, $column, null, null, $this->boolType, $this->isNot);
     }
@@ -2131,7 +2283,7 @@ class SharQ
     public function orHavingNotExists($column): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = true;
+        $this->isNot    = true;
 
         return $this->_having(Having::TYPE_EXISTS, $column, null, null, $this->boolType, $this->isNot);
     }
@@ -2143,7 +2295,10 @@ class SharQ
      */
     private function _havingBetween($column, array $values): SharQ
     {// 2023-06-05
-        if(count($values) !== 2) throw new \InvalidArgumentException('You must specify 2 values for the havingBetween clause');
+        if (count($values) !== 2)
+        {
+            throw new \InvalidArgumentException('You must specify 2 values for the havingBetween clause');
+        }
 
         return $this->_having(Having::TYPE_BETWEEN, $column, null, $values, $this->boolType, $this->isNot);
     }
@@ -2155,7 +2310,7 @@ class SharQ
     public function havingBetween($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         return $this->_havingBetween($column, $values);
     }
@@ -2167,7 +2322,7 @@ class SharQ
     public function orHavingBetween($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         return $this->_havingBetween($column, $values);
     }
@@ -2180,7 +2335,7 @@ class SharQ
     public function havingNotBetween($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = true;
+        $this->isNot    = true;
 
         return $this->_havingBetween($column, $values);
     }
@@ -2193,7 +2348,7 @@ class SharQ
     public function orHavingNotBetween($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = true;
+        $this->isNot    = true;
 
         return $this->_havingBetween($column, $values);
     }
@@ -2205,11 +2360,14 @@ class SharQ
     public function havingRaw($value): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         $iRaw = $value;
 
-        if(!($value instanceof Raw)) $iRaw = new Raw($value);
+        if (!($value instanceof Raw))
+        {
+            $iRaw = new Raw($value);
+        }
 
         return $this->_having(Having::TYPE_RAW, null, null, $iRaw, $this->boolType, $this->isNot);
     }
@@ -2221,11 +2379,14 @@ class SharQ
     public function orHavingRaw($value): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         $iRaw = $value;
 
-        if(!($value instanceof Raw)) $iRaw = new Raw($value);
+        if (!($value instanceof Raw))
+        {
+            $iRaw = new Raw($value);
+        }
 
         return $this->_having(Having::TYPE_RAW, null, null, $iRaw, $this->boolType, $this->isNot);
     }
@@ -2237,7 +2398,10 @@ class SharQ
      */
     private function _havingIn($column, array $values): SharQ
     {// 2023-06-05
-        if(count($values) === 0) return $this;
+        if (count($values) === 0)
+        {
+            return $this;
+        }
 
         return $this->_having(Having::TYPE_IN, $column, null, $values, $this->boolType, $this->isNot);
     }
@@ -2250,7 +2414,7 @@ class SharQ
     public function havingIn($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         return $this->_havingIn($column, $values);
     }
@@ -2263,7 +2427,7 @@ class SharQ
     public function orHavingIn($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         return $this->_havingIn($column, $values);
     }
@@ -2276,7 +2440,7 @@ class SharQ
     public function havingNotIn($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = true;
+        $this->isNot    = true;
 
         return $this->_havingIn($column, $values);
     }
@@ -2289,7 +2453,7 @@ class SharQ
     public function orHavingNotIn($column, array $values): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = true;
+        $this->isNot    = true;
 
         return $this->_havingIn($column, $values);
     }
@@ -2301,7 +2465,7 @@ class SharQ
     public function havingWrapped(\Closure $callback): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_AND;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         return $this->_having(Having::TYPE_WRAPPED, null, null, $callback, $this->boolType, $this->isNot);
     }
@@ -2313,7 +2477,7 @@ class SharQ
     public function orHavingWrapped(\Closure $callback): SharQ
     {// 2023-06-05
         $this->boolType = self::BOOL_TYPE_OR;
-        $this->isNot = false;
+        $this->isNot    = false;
 
         return $this->_having(Having::TYPE_WRAPPED, null, null, $callback, $this->boolType, $this->isNot);
     }
@@ -2327,31 +2491,41 @@ class SharQ
      */
     public function update(...$args): SharQ
     {// 2023-06-05
-        $values = $args[0] ?? null;
+        $values    = $args[0] ?? null;
         $returning = $args[1] ?? null;
-        $options = $args[2] ?? null;
+        $options   = $args[2] ?? null;
 
         $this->method = self::METHOD_UPDATE;
 
         $data = [];
-        $ret = null;
-        if(is_string($values))
+        $ret  = null;
+
+        if (is_string($values))
         {
             $data[$values] = $returning;
 
-            if(func_num_args() > 2) $ret = func_get_arg(2);
+            if (func_num_args() > 2)
+            {
+                $ret = func_get_arg(2);
+            }
         }
         else
         {
-            foreach($values as $key=>$value)
+            foreach ($values as $key => $value)
             {
                 $data[$key] = $value;
             }
 
-            if(func_num_args() > 1) $ret = func_get_arg(1);
+            if (func_num_args() > 1)
+            {
+                $ret = func_get_arg(1);
+            }
         }
 
-        if($ret) $this->returning($ret, $options);
+        if ($ret)
+        {
+            $this->returning($ret, $options);
+        }
 
         $this->iSingle->update = $data;
 
@@ -2364,16 +2538,26 @@ class SharQ
      */
     public function insert(...$args): SharQ
     {// 2023-06-06
-        $values = $args[0] ?? null;
+        $values    = $args[0] ?? null;
         $returning = $args[1] ?? null;
-        $options = $args[2] ?? null;
+        $options   = $args[2] ?? null;
 
-        if(func_num_args() === 0) throw new \InvalidArgumentException('insert() must be called with at least one argument');
-        if(is_array($values) && count($values) === 0) throw new \InvalidArgumentException('insert() must be called with at least one argument');
+        if (func_num_args() === 0)
+        {
+            throw new \InvalidArgumentException('insert() must be called with at least one argument');
+        }
+
+        if (is_array($values) && count($values) === 0)
+        {
+            throw new \InvalidArgumentException('insert() must be called with at least one argument');
+        }
 
         $this->method = self::METHOD_INSERT;
 
-        if($returning) $this->returning($returning, $options);
+        if ($returning)
+        {
+            $this->returning($returning, $options);
+        }
 
         $this->iSingle->insert = $values;
 
@@ -2386,7 +2570,10 @@ class SharQ
      */
     public function onConflict($columns): OnConflictBuilder
     {// 2023-06-06
-        if(is_string($columns)) $columns = [$columns];
+        if (is_string($columns))
+        {
+            $columns = [$columns];
+        }
 
         return new OnConflictBuilder($this, $columns);
     }
@@ -2397,12 +2584,15 @@ class SharQ
      * @param array<string, mixed> $options
      * @return SharQ
      */
-    public function returning($returning, $options=[]): SharQ
+    public function returning($returning, $options = []): SharQ
     {// 2023-06-05
-        if(!is_array($returning)) $returning = [$returning];
+        if (!is_array($returning))
+        {
+            $returning = [$returning];
+        }
 
         $this->iSingle->returning = $returning;
-        $this->iSingle->options = $options;
+        $this->iSingle->options   = $options;
 
         return $this;
     }
@@ -2428,11 +2618,11 @@ class SharQ
      * @param int|float $amount
      * @return SharQ
      */
-    public function increment($column, $amount=null): SharQ
+    public function increment($column, $amount = null): SharQ
     {// 2023-06-05
-        if(is_array($column))
+        if (is_array($column))
         {
-            foreach($column as $key=>$value)
+            foreach ($column as $key => $value)
             {
                 $this->_counter($key, $value);
             }
@@ -2448,11 +2638,11 @@ class SharQ
      * @param int|float $amount
      * @return SharQ
      */
-    public function decrement($column, $amount=null): SharQ
+    public function decrement($column, $amount = null): SharQ
     {// 2023-06-05
-        if(is_array($column))
+        if (is_array($column))
         {
-            foreach($column as $key=>$value)
+            foreach ($column as $key => $value)
             {
                 $this->_counter($key, -$value);
             }
@@ -2467,11 +2657,14 @@ class SharQ
      * @param string|Raw $table
      * @return SharQ
      */
-    public function truncate($table=null): SharQ
+    public function truncate($table = null): SharQ
     {// 2023-06-06
         $this->method = self::METHOD_TRUNCATE;
 
-        if($table) return $this->table($table);
+        if ($table)
+        {
+            return $this->table($table);
+        }
 
         return $this;
     }
@@ -2543,11 +2736,20 @@ class SharQ
      */
     public function skipLocked(): SharQ
     {// 2023-06-07
-        if(!$this->isSelectQuery()) throw new \LogicException("Cannot chain ->skipLocked() on \"{$this->getMethod()}\" query!");
+        if (!$this->isSelectQuery())
+        {
+            throw new \LogicException("Cannot chain ->skipLocked() on \"{$this->getMethod()}\" query!");
+        }
 
-        if($this->iSingle->lock === null) throw new \LogicException('->skipLocked() can only be used after a call to ->forShare() or ->forUpdate()!');
+        if ($this->iSingle->lock === null)
+        {
+            throw new \LogicException('->skipLocked() can only be used after a call to ->forShare() or ->forUpdate()!');
+        }
 
-        if($this->iSingle->waitMode === self::WAIT_MODE_NO_WAIT) throw new \LogicException('->skipLocked() cannot be used together with ->noWait()!');
+        if ($this->iSingle->waitMode === self::WAIT_MODE_NO_WAIT)
+        {
+            throw new \LogicException('->skipLocked() cannot be used together with ->noWait()!');
+        }
 
         $this->iSingle->waitMode = self::WAIT_MODE_SKIP_LOCKED;
 
@@ -2560,11 +2762,20 @@ class SharQ
      */
     public function noWait(): SharQ
     {// 2023-06-07
-        if(!$this->isSelectQuery()) throw new \LogicException("Cannot chain ->noWait() on \"{$this->getMethod()}\" query!");
+        if (!$this->isSelectQuery())
+        {
+            throw new \LogicException("Cannot chain ->noWait() on \"{$this->getMethod()}\" query!");
+        }
 
-        if($this->iSingle->lock=== null) throw new \LogicException('->noWait() can only be used after a call to ->forShare() or ->forUpdate()!');
+        if ($this->iSingle->lock === null)
+        {
+            throw new \LogicException('->noWait() can only be used after a call to ->forShare() or ->forUpdate()!');
+        }
 
-        if($this->iSingle->waitMode === self::WAIT_MODE_SKIP_LOCKED) throw new \LogicException('->noWait() cannot be used together with ->skipLocked()!');
+        if ($this->iSingle->waitMode === self::WAIT_MODE_SKIP_LOCKED)
+        {
+            throw new \LogicException('->noWait() cannot be used together with ->skipLocked()!');
+        }
 
         $this->iSingle->waitMode = self::WAIT_MODE_NO_WAIT;
 
@@ -2582,7 +2793,7 @@ class SharQ
         return $this;
     }
 
-    public function transacting(?Transaction &$iTransaction=null): SharQ
+    public function transacting(?Transaction &$iTransaction = null): SharQ
     {// 2023-06-07
         $this->iSingle->transaction = &$iTransaction;
 
@@ -2604,14 +2815,17 @@ class SharQ
     {// 2023-08-03
         static $validFetchModes =
         [
-            self::FETCH_MODE_ASSOCIATIVE=>\PDO::FETCH_ASSOC,
-            self::FETCH_MODE_OBJECT=>\PDO::FETCH_OBJ,
-            self::FETCH_MODE_NUMBERED=>\PDO::FETCH_NUM,
-            self::FETCH_MODE_KEY_PAIR=>\PDO::FETCH_KEY_PAIR,
-            self::FETCH_MODE_COLUMN=>\PDO::FETCH_COLUMN
+            self::FETCH_MODE_ASSOCIATIVE => \PDO::FETCH_ASSOC,
+            self::FETCH_MODE_OBJECT      => \PDO::FETCH_OBJ,
+            self::FETCH_MODE_NUMBERED    => \PDO::FETCH_NUM,
+            self::FETCH_MODE_KEY_PAIR    => \PDO::FETCH_KEY_PAIR,
+            self::FETCH_MODE_COLUMN      => \PDO::FETCH_COLUMN
         ];
 
-        if(!isset($validFetchModes[$fetchMode])) Throw new \LogicException('invalid fetch mode provided.');
+        if (!isset($validFetchModes[$fetchMode]))
+        {
+            Throw new \LogicException('invalid fetch mode provided.');
+        }
 
         $this->fetchMode = $validFetchModes[$fetchMode];
 
@@ -2628,7 +2842,10 @@ class SharQ
 
         $iTransaction = $this->iSingle->transaction;
 
-        if($iTransaction) $iTransaction->start($this->iClient);
+        if ($iTransaction)
+        {
+            $iTransaction->start($this->iClient);
+        }
 
         $statement = $this->iClient->query($iQuery);
 
@@ -2638,7 +2855,10 @@ class SharQ
 
         $statement->closeCursor();
 
-        if($result === false) return null;
+        if ($result === false)
+        {
+            return null;
+        }
 
         return $result;
     }
@@ -2652,9 +2872,12 @@ class SharQ
 
     public function __clone()
     {
-        foreach(get_object_vars($this) as $name => $value)
+        foreach (get_object_vars($this) as $name => $value)
         {
-            if(is_object($value)) $this->{$name} = clone $value;
+            if (is_object($value))
+            {
+                $this->{$name} = clone $value;
+            }
         }
     }
 }
