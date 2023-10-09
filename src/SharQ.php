@@ -2849,6 +2849,11 @@ class SharQ
 
         $statement = $this->iClient->query($iQuery);
 
+        if (in_array($this->getMethod(), [self::METHOD_INSERT, self::METHOD_UPDATE, self::METHOD_DELETE]))
+        {
+            return $statement->rowCount();
+        }
+
         $result = ($this->getMethod() === self::METHOD_FIRST)
             ? $statement->fetch($this->fetchMode)
             : $statement->fetchAll($this->fetchMode);
