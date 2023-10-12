@@ -53,18 +53,18 @@ class WithsTest extends \Codeception\Test\Unit
                         'updated_group',
                         self::qb()
                             ->table('group')
-                            ->update(['group_name'=>'bar'])
-                            ->where(['group_id'=>1])
+                            ->update(['group_name' => 'bar'])
+                            ->where(['group_id' => 1])
                             ->returning('group_id')
                     )
                     ->table('user')
-                    ->update(['name'=>'foo'])
-                    ->where(['group_id'=>1]),
+                    ->update(['name' => 'foo'])
+                    ->where(['group_id' => 1]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'WITH `updated_group` AS (UPDATE `group` SET `group_name` = ? WHERE `group_id` = ?) UPDATE `user` SET `name` = ? WHERE `group_id` = ?',
-                        'bindings'=>['bar', 1, 'foo', 1]
+                        'sql'      => 'WITH `updated_group` AS (UPDATE `group` SET `group_name` = ? WHERE `group_id` = ?) UPDATE `user` SET `name` = ? WHERE `group_id` = ?',
+                        'bindings' => ['bar', 1, 'foo', 1]
                     ]
                 ]
             ];
@@ -83,10 +83,10 @@ class WithsTest extends \Codeception\Test\Unit
                     })
                     ->from('accounts'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'WITH `delete1` AS (DELETE FROM `accounts` WHERE `id` = ?) SELECT * FROM `accounts`',
-                        'bindings'=>[1]
+                        'sql'      => 'WITH `delete1` AS (DELETE FROM `accounts` WHERE `id` = ?) SELECT * FROM `accounts`',
+                        'bindings' => [1]
                     ]
                 ]
             ];
@@ -102,10 +102,10 @@ class WithsTest extends \Codeception\Test\Unit
                     ->with('delete1', self::raw('??', self::qb()->delete()->from('accounts')->where('id', 1)))
                     ->from('accounts'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'WITH `delete1` AS (DELETE FROM `accounts` WHERE `id` = ?) SELECT * FROM `accounts`',
-                        'bindings'=>[1]
+                        'sql'      => 'WITH `delete1` AS (DELETE FROM `accounts` WHERE `id` = ?) SELECT * FROM `accounts`',
+                        'bindings' => [1]
                     ]
                 ]
             ];
@@ -120,14 +120,14 @@ class WithsTest extends \Codeception\Test\Unit
                 self::qb()
                     ->with('update1', function($q)
                     {
-                        $q->from('accounts')->update(['name'=>'foo']);
+                        $q->from('accounts')->update(['name' => 'foo']);
                     })
                     ->from('accounts'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'WITH `update1` AS (UPDATE `accounts` SET `name` = ?) SELECT * FROM `accounts`',
-                        'bindings'=>['foo']
+                        'sql'      => 'WITH `update1` AS (UPDATE `accounts` SET `name` = ?) SELECT * FROM `accounts`',
+                        'bindings' => ['foo']
                     ]
                 ]
             ];
@@ -140,13 +140,13 @@ class WithsTest extends \Codeception\Test\Unit
             $case =
             [
                 self::qb()
-                    ->with('update1', self::qb()->from('accounts')->update(['name'=>'foo']))
+                    ->with('update1', self::qb()->from('accounts')->update(['name' => 'foo']))
                     ->from('accounts'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'WITH `update1` AS (UPDATE `accounts` SET `name` = ?) SELECT * FROM `accounts`',
-                        'bindings'=>['foo']
+                        'sql'      => 'WITH `update1` AS (UPDATE `accounts` SET `name` = ?) SELECT * FROM `accounts`',
+                        'bindings' => ['foo']
                     ]
                 ]
             ];
@@ -194,13 +194,13 @@ class WithsTest extends \Codeception\Test\Unit
             $case =
             [
                 self::qb()
-                    ->with('update1', self::raw('??', self::qb()->from('accounts')->update(['name'=>'foo'])))
+                    ->with('update1', self::raw('??', self::qb()->from('accounts')->update(['name' => 'foo'])))
                     ->from('accounts'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'WITH `update1` AS (UPDATE `accounts` SET `name` = ?) SELECT * FROM `accounts`',
-                        'bindings'=>['foo']
+                        'sql'      => 'WITH `update1` AS (UPDATE `accounts` SET `name` = ?) SELECT * FROM `accounts`',
+                        'bindings' => ['foo']
                     ]
                 ]
             ];
@@ -230,10 +230,10 @@ class WithsTest extends \Codeception\Test\Unit
                     ->select('*')
                     ->from('categoryTrail'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>"WITH RECURSIVE `categoryTrail` (`categories_id`,`parent_id`,`level`,`trail`) AS (SELECT `categories_id`, `parent_id`, 0 as level, JSON_ARRAY(categories_id) as trail FROM `categories` WHERE `categories_id` = ? UNION ALL SELECT `c`.`categories_id`, `c`.`parent_id`, ct.level + 1, JSON_ARRAY_APPEND(ct.trail, \"$\", c.categories_id) FROM `categories` AS `c` INNER JOIN `categoryTrail` AS `ct` ON(`c`.`parent_id` = `ct`.`categories_id`)) SELECT * FROM `categoryTrail`",
-                        'bindings'=>[2650]
+                        'sql'      => "WITH RECURSIVE `categoryTrail` (`categories_id`,`parent_id`,`level`,`trail`) AS (SELECT `categories_id`, `parent_id`, 0 as level, JSON_ARRAY(categories_id) as trail FROM `categories` WHERE `categories_id` = ? UNION ALL SELECT `c`.`categories_id`, `c`.`parent_id`, ct.level + 1, JSON_ARRAY_APPEND(ct.trail, \"$\", c.categories_id) FROM `categories` AS `c` INNER JOIN `categoryTrail` AS `ct` ON(`c`.`parent_id` = `ct`.`categories_id`)) SELECT * FROM `categoryTrail`",
+                        'bindings' => [2650]
                     ]
                 ]
             ];
@@ -269,10 +269,10 @@ class WithsTest extends \Codeception\Test\Unit
                     ->select('*')
                     ->from('categoryTrail'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>"WITH RECURSIVE `categoryID` (`categories_id`) AS (SELECT `categories_id` FROM `categories` WHERE `categories_id` = ?), `categoryTrail` (`categories_id`,`parent_id`,`level`,`trail`) AS (SELECT `categories_id`, `parent_id`, 0 as level, JSON_ARRAY(categories_id) as trail FROM `categories` WHERE `categories_id` IN(SELECT * FROM `categoryID`) UNION ALL SELECT `c`.`categories_id`, `c`.`parent_id`, ct.level + 1, JSON_ARRAY_APPEND(ct.trail, \"$\", c.categories_id) FROM `categories` AS `c` INNER JOIN `categoryTrail` AS `ct` ON(`c`.`parent_id` = `ct`.`categories_id`)) SELECT * FROM `categoryTrail`",
-                        'bindings'=>[2650]
+                        'sql'      => "WITH RECURSIVE `categoryID` (`categories_id`) AS (SELECT `categories_id` FROM `categories` WHERE `categories_id` = ?), `categoryTrail` (`categories_id`,`parent_id`,`level`,`trail`) AS (SELECT `categories_id`, `parent_id`, 0 as level, JSON_ARRAY(categories_id) as trail FROM `categories` WHERE `categories_id` IN(SELECT * FROM `categoryID`) UNION ALL SELECT `c`.`categories_id`, `c`.`parent_id`, ct.level + 1, JSON_ARRAY_APPEND(ct.trail, \"$\", c.categories_id) FROM `categories` AS `c` INNER JOIN `categoryTrail` AS `ct` ON(`c`.`parent_id` = `ct`.`categories_id`)) SELECT * FROM `categoryTrail`",
+                        'bindings' => [2650]
                     ]
                 ]
             ];
@@ -280,7 +280,7 @@ class WithsTest extends \Codeception\Test\Unit
             return $case;
         };
 
-        foreach($cases as $name=>$caseFn)
+        foreach ($cases as $name => $caseFn)
         {
             $cases[$name] = $caseFn();
         }
@@ -288,18 +288,18 @@ class WithsTest extends \Codeception\Test\Unit
         return $cases;
     }
 
-	/**
-	 * @dataProvider caseProvider
-	 */
+    /**
+     * @dataProvider caseProvider
+     */
     public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery('select');
+        $iQuery         = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);

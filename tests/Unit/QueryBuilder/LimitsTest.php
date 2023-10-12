@@ -51,10 +51,10 @@ class TestLimits extends \Codeception\Test\Unit
                     ->from('users')
                     ->limit(10),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` LIMIT ?',
-                        'bindings'=>[10]
+                        'sql'      => 'SELECT * FROM `users` LIMIT ?',
+                        'bindings' => [10]
                     ]
                 ]
             ];
@@ -71,10 +71,10 @@ class TestLimits extends \Codeception\Test\Unit
                     ->from('users')
                     ->limit(0),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` LIMIT ?',
-                        'bindings'=>[0]
+                        'sql'      => 'SELECT * FROM `users` LIMIT ?',
+                        'bindings' => [0]
                     ]
                 ]
             ];
@@ -92,10 +92,10 @@ class TestLimits extends \Codeception\Test\Unit
                     ->offset(5)
                     ->limit(10),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` LIMIT ? OFFSET ?',
-                        'bindings'=>[10, 5]
+                        'sql'      => 'SELECT * FROM `users` LIMIT ? OFFSET ?',
+                        'bindings' => [10, 5]
                     ]
                 ]
             ];
@@ -109,14 +109,14 @@ class TestLimits extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->offset(self::raw('5'))
-                ->limit(self::raw('10')),
+                    ->from('users')
+                    ->offset(self::raw('5'))
+                    ->limit(self::raw('10')),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` LIMIT 10 OFFSET 5',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` LIMIT 10 OFFSET 5',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -154,10 +154,10 @@ class TestLimits extends \Codeception\Test\Unit
                     ->from('users')
                     ->limit(1),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT name = ? AS isJohn FROM `users` LIMIT ?',
-                        'bindings'=>['john', 1]
+                        'sql'      => 'SELECT name = ? AS isJohn FROM `users` LIMIT ?',
+                        'bindings' => ['john', 1]
                     ]
                 ]
             ];
@@ -174,10 +174,10 @@ class TestLimits extends \Codeception\Test\Unit
                     ->from('users')
                     ->first(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` LIMIT ?',
-                        'bindings'=>[1]
+                        'sql'      => 'SELECT * FROM `users` LIMIT ?',
+                        'bindings' => [1]
                     ]
                 ]
             ];
@@ -194,10 +194,10 @@ class TestLimits extends \Codeception\Test\Unit
                     ->from('users')
                     ->offset(5),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` LIMIT 18446744073709551615 OFFSET ?',
-                        'bindings'=>[5]
+                        'sql'      => 'SELECT * FROM `users` LIMIT 18446744073709551615 OFFSET ?',
+                        'bindings' => [5]
                     ]
                 ]
             ];
@@ -214,10 +214,10 @@ class TestLimits extends \Codeception\Test\Unit
                     ->limit(null)
                     ->offset(null),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `test`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `test`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -233,10 +233,10 @@ class TestLimits extends \Codeception\Test\Unit
                     ->from('test')
                     ->limit(null),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `test`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `test`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -253,10 +253,10 @@ class TestLimits extends \Codeception\Test\Unit
                     ->limit(10)
                     ->offset(null),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `test` LIMIT ?',
-                        'bindings'=>[10]
+                        'sql'      => 'SELECT * FROM `test` LIMIT ?',
+                        'bindings' => [10]
                     ]
                 ]
             ];
@@ -294,10 +294,10 @@ class TestLimits extends \Codeception\Test\Unit
                     ->offset(10)
                     ->offset(null),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `test`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `test`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -305,7 +305,7 @@ class TestLimits extends \Codeception\Test\Unit
             return $case;
         };
 
-        foreach($cases as $name=>$caseFn)
+        foreach ($cases as $name => $caseFn)
         {
             $cases[$name] = $caseFn();
         }
@@ -328,7 +328,7 @@ class TestLimits extends \Codeception\Test\Unit
                     ->offset('$10');
             },
             [
-                'exception'=>\InvalidArgumentException::class,
+                'exception' => \InvalidArgumentException::class,
             ]
         ];
 
@@ -336,18 +336,18 @@ class TestLimits extends \Codeception\Test\Unit
     }
 
 
-	/**
-	 * @dataProvider caseProvider
-	 */
+    /**
+     * @dataProvider caseProvider
+     */
     public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery('select');
+        $iQuery         = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);
@@ -367,9 +367,9 @@ class TestLimits extends \Codeception\Test\Unit
         }
     }
 
-	/**
-	 * @dataProvider negativeCaseProvider
-	 */
+    /**
+     * @dataProvider negativeCaseProvider
+     */
     public function testSharQThrows($callback, array $iExpected)
     {// 2023-06-05
         $this->assertEquals($this->seeExceptionThrown($callback), $iExpected['exception']);

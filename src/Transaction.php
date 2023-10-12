@@ -36,8 +36,8 @@ class Transaction
      */
     private ?string $isolationLevel = self::ISOLATION_REPEATABLE_READ;
 
-	private string $currentIsolationLevel = self::ISOLATION_REPEATABLE_READ;
-	private string $defaultIsolationLevel = self::ISOLATION_REPEATABLE_READ;
+    private string $currentIsolationLevel = self::ISOLATION_REPEATABLE_READ;
+    private string $defaultIsolationLevel = self::ISOLATION_REPEATABLE_READ;
 
     /**
      * 2023-06-12
@@ -66,7 +66,10 @@ class Transaction
 
     public function start(Client $iClient)
     {
-        if(!$this->isStarted()) $this->initialize($iClient);
+        if (!$this->isStarted())
+        {
+            $this->initialize($iClient);
+        }
 
         $this->started = true;
     }
@@ -94,7 +97,7 @@ class Transaction
 
         $this->transactionID = 'transaction_'.self::$transactionCounter;
 
-        if($this->iClient->isTransacting())
+        if ($this->iClient->isTransacting())
         {
             $this->savepoint();
         }
@@ -119,7 +122,7 @@ class Transaction
      */
     protected function begin()
     {
-        if($this->isolationLevel !== null)
+        if ($this->isolationLevel !== null)
         {
             $this->query("SET TRANSACTION ISOLATION LEVEL {$this->isolationLevel};");
 
@@ -135,7 +138,10 @@ class Transaction
      */
     protected function savepoint()
     {
-        if(!$this->isStarted()) throw new \Exception('Transaction not started');
+        if (!$this->isStarted())
+        {
+            throw new \Exception('Transaction not started');
+        }
 
         return $this->query("SAVEPOINT {$this->getID()};");
     }
@@ -146,11 +152,14 @@ class Transaction
      */
     public function commit()
     {
-        if($this->iClient->isTransacting()) return $this->release();
+        if ($this->iClient->isTransacting())
+        {
+            return $this->release();
+        }
 
         $this->iClient->commit();
 
-        if($this->currentIsolationLevel !== $this->defaultIsolationLevel)
+        if ($this->currentIsolationLevel !== $this->defaultIsolationLevel)
         {
             $this->query("SET TRANSACTION ISOLATION LEVEL {$this->defaultIsolationLevel};");
 
@@ -166,7 +175,10 @@ class Transaction
      */
     protected function release()
     {
-        if(!$this->isStarted()) throw new \Exception('Transaction not started');
+        if (!$this->isStarted())
+        {
+            throw new \Exception('Transaction not started');
+        }
 
         return $this->query("RELEASE SAVEPOINT {$this->getID()};");
     }
@@ -176,7 +188,10 @@ class Transaction
      */
     public function setIsolationLevel(string $isolationLevel)
     {
-        if($this->isStarted()) throw new \Exception('Transaction already started');
+        if ($this->isStarted())
+        {
+            throw new \Exception('Transaction already started');
+        }
 
         $this->isolationLevel = $isolationLevel;
     }
@@ -187,9 +202,15 @@ class Transaction
      */
     public function rollback()
     {
-        if(!$this->isStarted()) throw new \Exception('Transaction not started');
+        if (!$this->isStarted())
+        {
+            throw new \Exception('Transaction not started');
+        }
 
-        if($this->iClient->isTransacting()) return $this->rollbackTo();
+        if ($this->iClient->isTransacting())
+        {
+            return $this->rollbackTo();
+        }
 
         return $this->iClient->rollback();
         // return $this->query('ROLLBACK;');
@@ -201,7 +222,10 @@ class Transaction
      */
     protected function rollbackTo()
     {
-        if(!$this->isStarted()) throw new \Exception('Transaction not started');
+        if (!$this->isStarted())
+        {
+            throw new \Exception('Transaction not started');
+        }
 
         return $this->query("ROLLBACK TO SAVEPOINT {$this->getID()};");
     }

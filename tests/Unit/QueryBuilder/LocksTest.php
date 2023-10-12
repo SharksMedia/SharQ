@@ -50,10 +50,10 @@ class LocksTest extends \Codeception\Test\Unit
                     ->where('bar', '=', 'baz')
                     ->forUpdate(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
-                        'bindings'=>['baz']
+                        'sql'      => 'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
+                        'bindings' => ['baz']
                     ]
                 ]
             ];
@@ -71,10 +71,10 @@ class LocksTest extends \Codeception\Test\Unit
                     ->where('bar', '=', 'baz')
                     ->forShare(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `foo` WHERE `bar` = ? LOCK IN SHARE MODE',
-                        'bindings'=>['baz']
+                        'sql'      => 'SELECT * FROM `foo` WHERE `bar` = ? LOCK IN SHARE MODE',
+                        'bindings' => ['baz']
                     ]
                 ]
             ];
@@ -92,10 +92,10 @@ class LocksTest extends \Codeception\Test\Unit
                     ->where('bar', '=', 'baz')
                     ->forUpdate(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
-                        'bindings'=>['baz']
+                        'sql'      => 'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
+                        'bindings' => ['baz']
                     ]
                 ]
             ];
@@ -113,10 +113,10 @@ class LocksTest extends \Codeception\Test\Unit
                     ->where('bar', '=', 'baz')
                     ->forUpdate('lo', 'rem'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
-                        'bindings'=>['baz']
+                        'sql'      => 'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
+                        'bindings' => ['baz']
                     ]
                 ]
             ];
@@ -134,10 +134,10 @@ class LocksTest extends \Codeception\Test\Unit
                     ->where('bar', '=', 'baz')
                     ->forUpdate(['lo', 'rem']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
-                        'bindings'=>['baz']
+                        'sql'      => 'SELECT * FROM `foo` WHERE `bar` = ? FOR UPDATE',
+                        'bindings' => ['baz']
                     ]
                 ]
             ];
@@ -156,10 +156,10 @@ class LocksTest extends \Codeception\Test\Unit
                     ->forUpdate()
                     ->skipLocked(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `foo` LIMIT ? FOR UPDATE SKIP LOCKED',
-                        'bindings'=>[1]
+                        'sql'      => 'SELECT * FROM `foo` LIMIT ? FOR UPDATE SKIP LOCKED',
+                        'bindings' => [1]
                     ]
                 ]
             ];
@@ -178,10 +178,10 @@ class LocksTest extends \Codeception\Test\Unit
                     ->forUpdate()
                     ->noWait(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `foo` LIMIT ? FOR UPDATE NOWAIT',
-                        'bindings'=>[1]
+                        'sql'      => 'SELECT * FROM `foo` LIMIT ? FOR UPDATE NOWAIT',
+                        'bindings' => [1]
                     ]
                 ]
             ];
@@ -219,7 +219,7 @@ class LocksTest extends \Codeception\Test\Unit
         //   });
         // };
 
-        foreach($cases as $name=>$caseFn)
+        foreach ($cases as $name => $caseFn)
         {
             $cases[$name] = $caseFn();
         }
@@ -227,18 +227,18 @@ class LocksTest extends \Codeception\Test\Unit
         return $cases;
     }
 
-	/**
-	 * @dataProvider caseProvider
-	 */
+    /**
+     * @dataProvider caseProvider
+     */
     public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery();
+        $iQuery         = $iSharQCompiler->toQuery();
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);

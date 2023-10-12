@@ -14,16 +14,16 @@ use Sharksmedia\SharQ\Statement\IStatement;
 class Order implements IStatement
 {
     public const TYPE_BASIC = 'ORDER_BY_BASIC';
-    public const TYPE_RAW = 'ORDER_BY_RAW';
+    public const TYPE_RAW   = 'ORDER_BY_RAW';
 
     public const TYPE_NULLS_POSITION_FIRST = 'NULLS_POSITION_FIRST';
-    public const TYPE_NULLS_POSITION_LAST = 'NULLS_POSITION_LAST';
+    public const TYPE_NULLS_POSITION_LAST  = 'NULLS_POSITION_LAST';
 
-    public const DIRECTION_ASC = 'ASC';
+    public const DIRECTION_ASC  = 'ASC';
     public const DIRECTION_DESC = 'DESC';
     
     private string $type;
-    private        $column;
+    private $column;
     private ?string $direction;
     private ?string $nullsPosition;
 
@@ -48,11 +48,11 @@ class Order implements IStatement
         return $types;
     }
 
-    public function __construct(string $type, $column, $direction, $nullsPosition=null)
+    public function __construct(string $type, $column, $direction, $nullsPosition = null)
     {// 2023-05-08
-        $this->type = $type;
-        $this->column = $column;
-        $this->direction = $direction;
+        $this->type          = $type;
+        $this->column        = $column;
+        $this->direction     = $direction;
         $this->nullsPosition = $nullsPosition;
     }
     
@@ -75,5 +75,4 @@ class Order implements IStatement
     {// 2023-05-08
         return $this->nullsPosition;
     }
-
 }

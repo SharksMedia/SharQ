@@ -36,13 +36,13 @@ class Where implements IStatement, IAliasable
     public const TYPE_BETWEEN       = 'WHERE_BETWEEN';
 
     public const BOOL_TYPE_AND = 'AND';
-    public const BOOL_TYPE_OR = 'OR';
+    public const BOOL_TYPE_OR  = 'OR';
 
     private string $type;
 
-    private         $column;
+    private $column;
     private ?string $operator;
-    private         $value;
+    private $value;
     private string  $boolType;
     private bool    $isNot;
 
@@ -55,7 +55,7 @@ class Where implements IStatement, IAliasable
      * @param string $boolType
      * @param bool $isNot
      */
-    public function __construct($column, ?string $operator, $value, string $boolType=SharQ::BOOL_TYPE_AND, bool $isNot=false, string $type=self::TYPE_BASIC)
+    public function __construct($column, ?string $operator, $value, string $boolType = SharQ::BOOL_TYPE_AND, bool $isNot = false, string $type = self::TYPE_BASIC)
     {// 2023-05-08
         $this->column   = $column;
         $this->operator = $operator;
@@ -127,6 +127,4 @@ class Where implements IStatement, IAliasable
     {// 2023-05-15
         return $this->boolType;
     }
-
-
 }

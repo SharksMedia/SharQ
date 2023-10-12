@@ -75,7 +75,7 @@ class Join implements IStatement, IAliasable
      */
     public function __construct($table, string $joinType)
     {// 2023-05-09
-        $this->table = $table;
+        $this->table    = $table;
         $this->joinType = $joinType;
 
         $this->boolType = self::ON_AND;
@@ -124,15 +124,42 @@ class Join implements IStatement, IAliasable
      */
     public function getJoinFunction(): string
     {// 2023-05-31
-        if($this->joinType === self::TYPE_INNER) return 'INNER JOIN';
-        if($this->joinType === self::TYPE_OUTER) return 'OUTER JOIN';
-        if($this->joinType === self::TYPE_CROSS) return 'CROSS JOIN';
-        if($this->joinType === self::TYPE_LEFT) return 'LEFT JOIN';
-        if($this->joinType === self::TYPE_LEFT_OUTER) return 'LEFT OUTER JOIN';
-        if($this->joinType === self::TYPE_RIGHT) return 'RIGHT JOIN';
-        if($this->joinType === self::TYPE_RIGHT_OUTER) return 'RIGHT OUTER JOIN';
+        if ($this->joinType === self::TYPE_INNER)
+        {
+            return 'INNER JOIN';
+        }
 
-        throw new \Exception('Unknown join type: ' . $this->joinType);
+        if ($this->joinType === self::TYPE_OUTER)
+        {
+            return 'OUTER JOIN';
+        }
+
+        if ($this->joinType === self::TYPE_CROSS)
+        {
+            return 'CROSS JOIN';
+        }
+
+        if ($this->joinType === self::TYPE_LEFT)
+        {
+            return 'LEFT JOIN';
+        }
+
+        if ($this->joinType === self::TYPE_LEFT_OUTER)
+        {
+            return 'LEFT OUTER JOIN';
+        }
+
+        if ($this->joinType === self::TYPE_RIGHT)
+        {
+            return 'RIGHT JOIN';
+        }
+
+        if ($this->joinType === self::TYPE_RIGHT_OUTER)
+        {
+            return 'RIGHT OUTER JOIN';
+        }
+
+        throw new \Exception('Unknown join type: '.$this->joinType);
     }
 
     /**
@@ -151,15 +178,15 @@ class Join implements IStatement, IAliasable
      */
     private function getClauseFromArguments(string $onType, string $boolType, ...$args): Clause
     {// 2023-05-09
-        $first = $args[0] ?? null;
+        $first    = $args[0] ?? null;
         $operator = $args[1] ?? null;
-        $second = $args[2] ?? null;
+        $second   = $args[2] ?? null;
 
-        if($first instanceof \Closure)
+        if ($first instanceof \Closure)
         {
-            $iClause = new Clause();
-            $iClause->type = self::ON_TYPE_WRAPPED;
-            $iClause->value = $first;
+            $iClause           = new Clause();
+            $iClause->type     = self::ON_TYPE_WRAPPED;
+            $iClause->value    = $first;
             $iClause->boolType = $boolType;
 
             return $iClause;
@@ -167,34 +194,34 @@ class Join implements IStatement, IAliasable
 
         $argCount = func_num_args();
 
-        if($argCount === 3)
+        if ($argCount === 3)
         {
-            $iClause = new Clause();
-            $iClause->type = self::ON_TYPE_RAW;
-            $iClause->value = $first;
+            $iClause           = new Clause();
+            $iClause->type     = self::ON_TYPE_RAW;
+            $iClause->value    = $first;
             $iClause->boolType = $boolType;
 
             return $iClause;
         }
 
-        if($argCount === 4)
+        if ($argCount === 4)
         {
-            $iClause = new Clause();
-            $iClause->type = is_numeric($operator) ? self::ON_TYPE_VALUE : $onType;
+            $iClause              = new Clause();
+            $iClause->type        = is_numeric($operator) ? self::ON_TYPE_VALUE : $onType;
             $iClause->columnFirst = $first;
-            $iClause->operator = '=';
-            $iClause->value = $operator;
-            $iClause->boolType = $boolType;
+            $iClause->operator    = '=';
+            $iClause->value       = $operator;
+            $iClause->boolType    = $boolType;
 
             return $iClause;
         }
 
-        $iClause = new Clause();
-        $iClause->type = is_numeric($second) ? self::ON_TYPE_VALUE : $onType;
+        $iClause              = new Clause();
+        $iClause->type        = is_numeric($second) ? self::ON_TYPE_VALUE : $onType;
         $iClause->columnFirst = $first;
-        $iClause->operator = $operator;
-        $iClause->value = $second;
-        $iClause->boolType = $boolType;
+        $iClause->operator    = $operator;
+        $iClause->value       = $second;
+        $iClause->boolType    = $boolType;
 
         return $iClause;
     }
@@ -245,9 +272,9 @@ class Join implements IStatement, IAliasable
      */
     public function using($column): Join
     {// 2023-05-09
-        $iClause = new Clause();
-        $iClause->type = self::ON_TYPE_USING;
-        $iClause->column = $column;
+        $iClause           = new Clause();
+        $iClause->type     = self::ON_TYPE_USING;
+        $iClause->column   = $column;
         $iClause->boolType = $this->boolType;
 
         $this->iClauses[] = $iClause;
@@ -301,16 +328,19 @@ class Join implements IStatement, IAliasable
      * @param bool $isNot
      * @return Join
      */
-    public function onBetween(string $column, array $values, bool $isNot=false): Join
+    public function onBetween(string $column, array $values, bool $isNot = false): Join
     {// 2023-05-09
-        if(count($values) !== 2) throw new \UnexpectedValueException('Between clause must have 2 values');
+        if (count($values) !== 2)
+        {
+            throw new \UnexpectedValueException('Between clause must have 2 values');
+        }
         
-        $iClause = new Clause();
-        $iClause->type = self::ON_TYPE_BETWEEN; 
-        $iClause->column = $column;
-        $iClause->value = $values;
+        $iClause           = new Clause();
+        $iClause->type     = self::ON_TYPE_BETWEEN; 
+        $iClause->column   = $column;
+        $iClause->value    = $values;
         $iClause->boolType = $this->boolType;
-        $iClause->isNot = $isNot;
+        $iClause->isNot    = $isNot;
 
         $this->iClauses[] = $iClause;
 
@@ -335,6 +365,7 @@ class Join implements IStatement, IAliasable
     public function orOnBetween(string $column, array $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
+
         return $this->onBetween($column, $values, false);
     }
 
@@ -346,6 +377,7 @@ class Join implements IStatement, IAliasable
     public function orOnNotBetween(string $column, array $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
+
         return $this->onBetween($column, $values, true);
     }
 
@@ -355,16 +387,19 @@ class Join implements IStatement, IAliasable
      * @param bool $isNot
      * @return Join
      */
-    public function onIn(string $column, $values, bool $isNot=false): Join
+    public function onIn(string $column, $values, bool $isNot = false): Join
     {// 2023-05-09
-        if(is_array($values) && count($values) === 0) return $this->on(new Raw(1), '=', new Raw(0)); // Mathes an empty array; will always be false.
+        if (is_array($values) && count($values) === 0)
+        {
+            return $this->on(new Raw(1), '=', new Raw(0));
+        } // Mathes an empty array; will always be false.
 
-        $iClause = new Clause();
-        $iClause->type = self::ON_TYPE_IN;
-        $iClause->column = $column;
-        $iClause->value = $values;
+        $iClause           = new Clause();
+        $iClause->type     = self::ON_TYPE_IN;
+        $iClause->column   = $column;
+        $iClause->value    = $values;
         $iClause->boolType = $this->boolType;
-        $iClause->isNot = $isNot;
+        $iClause->isNot    = $isNot;
 
         $this->iClauses[] = $iClause;
 
@@ -379,6 +414,7 @@ class Join implements IStatement, IAliasable
     public function onNotIn(string $column, $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_AND;
+
         return $this->onIn($column, $values, true);
     }
 
@@ -390,6 +426,7 @@ class Join implements IStatement, IAliasable
     public function andOnIn(string $column, $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_AND;
+
         return $this->onIn($column, $values, false);
     }
 
@@ -401,6 +438,7 @@ class Join implements IStatement, IAliasable
     public function andOnNotIn(string $column, $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_AND;
+
         return $this->onIn($column, $values, true);
     }
 
@@ -412,6 +450,7 @@ class Join implements IStatement, IAliasable
     public function orOnIn(string $column, $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
+
         return $this->onIn($column, $values, false);
     }
 
@@ -423,6 +462,7 @@ class Join implements IStatement, IAliasable
     public function orOnNotIn(string $column, $values): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
+
         return $this->onIn($column, $values, true);
     }
 
@@ -431,13 +471,13 @@ class Join implements IStatement, IAliasable
      * @param bool $isNot
      * @return Join
      */
-    public function onNull(string $column, bool $isNot=false): self
+    public function onNull(string $column, bool $isNot = false): self
     {// 2023-05-09
-        $iClause = new Clause();
-        $iClause->type = self::ON_TYPE_NULL;
-        $iClause->column = $column;
+        $iClause           = new Clause();
+        $iClause->type     = self::ON_TYPE_NULL;
+        $iClause->column   = $column;
         $iClause->boolType = $this->boolType;
-        $iClause->isNot = $isNot;
+        $iClause->isNot    = $isNot;
 
         $this->iClauses[] = $iClause;
 
@@ -460,6 +500,7 @@ class Join implements IStatement, IAliasable
     public function orOnNull(string $column): self
     {// 2023-05-09
         $this->boolType = self::ON_OR;
+
         return $this->onNull($column, false);
     }
 
@@ -470,6 +511,7 @@ class Join implements IStatement, IAliasable
     public function orOnNotNull(string $column): self
     {// 2023-05-09
         $this->boolType = self::ON_OR;
+
         return $this->onNull($column, true);
     }
 
@@ -478,13 +520,13 @@ class Join implements IStatement, IAliasable
      * @param bool $isNot
      * @return Join
      */
-    public function onExists(\Closure $callback, bool $isNot=false): Join
+    public function onExists(\Closure $callback, bool $isNot = false): Join
     {// 2023-05-09
-        $iClause = new Clause();
-        $iClause->type = self::ON_TYPE_EXISTS;
-        $iClause->value = $callback;
+        $iClause           = new Clause();
+        $iClause->type     = self::ON_TYPE_EXISTS;
+        $iClause->value    = $callback;
         $iClause->boolType = $this->boolType;
-        $iClause->isNot = $isNot;
+        $iClause->isNot    = $isNot;
 
         $this->iClauses[] = $iClause;
 
@@ -507,6 +549,7 @@ class Join implements IStatement, IAliasable
     public function orOnExists(\Closure $callback): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
+
         return $this->onExists($callback, false);
     }
 
@@ -517,6 +560,7 @@ class Join implements IStatement, IAliasable
     public function orOnNotExists(\Closure $callback): Join
     {// 2023-05-09
         $this->boolType = self::ON_OR;
+
         return $this->onExists($callback, true);
     }
 

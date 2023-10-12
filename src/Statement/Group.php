@@ -14,7 +14,7 @@ use Sharksmedia\SharQ\Statement\IStatement;
 class Group implements IStatement
 {
     public const TYPE_BASIC = 'GROUP_BY_BASIC';
-    public const TYPE_RAW = 'GROUP_BY_RAW';
+    public const TYPE_RAW   = 'GROUP_BY_RAW';
 
     /**
      * This is the type property.
@@ -26,7 +26,7 @@ class Group implements IStatement
      * This is the column property.
      * @var string|Raw|array<int, string|Raw>
      */
-    private        $column;
+    private $column;
 
     /**
      * This method returns the class name.
@@ -53,7 +53,7 @@ class Group implements IStatement
      */
     public function __construct(string $type, $column)
     {// 2023-05-08
-        $this->type = $type;
+        $this->type   = $type;
         $this->column = $column;
     }
 
@@ -65,5 +65,4 @@ class Group implements IStatement
     {// 2023-05-08
         return $this->column;
     }
-
 }

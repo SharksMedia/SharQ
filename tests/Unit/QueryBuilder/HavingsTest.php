@@ -50,10 +50,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->having('email', '>', 1),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `email` > ?',
-                        'bindings'=>[1]
+                        'sql'      => 'SELECT * FROM `users` HAVING `email` > ?',
+                        'bindings' => [1]
                     ]
                 ]
             ];
@@ -67,14 +67,14 @@ class HavingsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->having('baz', '>', 5)
-                ->orHaving('email', '>', 1),
+                    ->from('users')
+                    ->having('baz', '>', 5)
+                    ->orHaving('email', '>', 1),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` > ? OR `email` > ?',
-                        'bindings'=>[5, 1]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` > ? OR `email` > ?',
+                        'bindings' => [5, 1]
                     ]
                 ]
             ];
@@ -94,10 +94,10 @@ class HavingsTest extends \Codeception\Test\Unit
                         $q->where('email', '>', 1);
                     }),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING (`email` > ?)',
-                        'bindings'=>[1]
+                        'sql'      => 'SELECT * FROM `users` HAVING (`email` > ?)',
+                        'bindings' => [1]
                     ]
                 ]
             ];
@@ -118,10 +118,10 @@ class HavingsTest extends \Codeception\Test\Unit
                         $q->orWhere('email', '=', 7);
                     }),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING (`email` > ? OR `email` = ?)',
-                        'bindings'=>[10, 7]
+                        'sql'      => 'SELECT * FROM `users` HAVING (`email` > ? OR `email` = ?)',
+                        'bindings' => [10, 7]
                     ]
                 ]
             ];
@@ -139,10 +139,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->groupBy('email')
                     ->having('email', '>', 1),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` GROUP BY `email` HAVING `email` > ?',
-                        'bindings'=>[1]
+                        'sql'      => 'SELECT * FROM `users` GROUP BY `email` HAVING `email` > ?',
+                        'bindings' => [1]
                     ]
                 ]
             ];
@@ -159,10 +159,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->having('foo_email', '>', 1),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT `email` AS `foo_email` FROM `users` HAVING `foo_email` > ?',
-                        'bindings'=>[1]
+                        'sql'      => 'SELECT `email` AS `foo_email` FROM `users` HAVING `foo_email` > ?',
+                        'bindings' => [1]
                     ]
                 ]
             ];
@@ -179,10 +179,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->having(self::raw('user_foo < user_bar')),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING user_foo < user_bar',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` HAVING user_foo < user_bar',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -200,10 +200,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->having('baz', '=', 1)
                     ->orHaving(self::raw('user_foo < user_bar')),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` = ? OR user_foo < user_bar',
-                        'bindings'=>[1]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` = ? OR user_foo < user_bar',
+                        'bindings' => [1]
                     ]
                 ]
             ];
@@ -220,10 +220,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->havingNull('baz'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` IS NULL',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` IS NULL',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -241,10 +241,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->havingNull('baz')
                     ->orHavingNull('foo'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` IS NULL OR `foo` IS NULL',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` IS NULL OR `foo` IS NULL',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -261,10 +261,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->havingNotNull('baz'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` IS NOT NULL',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` IS NOT NULL',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -282,10 +282,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->havingNotNull('baz')
                     ->orHavingNotNull('foo'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` IS NOT NULL OR `foo` IS NOT NULL',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` IS NOT NULL OR `foo` IS NOT NULL',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -303,14 +303,14 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->havingExists(function($q)
                     {
                         $q
-                          ->select('baz')
-                          ->from('users');
+                            ->select('baz')
+                            ->from('users');
                     }),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING EXISTS (SELECT `baz` FROM `users`)',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` HAVING EXISTS (SELECT `baz` FROM `users`)',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -328,18 +328,18 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->havingExists(function($q)
                     {
                         $q->select('baz')
-                          ->from('users');
+                            ->from('users');
                     })
                     ->orHavingExists(function($q)
                     {
                         $q->select('foo')
-                          ->from('users');
+                            ->from('users');
                     }),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING EXISTS (SELECT `baz` FROM `users`) OR EXISTS (SELECT `foo` FROM `users`)',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` HAVING EXISTS (SELECT `baz` FROM `users`) OR EXISTS (SELECT `foo` FROM `users`)',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -353,17 +353,17 @@ class HavingsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->havingNotExists(function($q)
+                    ->from('users')
+                    ->havingNotExists(function($q)
                     {
                         $q->select('baz')
-                          ->from('users');
+                            ->from('users');
                     }),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING NOT EXISTS (SELECT `baz` FROM `users`)',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` HAVING NOT EXISTS (SELECT `baz` FROM `users`)',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -381,18 +381,18 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->havingNotExists(function($q)
                     {
                         $q->select('baz')
-                          ->from('users');
+                            ->from('users');
                     })
                     ->orHavingNotExists(function($q)
                     {
                         $q->select('foo')
-                          ->from('users');
+                            ->from('users');
                     }),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING NOT EXISTS (SELECT `baz` FROM `users`) OR NOT EXISTS (SELECT `foo` FROM `users`)',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` HAVING NOT EXISTS (SELECT `baz` FROM `users`) OR NOT EXISTS (SELECT `foo` FROM `users`)',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -409,10 +409,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->havingBetween('baz', [5, 10]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` BETWEEN ? AND ?',
-                        'bindings'=>[5, 10]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` BETWEEN ? AND ?',
+                        'bindings' => [5, 10]
                     ]
                 ]
             ];
@@ -426,14 +426,14 @@ class HavingsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->havingBetween('baz', [5, 10])
-                ->orHavingBetween('baz', [20, 30]),
+                    ->from('users')
+                    ->havingBetween('baz', [5, 10])
+                    ->orHavingBetween('baz', [20, 30]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` BETWEEN ? AND ? OR `baz` BETWEEN ? AND ?',
-                        'bindings'=>[5, 10, 20, 30]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` BETWEEN ? AND ? OR `baz` BETWEEN ? AND ?',
+                        'bindings' => [5, 10, 20, 30]
                     ]
                 ]
             ];
@@ -450,10 +450,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->havingNotBetween('baz', [5, 10]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` NOT BETWEEN ? AND ?',
-                        'bindings'=>[5 ,10]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` NOT BETWEEN ? AND ?',
+                        'bindings' => [5 ,10]
                     ]
                 ]
             ];
@@ -471,10 +471,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->havingNotBetween('baz', [5, 10])
                     ->orHavingNotBetween('baz', [20, 30]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` NOT BETWEEN ? AND ? OR `baz` NOT BETWEEN ? AND ?',
-                        'bindings'=>[5, 10, 20, 30]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` NOT BETWEEN ? AND ? OR `baz` NOT BETWEEN ? AND ?',
+                        'bindings' => [5, 10, 20, 30]
                     ]
                 ]
             ];
@@ -488,13 +488,13 @@ class HavingsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->havingIn('baz', [5, 10, 37]),
+                    ->from('users')
+                    ->havingIn('baz', [5, 10, 37]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` IN (?, ?, ?)',
-                        'bindings'=>[5, 10, 37]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` IN (?, ?, ?)',
+                        'bindings' => [5, 10, 37]
                     ]
                 ]
             ];
@@ -508,14 +508,14 @@ class HavingsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->havingIn('baz', [5, 10, 37])
-                ->orHavingIn('foo', ['Batman', 'Joker']),
+                    ->from('users')
+                    ->havingIn('baz', [5, 10, 37])
+                    ->orHavingIn('foo', ['Batman', 'Joker']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` IN (?, ?, ?) OR `foo` IN (?, ?)',
-                        'bindings'=>[5, 10, 37, 'Batman', 'Joker']
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` IN (?, ?, ?) OR `foo` IN (?, ?)',
+                        'bindings' => [5, 10, 37, 'Batman', 'Joker']
                     ]
                 ]
             ];
@@ -532,10 +532,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->havingNotIn('baz', [5, 10, 37]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` NOT IN (?, ?, ?)',
-                        'bindings'=>[5, 10, 37]
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` NOT IN (?, ?, ?)',
+                        'bindings' => [5, 10, 37]
                     ]
                 ]
             ];
@@ -553,10 +553,10 @@ class HavingsTest extends \Codeception\Test\Unit
                     ->havingNotIn('baz', [5, 10, 37])
                     ->orHavingNotIn('foo', ['Batman', 'Joker']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `baz` NOT IN (?, ?, ?) OR `foo` NOT IN (?, ?)',
-                        'bindings'=>[5, 10, 37, 'Batman', 'Joker']
+                        'sql'      => 'SELECT * FROM `users` HAVING `baz` NOT IN (?, ?, ?) OR `foo` NOT IN (?, ?)',
+                        'bindings' => [5, 10, 37, 'Batman', 'Joker']
                     ]
                 ]
             ];
@@ -564,7 +564,7 @@ class HavingsTest extends \Codeception\Test\Unit
             return $case;
         };
 
-        foreach($cases as $name=>$caseFn)
+        foreach ($cases as $name => $caseFn)
         {
             $cases[$name] = $caseFn();
         }
@@ -572,18 +572,18 @@ class HavingsTest extends \Codeception\Test\Unit
         return $cases;
     }
 
-	/**
-	 * @dataProvider caseProvider
-	 */
+    /**
+     * @dataProvider caseProvider
+     */
     public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery('select');
+        $iQuery         = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);

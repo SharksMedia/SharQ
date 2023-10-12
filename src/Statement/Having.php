@@ -14,13 +14,13 @@ use Sharksmedia\SharQ\Statement\IStatement;
 
 class Having implements IStatement
 {
-    public const TYPE_BASIC = 'HAVING_BASIC';
+    public const TYPE_BASIC   = 'HAVING_BASIC';
     public const TYPE_WRAPPED = 'HAVING_WRAPPED';
-    public const TYPE_NULL = 'HAVING_NULL';
-    public const TYPE_EXISTS = 'HAVING_EXISTS';
+    public const TYPE_NULL    = 'HAVING_NULL';
+    public const TYPE_EXISTS  = 'HAVING_EXISTS';
     public const TYPE_BETWEEN = 'HAVING_BETWEEN';
-    public const TYPE_IN = 'HAVING_IN';
-    public const TYPE_RAW = 'HAVING_RAW';
+    public const TYPE_IN      = 'HAVING_IN';
+    public const TYPE_RAW     = 'HAVING_RAW';
 
     /**
      * This is the type property.
@@ -32,7 +32,7 @@ class Having implements IStatement
      * This is the column property.
      * @var string|Raw
      */
-    private         $column;
+    private $column;
 
     /**
      * This is the operator property.
@@ -44,7 +44,7 @@ class Having implements IStatement
      * This is the value property.
      * @var string|Raw|SharQ|\Closure|null
      */
-    private         $value;
+    private $value;
 
     /**
      * This is the boolType property.
@@ -64,7 +64,7 @@ class Having implements IStatement
      * @return string
      */
     public function getClass(): string
-	{// 2023-05-10
+    {// 2023-05-10
         return 'Having';
     }
 
@@ -84,7 +84,7 @@ class Having implements IStatement
      * @param string $boolType
      * @param bool $isNot
      */
-    public function __construct(string $type, $column, ?string $operator, $value, string $boolType=SharQ::BOOL_TYPE_AND, bool $isNot=false)
+    public function __construct(string $type, $column, ?string $operator, $value, string $boolType = SharQ::BOOL_TYPE_AND, bool $isNot = false)
     {// 2023-05-08
         $this->column   = $column;
         $this->operator = $operator;
@@ -139,5 +139,4 @@ class Having implements IStatement
     {// 2023-05-15
         return $this->boolType;
     }
-
 }

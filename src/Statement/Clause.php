@@ -26,19 +26,19 @@ class Clause
      * This is the type columnFirst.
      * @var string
      */
-    public                  $columnFirst;
+    public $columnFirst;
 
     /**
      * This is the type value.
      * @var string|Raw|SharQ|\Closure
      */
-    public                  $value;
+    public $value;
 
     /**
      * This is the type operator.
      * @var string|null
      */
-    public                  $operator;
+    public $operator;
 
     /**
      * This is the type boolType.
@@ -57,7 +57,7 @@ class Clause
      * This is the type column.
      * @var string|Raw
      */
-    public                  $column;
+    public $column;
 
     /**
      * This is the type columnSecond.
@@ -66,10 +66,17 @@ class Clause
      */
     public function getBoolFunction(): string
     {// 2023-05-31
-        if($this->boolType === Join::ON_AND) return 'AND';
-        if($this->boolType === Join::ON_OR) return 'OR';
+        if ($this->boolType === Join::ON_AND)
+        {
+            return 'AND';
+        }
 
-        throw new \Exception('Unknown bool type: ' . $this->boolType);
+        if ($this->boolType === Join::ON_OR)
+        {
+            return 'OR';
+        }
+
+        throw new \Exception('Unknown bool type: '.$this->boolType);
     }
 
     /**
@@ -79,13 +86,32 @@ class Clause
      */
     public function getOnFunction(): string
     {// 2023-05-31
-        if($this->type === Join::ON_TYPE_BASIC) return 'ON';
-        if($this->type === Join::ON_TYPE_VALUE) return 'ON';
-        if($this->type === Join::ON_TYPE_USING) return 'USING';
-        if($this->type === Join::ON_TYPE_WRAPPED) return 'ON';
-        if($this->type === Join::ON_TYPE_RAW) return 'ON';
+        if ($this->type === Join::ON_TYPE_BASIC)
+        {
+            return 'ON';
+        }
 
-        throw new \Exception('Unknown on type: ' . $this->type);
+        if ($this->type === Join::ON_TYPE_VALUE)
+        {
+            return 'ON';
+        }
+
+        if ($this->type === Join::ON_TYPE_USING)
+        {
+            return 'USING';
+        }
+
+        if ($this->type === Join::ON_TYPE_WRAPPED)
+        {
+            return 'ON';
+        }
+
+        if ($this->type === Join::ON_TYPE_RAW)
+        {
+            return 'ON';
+        }
+
+        throw new \Exception('Unknown on type: '.$this->type);
     }
 
     /**

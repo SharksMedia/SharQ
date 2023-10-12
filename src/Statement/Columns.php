@@ -21,11 +21,11 @@ use Sharksmedia\SharQ\Statement\IAliasable;
  */
 class Columns implements IStatement, IAliasable
 {
-    public const TYPE_PLUCK = 'COLUMNS_PLUCK';
-    public const TYPE_FIRST = 'COLUMNS_FIRST';
-    public const TYPE_RAW = 'COLUMNS_RAW';
-    public const TYPE_ANALYTIC = 'COLUMNS_ANALYTIC';
-    public const TYPE_AGGREGATE = 'COLUMNS_AGGREGATE';
+    public const TYPE_PLUCK         = 'COLUMNS_PLUCK';
+    public const TYPE_FIRST         = 'COLUMNS_FIRST';
+    public const TYPE_RAW           = 'COLUMNS_RAW';
+    public const TYPE_ANALYTIC      = 'COLUMNS_ANALYTIC';
+    public const TYPE_AGGREGATE     = 'COLUMNS_AGGREGATE';
     public const TYPE_AGGREGATE_RAW = 'COLUMNS_AGGREGATE_RAW';
 
     public const AGGREGATE_FUNCTION_COUNT = 'COUNT';
@@ -73,11 +73,11 @@ class Columns implements IStatement, IAliasable
      * @param array<int,string|Raw> $columns
      * @param string $type Columns::TYPE_* constants
      */
-    public function __construct(?string $aggregateFunction, array $columns, string $type=self::TYPE_PLUCK)
+    public function __construct(?string $aggregateFunction, array $columns, string $type = self::TYPE_PLUCK)
     {// 2023-05-08
         $this->aggregateFunction = $aggregateFunction;
-        $this->columns = $columns;
-        $this->type = $type;
+        $this->columns           = $columns;
+        $this->type              = $type;
     }
 
     /**
@@ -134,12 +134,18 @@ class Columns implements IStatement, IAliasable
      */
     public function isSingleColumn(): bool
     {// 2023-05-26
-        if(count($this->columns) > 1) return false;
+        if (count($this->columns) > 1)
+        {
+            return false;
+        }
 
         // $column = $this->columns[0];
         $column = reset($this->columns);
 
-        if(is_array($column)) return count($column) === 1;
+        if (is_array($column))
+        {
+            return count($column) === 1;
+        }
 
         return true;
     }

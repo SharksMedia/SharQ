@@ -22,7 +22,7 @@ class OnConflictBuilder
      * This is the schema property.
      * @var array<int|string, string|Raw|SharQ>
      */
-    private              $columns;
+    private $columns;
 
     /**
      * @param SharQ $iSharQ
@@ -30,7 +30,7 @@ class OnConflictBuilder
      */
     public function __construct(SharQ $iSharQ, $columns)
     {// 2023-06-06
-        $this->iSharQ = $iSharQ;
+        $this->iSharQ  = $iSharQ;
         $this->columns = $columns;
     }
 
@@ -42,7 +42,7 @@ class OnConflictBuilder
         $iSingle = &$this->iSharQ->getSingle();
 
         $iSingle->onConflict = $this->columns;
-        $iSingle->ignore = true;
+        $iSingle->ignore     = true;
 
         return $this->iSharQ;
     }
@@ -51,12 +51,12 @@ class OnConflictBuilder
      * @param array<int, mixed> $updates
      * @return SharQ
      */
-    public function merge($updates=[]): SharQ
+    public function merge($updates = []): SharQ
     {// 2023-06-06
         $iSingle = &$this->iSharQ->getSingle();
 
         $iSingle->onConflict = $this->columns;
-        $iSingle->merge = $updates;
+        $iSingle->merge      = $updates;
 
         return $this->iSharQ;
     }

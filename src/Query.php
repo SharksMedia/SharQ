@@ -25,11 +25,11 @@ class Query
 
     public function __construct(string $method, array $options, int $timeout, bool $cancelOnTimeout, array $bindings, string $queryUUID)
     {// 2023-05-15
-        $this->method = $method;
-        $this->options = $options;
-        $this->timeout = $timeout;
+        $this->method          = $method;
+        $this->options         = $options;
+        $this->timeout         = $timeout;
         $this->cancelOnTimeout = $cancelOnTimeout;
-        $this->bindings = $bindings;
+        $this->bindings        = $bindings;
 
         $this->queryUUID = $queryUUID;
     }
@@ -68,11 +68,14 @@ class Query
     {// 2023-05-15
         $sql = $this->getSQL();
 
-        if(in_array($this->getMethod(), [SharQ::METHOD_SELECT, SharQ::METHOD_FIRST, SharQ::METHOD_UPDATE, SharQ::METHOD_DELETE]) && ($isParameter || $this->hasAs()))
+        if (in_array($this->getMethod(), [SharQ::METHOD_SELECT, SharQ::METHOD_FIRST, SharQ::METHOD_UPDATE, SharQ::METHOD_DELETE]) && ($isParameter || $this->hasAs()))
         {
             $sql = "({$sql})";
 
-            if($this->hasAs()) $sql = $sql . ' AS ' . $iSharQCompiler->wrap($this->getAs());
+            if ($this->hasAs())
+            {
+                $sql = $sql.' AS '.$iSharQCompiler->wrap($this->getAs());
+            }
         }
 
         return $sql;

@@ -50,10 +50,10 @@ class DeletesTest extends \Codeception\Test\Unit
                     ->where('email', '=', 'foo')
                     ->delete(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'DELETE FROM `users` WHERE `email` = ?',
-                        'bindings'=>['foo']
+                        'sql'      => 'DELETE FROM `users` WHERE `email` = ?',
+                        'bindings' => ['foo']
                     ]
                 ]
             ];
@@ -88,10 +88,10 @@ class DeletesTest extends \Codeception\Test\Unit
                     ->table('users')
                     ->truncate(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'TRUNCATE `users`',
-                        'bindings'=>[]
+                        'sql'      => 'TRUNCATE `users`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -99,7 +99,7 @@ class DeletesTest extends \Codeception\Test\Unit
             return $case;
         };
 
-        foreach($cases as $name=>$caseFn)
+        foreach ($cases as $name => $caseFn)
         {
             $cases[$name] = $caseFn();
         }
@@ -107,18 +107,18 @@ class DeletesTest extends \Codeception\Test\Unit
         return $cases;
     }
 
-	/**
-	 * @dataProvider caseProvider
-	 */
+    /**
+     * @dataProvider caseProvider
+     */
     public function testSharQ(SharQ $iSharQ, array $iExpected): void
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery();
+        $iQuery         = $iSharQCompiler->toQuery();
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);

@@ -39,12 +39,35 @@ class MySQL extends Client
         $iConfig = $this->iConfig;
 
         // Don't override the values if they are already set
-        if(!isset($this->pdoOptions[\PDO::ATTR_CASE]))$this->setPDOAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
-        if(!isset($this->pdoOptions[\PDO::ATTR_ERRMODE]))$this->setPDOAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        if(!isset($this->pdoOptions[\PDO::ATTR_ORACLE_NULLS]))$this->setPDOAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
-        if(!isset($this->pdoOptions[\PDO::ATTR_STRINGIFY_FETCHES]))$this->setPDOAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
-        if(!isset($this->pdoOptions[\PDO::ATTR_EMULATE_PREPARES]))$this->setPDOAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
-        if(!isset($this->pdoOptions[\PDO::ATTR_TIMEOUT]))$this->setPDOAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
+        if (!isset($this->pdoOptions[\PDO::ATTR_CASE]))
+        {
+            $this->setPDOAttribute(\PDO::ATTR_CASE, \PDO::CASE_NATURAL);
+        }
+
+        if (!isset($this->pdoOptions[\PDO::ATTR_ERRMODE]))
+        {
+            $this->setPDOAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        }
+
+        if (!isset($this->pdoOptions[\PDO::ATTR_ORACLE_NULLS]))
+        {
+            $this->setPDOAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_NATURAL);
+        }
+
+        if (!isset($this->pdoOptions[\PDO::ATTR_STRINGIFY_FETCHES]))
+        {
+            $this->setPDOAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
+        }
+
+        if (!isset($this->pdoOptions[\PDO::ATTR_EMULATE_PREPARES]))
+        {
+            $this->setPDOAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+        }
+
+        if (!isset($this->pdoOptions[\PDO::ATTR_TIMEOUT]))
+        {
+            $this->setPDOAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
+        }
 
         $pdo = new CustomPDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword(), $this->pdoOptions);
         
@@ -65,7 +88,7 @@ class MySQL extends Client
     {
         $this->pdoOptions[$attribute] = $value;
 
-        if($this->isInitialized)
+        if ($this->isInitialized)
         {
             return $this->driver->setAttribute($attribute, $value);
         }
@@ -80,22 +103,26 @@ class MySQL extends Client
      * @return \PDOStatement
      * @throws \PDOException
      */
-    public function query(Query $iQuery, array $options=[]): \PDOStatement
+    public function query(Query $iQuery, array $options = []): \PDOStatement
     {
-        $sql = $iQuery->getSQL();
+        $sql      = $iQuery->getSQL();
         $bindings = $iQuery->getBindings();
 
-        if(!isset($this->preparedStatements[$sql]))
+        if (!isset($this->preparedStatements[$sql]))
         {
             $this->preparedStatements[$sql] = $this->driver->prepare($sql, $options);
         }
 
         $statement = $this->preparedStatements[$sql];
 
-        foreach($bindings as $i=>$value)
+        foreach ($bindings as $i => $value)
         {
             $type = \PDO::PARAM_STR;
-            if(is_int($value)) $type = \PDO::PARAM_INT;
+
+            if (is_int($value))
+            {
+                $type = \PDO::PARAM_INT;
+            }
 
             $statement->bindValue($i + 1, $value, $type);
         }
@@ -113,12 +140,19 @@ class MySQL extends Client
      */
     public function wrapIdentifier(string $identifier, string $context): string
     {// 2023-05-10
-        if($identifier === '*') return $identifier;
+        if ($identifier === '*')
+        {
+            return $identifier;
+        }
 
         $parts = explode('.', $identifier);
-        foreach($parts as &$part)
+
+        foreach ($parts as &$part)
         {
-            if($part === '*') continue;
+            if ($part === '*')
+            {
+                continue;
+            }
 
             $part = '`'.str_replace('`', '\\`', $part).'`';
         }
@@ -167,7 +201,6 @@ class MySQL extends Client
      */
     public function beginTransaction(): bool
     {// 2023-01-10
-
         return $this->driver->beginTransaction();
 
         // $this->transactionCounter++;
@@ -219,6 +252,5 @@ class MySQL extends Client
     {
         return $this->driver->lastInsertId();
     }
-
 }
 

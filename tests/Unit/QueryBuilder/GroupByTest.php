@@ -51,10 +51,10 @@ class GroupByTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->groupBy('id', 'email'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` GROUP BY `id`, `email`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` GROUP BY `id`, `email`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -71,10 +71,10 @@ class GroupByTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->groupByRaw('id', 'email'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` GROUP BY id, email',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` GROUP BY id, email',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -82,7 +82,7 @@ class GroupByTest extends \Codeception\Test\Unit
             return $case;
         };
 
-        foreach($cases as $name=>$caseFn)
+        foreach ($cases as $name => $caseFn)
         {
             $cases[$name] = $caseFn();
         }
@@ -90,18 +90,18 @@ class GroupByTest extends \Codeception\Test\Unit
         return $cases;
     }
 
-	/**
-	 * @dataProvider caseProvider
-	 */
+    /**
+     * @dataProvider caseProvider
+     */
     public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery('select');
+        $iQuery         = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);

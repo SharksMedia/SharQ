@@ -51,11 +51,11 @@ class JoinsTest extends \Codeception\Test\Unit
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery('select');
+        $iQuery         = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);
@@ -71,10 +71,10 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->crossJoin('contracts')
                 ->crossJoin('photos'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` CROSS JOIN `contracts` CROSS JOIN `photos`',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` CROSS JOIN `contracts` CROSS JOIN `photos`',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -91,10 +91,10 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->crossJoin('contracts', 'users.contractId', 'contracts.id'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` CROSS JOIN `contracts` ON(`users`.`contractId` = `contracts`.`id`)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` CROSS JOIN `contracts` ON(`users`.`contractId` = `contracts`.`id`)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -112,10 +112,10 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', 'users.id', '=', 'contacts.id')
                 ->leftJoin('photos', 'users.id', '=', 'photos.id'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id`) LEFT JOIN `photos` ON(`users`.`id` = `photos`.`id`)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id`) LEFT JOIN `photos` ON(`users`.`id` = `photos`.`id`)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -129,14 +129,14 @@ class JoinsTest extends \Codeception\Test\Unit
         [
             self::qb()
                 ->select('*')
-            ->from('users')
-            ->rightJoin('contacts', 'users.id', '=', 'contacts.id')
-            ->rightOuterJoin('photos', 'users.id', '=', 'photos.id'),
+                ->from('users')
+                ->rightJoin('contacts', 'users.id', '=', 'contacts.id')
+                ->rightOuterJoin('photos', 'users.id', '=', 'photos.id'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` RIGHT JOIN `contacts` ON(`users`.`id` = `contacts`.`id`) RIGHT OUTER JOIN `photos` ON(`users`.`id` = `photos`.`id`)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` RIGHT JOIN `contacts` ON(`users`.`id` = `contacts`.`id`) RIGHT OUTER JOIN `photos` ON(`users`.`id` = `photos`.`id`)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -154,13 +154,13 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->orOn('users.name', '=', 'contacts.name');
+                        ->orOn('users.name', '=', 'contacts.name');
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` OR `users`.`name` = `contacts`.`name`)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` OR `users`.`name` = `contacts`.`name`)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -180,14 +180,14 @@ class JoinsTest extends \Codeception\Test\Unit
                     $q->on(function($q)
                     {
                         $q->on('users.id', '=', 'contacts.id')
-                          ->orOn('users.name', '=', 'contacts.name');
+                            ->orOn('users.name', '=', 'contacts.name');
                     });
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON((`users`.`id` = `contacts`.`id` OR `users`.`name` = `contacts`.`name`))',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON((`users`.`id` = `contacts`.`id` OR `users`.`name` = `contacts`.`name`))',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -205,13 +205,13 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onIn('users.name', []);
+                        ->onIn('users.name', []);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND 1 = 0)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND 1 = 0)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -225,15 +225,15 @@ class JoinsTest extends \Codeception\Test\Unit
         [
             self::qb()
                 ->select('*')
-            ->from('users')
-            ->join('contacts', 'user.id', self::raw(1))
+                ->from('users')
+                ->join('contacts', 'user.id', self::raw(1))
             // ->leftJoin('photos', 'photos.title', '=', self::raw('?', ['My Photo'])),
-            ->leftJoin('photos', 'photos.title', '=', self::raw('?', 'My Photo')),
+                ->leftJoin('photos', 'photos.title', '=', self::raw('?', 'My Photo')),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`user`.`id` = 1) LEFT JOIN `photos` ON(`photos`.`title` = ?)',
-                    'bindings'=>['My Photo']
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`user`.`id` = 1) LEFT JOIN `photos` ON(`photos`.`title` = ?)',
+                    'bindings' => ['My Photo']
                 ]
             ]
         ];
@@ -246,16 +246,16 @@ class JoinsTest extends \Codeception\Test\Unit
         $case =
         [
             self::qb()
-            ->withSchema('myschema')
-            ->select('*')
-            ->from('users')
-            ->join('contacts', 'user.id', '=', 'contacts.id')
-            ->leftJoin('photos', 'users.id', '=', 'photos.id'),
+                ->withSchema('myschema')
+                ->select('*')
+                ->from('users')
+                ->join('contacts', 'user.id', '=', 'contacts.id')
+                ->leftJoin('photos', 'users.id', '=', 'photos.id'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `myschema`.`users` INNER JOIN `myschema`.`contacts` ON(`user`.`id` = `contacts`.`id`) LEFT JOIN `myschema`.`photos` ON(`users`.`id` = `photos`.`id`)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `myschema`.`users` INNER JOIN `myschema`.`contacts` ON(`user`.`id` = `contacts`.`id`) LEFT JOIN `myschema`.`photos` ON(`users`.`id` = `photos`.`id`)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -273,13 +273,13 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onNull('contacts.address');
+                        ->onNull('contacts.address');
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NULL)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NULL)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -297,14 +297,14 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                    ->onNull('contacts.address')
-                    ->orOnNull('contacts.phone');
+                        ->onNull('contacts.address')
+                        ->orOnNull('contacts.phone');
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NULL OR `contacts`.`phone` IS NULL)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NULL OR `contacts`.`phone` IS NULL)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -322,13 +322,13 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                    ->onNotNull('contacts.address');
+                        ->onNotNull('contacts.address');
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NOT NULL)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NOT NULL)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -346,14 +346,14 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onNotNull('contacts.address')
-                      ->orOnNotNull('contacts.phone');
+                        ->onNotNull('contacts.address')
+                        ->orOnNotNull('contacts.phone');
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NOT NULL OR `contacts`.`phone` IS NOT NULL)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`address` IS NOT NULL OR `contacts`.`phone` IS NOT NULL)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -367,21 +367,21 @@ class JoinsTest extends \Codeception\Test\Unit
         [
             self::qb()
                 ->select('*')
-            ->from('users')
-            ->join('contacts', function($q)
+                ->from('users')
+                ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onExists(function($q)
-                      {
-                          $q->select('*')
-                            ->from('foo');
-                      });
+                        ->onExists(function($q)
+                        {
+                            $q->select('*')
+                                ->from('foo');
+                        });
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND EXISTS(SELECT * FROM `foo`))',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND EXISTS(SELECT * FROM `foo`))',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -395,26 +395,26 @@ class JoinsTest extends \Codeception\Test\Unit
         [
             self::qb()
                 ->select('*')
-            ->from('users')
-            ->join('contacts', function($q)
+                ->from('users')
+                ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onExists(function($q)
+                        ->onExists(function($q)
                         {
                             $q->select('*')
-                              ->from('foo');
+                                ->from('foo');
                         })
                         ->orOnExists(function($q)
                         {
                             $q->select('*')
-                              ->from('bar');
+                                ->from('bar');
                         });
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND EXISTS(SELECT * FROM `foo`) OR EXISTS(SELECT * FROM `bar`))',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND EXISTS(SELECT * FROM `foo`) OR EXISTS(SELECT * FROM `bar`))',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -432,17 +432,17 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onNotExists(function($q)
+                        ->onNotExists(function($q)
                         {
                             $q->select('*')
-                              ->from('foo');
+                                ->from('foo');
                         });
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND NOT EXISTS(SELECT * FROM `foo`))',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND NOT EXISTS(SELECT * FROM `foo`))',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -460,22 +460,22 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onNotExists(function($q)
+                        ->onNotExists(function($q)
                         {
                             $q->select('*')
-                              ->from('foo');
+                                ->from('foo');
                         })
                         ->orOnNotExists(function($q)
                         {
                             $q->select('*')
-                              ->from('bar');
+                                ->from('bar');
                         });
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND NOT EXISTS(SELECT * FROM `foo`) OR NOT EXISTS(SELECT * FROM `bar`))',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND NOT EXISTS(SELECT * FROM `foo`) OR NOT EXISTS(SELECT * FROM `bar`))',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -493,13 +493,13 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onBetween('contacts.id', [7, 15]);
+                        ->onBetween('contacts.id', [7, 15]);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` BETWEEN ? AND ?)',
-                    'bindings'=>[7, 15]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` BETWEEN ? AND ?)',
+                    'bindings' => [7, 15]
                 ]
             ]
         ];
@@ -517,14 +517,14 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onBetween('contacts.id', [7, 15])
-                      ->orOnBetween('users.id', [9, 14]);
+                        ->onBetween('contacts.id', [7, 15])
+                        ->orOnBetween('users.id', [9, 14]);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` BETWEEN ? AND ? OR `users`.`id` BETWEEN ? AND ?)',
-                    'bindings'=>[7, 15, 9, 14]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` BETWEEN ? AND ? OR `users`.`id` BETWEEN ? AND ?)',
+                    'bindings' => [7, 15, 9, 14]
                 ]
             ]
         ];
@@ -542,13 +542,13 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onNotBetween('contacts.id', [7, 15]);
+                        ->onNotBetween('contacts.id', [7, 15]);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT BETWEEN ? AND ?)',
-                    'bindings'=>[7, 15]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT BETWEEN ? AND ?)',
+                    'bindings' => [7, 15]
                 ]
             ]
         ];
@@ -566,14 +566,14 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onNotBetween('contacts.id', [7, 15])
-                      ->orOnNotBetween('users.id', [9, 14]);
+                        ->onNotBetween('contacts.id', [7, 15])
+                        ->orOnNotBetween('users.id', [9, 14]);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT BETWEEN ? AND ? OR `users`.`id` NOT BETWEEN ? AND ?)',
-                    'bindings'=>[7, 15, 9, 14]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT BETWEEN ? AND ? OR `users`.`id` NOT BETWEEN ? AND ?)',
+                    'bindings' => [7, 15, 9, 14]
                 ]
             ]
         ];
@@ -591,13 +591,13 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onIn('contacts.id', [7, 15, 23, 41]);
+                        ->onIn('contacts.id', [7, 15, 23, 41]);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?))',
-                    'bindings'=>[7, 15, 23, 41]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?))',
+                    'bindings' => [7, 15, 23, 41]
                 ]
             ]
         ];
@@ -615,14 +615,14 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onIn('contacts.id', [7, 15, 23, 41])
-                      ->orOnIn('users.id', [21, 37]);
+                        ->onIn('contacts.id', [7, 15, 23, 41])
+                        ->orOnIn('users.id', [21, 37]);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?) OR `users`.`id` IN(?, ?))',
-                    'bindings'=>[7, 15, 23, 41, 21, 37]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?) OR `users`.`id` IN(?, ?))',
+                    'bindings' => [7, 15, 23, 41, 21, 37]
                 ]
             ]
         ];
@@ -640,19 +640,19 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onIn('contacts.id', [7, 15, 23, 41])
-                      ->orOnIn('users.id', function($q)
-                      {
-                          $q->select('id')
-                            ->from('users')
-                            ->where('age', '>', 18);
-                      });
+                        ->onIn('contacts.id', [7, 15, 23, 41])
+                        ->orOnIn('users.id', function($q)
+                        {
+                            $q->select('id')
+                                ->from('users')
+                                ->where('age', '>', 18);
+                        });
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?) OR `users`.`id` IN(SELECT `id` FROM `users` WHERE `age` > ?))',
-                    'bindings'=>[7, 15, 23, 41, 18]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` IN(?, ?, ?, ?) OR `users`.`id` IN(SELECT `id` FROM `users` WHERE `age` > ?))',
+                    'bindings' => [7, 15, 23, 41, 18]
                 ]
             ]
         ];
@@ -670,13 +670,13 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onNotIn('contacts.id', [7, 15, 23, 41]);
+                        ->onNotIn('contacts.id', [7, 15, 23, 41]);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT IN(?, ?, ?, ?))',
-                    'bindings'=>[7, 15, 23, 41]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT IN(?, ?, ?, ?))',
+                    'bindings' => [7, 15, 23, 41]
                 ]
             ]
         ];
@@ -694,14 +694,14 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->join('contacts', function($q)
                 {
                     $q->on('users.id', '=', 'contacts.id')
-                      ->onNotIn('contacts.id', [7, 15, 23, 41])
-                      ->orOnNotIn('users.id', [21, 37]);
+                        ->onNotIn('contacts.id', [7, 15, 23, 41])
+                        ->orOnNotIn('users.id', [21, 37]);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT IN(?, ?, ?, ?) OR `users`.`id` NOT IN(?, ?))',
-                    'bindings'=>[7, 15, 23, 41, 21, 37]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id` AND `contacts`.`id` NOT IN(?, ?, ?, ?) OR `users`.`id` NOT IN(?, ?))',
+                    'bindings' => [7, 15, 23, 41, 21, 37]
                 ]
             ]
         ];
@@ -719,13 +719,13 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->leftOuterJoin('student_languages', function($q)
                 {
                     $q->on('student.id', 'student_languages.student_id')
-                      ->andOn('student_languages.code', self::raw('?', 'en_US'));
+                        ->andOn('student_languages.code', self::raw('?', 'en_US'));
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `student` LEFT OUTER JOIN `student_languages` ON(`student`.`id` = `student_languages`.`student_id` AND `student_languages`.`code` = ?)',
-                    'bindings'=>['en_US']
+                    'sql'      => 'SELECT * FROM `student` LEFT OUTER JOIN `student_languages` ON(`student`.`id` = `student_languages`.`student_id` AND `student_languages`.`code` = ?)',
+                    'bindings' => ['en_US']
                 ]
             ]
         ];
@@ -743,10 +743,10 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->joinRaw('natural full join table1')
                 ->where('id', 1),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `accounts` natural full join table1 WHERE `id` = ?',
-                    'bindings'=>[1]
+                    'sql'      => 'SELECT * FROM `accounts` natural full join table1 WHERE `id` = ?',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -763,10 +763,10 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->from('accounts')
                 ->innerJoin('table1', self::raw('ST_Contains(buildings_pluto.geom, ST_Centroid(buildings_building.geom))')),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `accounts` INNER JOIN `table1` ON(ST_Contains(buildings_pluto.geom, ST_Centroid(buildings_building.geom)))',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `accounts` INNER JOIN `table1` ON(ST_Contains(buildings_pluto.geom, ST_Centroid(buildings_building.geom)))',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -786,10 +786,10 @@ class JoinsTest extends \Codeception\Test\Unit
                     $q->using('id');
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `accounts` INNER JOIN `table1` USING(`id`)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `accounts` INNER JOIN `table1` USING(`id`)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -809,10 +809,10 @@ class JoinsTest extends \Codeception\Test\Unit
                     $q->using(['id', 'test']);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `accounts` INNER JOIN `table1` USING(`id`, `test`)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `accounts` INNER JOIN `table1` USING(`id`, `test`)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -834,10 +834,10 @@ class JoinsTest extends \Codeception\Test\Unit
                     'B.x'
                 ),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT `A`.`nid` AS `id` FROM nidmap2 AS A INNER JOIN (SELECT MIN(nid) AS location_id FROM nidmap2) AS B ON(`A`.`x` = `B`.`x`)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT `A`.`nid` AS `id` FROM nidmap2 AS A INNER JOIN (SELECT MIN(nid) AS location_id FROM nidmap2) AS B ON(`A`.`x` = `B`.`x`)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -854,10 +854,10 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->join('photos', 'photos.id', 0),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `photos` ON(`photos`.`id` = ?)',
-                    'bindings'=>[0]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `photos` ON(`photos`.`id` = ?)',
+                    'bindings' => [0]
                 ]
             ]
         ];
@@ -874,10 +874,10 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->join('photos', 'photos.id', '>', 0),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `photos` ON(`photos`.`id` > ?)',
-                    'bindings'=>[0]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `photos` ON(`photos`.`id` > ?)',
+                    'bindings' => [0]
                 ]
             ]
         ];
@@ -894,10 +894,10 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->join('photos as p', 'p.id', '>', 0),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN `photos` AS `p` ON(`p`.`id` > ?)',
-                    'bindings'=>[0]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `photos` AS `p` ON(`p`.`id` > ?)',
+                    'bindings' => [0]
                 ]
             ]
         ];
@@ -908,10 +908,10 @@ class JoinsTest extends \Codeception\Test\Unit
     public function testJoinOnQuery(): void
     {
         $qb = self::qb()
-                ->select('userID')
-                ->from('users')
-                ->where('userID', 1)
-                ->as('u');
+            ->select('userID')
+            ->from('users')
+            ->where('userID', 1)
+            ->as('u');
 
         $case =
         [
@@ -920,10 +920,10 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->join($qb, 'users.userID', '=', 'p.userID'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` INNER JOIN (SELECT `userID` FROM `users` WHERE `userID` = ?) AS `u` ON(`users`.`userID` = `p`.`userID`)',
-                    'bindings'=>[1]
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN (SELECT `userID` FROM `users` WHERE `userID` = ?) AS `u` ON(`users`.`userID` = `p`.`userID`)',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -941,16 +941,14 @@ class JoinsTest extends \Codeception\Test\Unit
                 ->leftJoin('a', 'a.id', '=', 'p.userID')
                 ->join('p', 'users.userID', '=', 'p.userID'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` LEFT JOIN `a` ON(`a`.`id` = `p`.`userID`) INNER JOIN `p` ON(`users`.`userID` = `p`.`userID`)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` LEFT JOIN `a` ON(`a`.`id` = `p`.`userID`) INNER JOIN `p` ON(`users`.`userID` = `p`.`userID`)',
+                    'bindings' => []
                 ]
             ]
         ];
 
         $this->_testSharQ(...$case);
     }
-
-    
 }

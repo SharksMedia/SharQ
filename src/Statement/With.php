@@ -13,9 +13,9 @@ use Sharksmedia\SharQ\Statement\IStatement;
 
 class With implements IStatement, IAliasable
 {
-    public const TYPE_WRAPPED = 'WITH_WRAPPED';
-    public const TYPE_RECURSIVE_WRAPPED = 'WITH_RECURSIVE_WRAPPED';
-    public const TYPE_MATERIALIZED_WRAPPED = 'WITH_MATERIALIZED_WRAPPED';
+    public const TYPE_WRAPPED                  = 'WITH_WRAPPED';
+    public const TYPE_RECURSIVE_WRAPPED        = 'WITH_RECURSIVE_WRAPPED';
+    public const TYPE_MATERIALIZED_WRAPPED     = 'WITH_MATERIALIZED_WRAPPED';
     public const TYPE_NOT_MATERIALIZED_WRAPPED = 'WITH_NOT_MATERIALIZED_WRAPPED';
 
     private string $type;
@@ -24,7 +24,7 @@ class With implements IStatement, IAliasable
     private ?array  $columnList;
     private $value;
 
-    public function __construct(string $type, string $alias, ?array $columnList, $value=null)
+    public function __construct(string $type, string $alias, ?array $columnList, $value = null)
     {// 2023-06-07
         $this->as($alias);
 

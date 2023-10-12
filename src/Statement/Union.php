@@ -18,7 +18,7 @@ class Union implements IStatement
     public const TYPE_ALL               = 'UNION_ALL';
 
     private string      $type;
-    private             $statement;
+    private $statement;
     private bool        $wrap;
 
     public function getClass(): string
@@ -46,9 +46,9 @@ class Union implements IStatement
      */
     public function __construct(string $type, $statement, bool $wrap)
     {// 2023-05-08
-        $this->type = $type;
+        $this->type      = $type;
         $this->statement = $statement;
-        $this->wrap = $wrap;
+        $this->wrap      = $wrap;
     }
 
     /**
@@ -66,11 +66,21 @@ class Union implements IStatement
 
     public function getClause(): string
     {// 2023-06-07
-        if($this->getType() === self::TYPE_BASIC) return 'UNION';
-        if($this->getType() === self::TYPE_ALL) return 'UNION ALL';
-        if($this->getType() === self::TYPE_INTERSECT) return 'INTERSECT';
+        if ($this->getType() === self::TYPE_BASIC)
+        {
+            return 'UNION';
+        }
 
-        throw new \Exception('Invalid union type "' . $this->getType() . '"');
+        if ($this->getType() === self::TYPE_ALL)
+        {
+            return 'UNION ALL';
+        }
+
+        if ($this->getType() === self::TYPE_INTERSECT)
+        {
+            return 'INTERSECT';
+        }
+
+        throw new \Exception('Invalid union type "'.$this->getType().'"');
     }
-
 }

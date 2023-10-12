@@ -47,12 +47,12 @@ class InsertsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->into('users')
-                    ->insert(['email'=>'foo']),
+                    ->insert(['email' => 'foo']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `users` (`email`) VALUES (?)',
-                        'bindings'=>['foo']
+                        'sql'      => 'INSERT INTO `users` (`email`) VALUES (?)',
+                        'bindings' => ['foo']
                     ]
                 ]
             ];
@@ -67,14 +67,14 @@ class InsertsTest extends \Codeception\Test\Unit
                 self::qb()
                     ->from('users')
                     ->insert([
-                        ['email'=>'foo', 'name'=>'taylor'],
-                        ['email'=>'bar', 'name'=>'dayle'],
+                        ['email' => 'foo', 'name' => 'taylor'],
+                        ['email' => 'bar', 'name' => 'dayle'],
                     ]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (?, ?)',
-                        'bindings'=>['foo', 'taylor', 'bar', 'dayle']
+                        'sql'      => 'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (?, ?)',
+                        'bindings' => ['foo', 'taylor', 'bar', 'dayle']
                     ]
                 ]
             ];
@@ -112,14 +112,14 @@ class InsertsTest extends \Codeception\Test\Unit
                 self::qb()
                     ->from('users')
                     ->insert([
-                        ['email'=>'foo', 'name'=>'taylor'],
-                        ['name'=>'dayle'],
+                        ['email' => 'foo', 'name' => 'taylor'],
+                        ['name' => 'dayle'],
                     ]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (DEFAULT, ?)',
-                        'bindings'=>['foo', 'taylor', 'dayle']
+                        'sql'      => 'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (DEFAULT, ?)',
+                        'bindings' => ['foo', 'taylor', 'dayle']
                     ]
                 ]
             ];
@@ -155,14 +155,14 @@ class InsertsTest extends \Codeception\Test\Unit
                 self::qb()
                     ->from('users')
                     ->insert([
-                        ['email'=>'foo', 'name'=>'taylor'],
-                        ['email'=>'bar', 'name'=>'dayle'],
+                        ['email' => 'foo', 'name' => 'taylor'],
+                        ['email' => 'bar', 'name' => 'dayle'],
                     ], ['id']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (?, ?)',
-                        'bindings'=>['foo', 'taylor', 'bar', 'dayle']
+                        'sql'      => 'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (?, ?)',
+                        'bindings' => ['foo', 'taylor', 'bar', 'dayle']
                     ]
                 ]
             ];
@@ -177,14 +177,14 @@ class InsertsTest extends \Codeception\Test\Unit
                 self::qb()
                     ->from('users')
                     ->insert([
-                        ['email'=>'foo', 'name'=>'taylor'],
-                        ['email'=>'bar', 'name'=>'dayle'],
+                        ['email' => 'foo', 'name' => 'taylor'],
+                        ['email' => 'bar', 'name' => 'dayle'],
                     ], ['id', 'name']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (?, ?)',
-                        'bindings'=>['foo', 'taylor', 'bar', 'dayle']
+                        'sql'      => 'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (?, ?)',
+                        'bindings' => ['foo', 'taylor', 'bar', 'dayle']
                     ]
                 ]
             ];
@@ -197,13 +197,13 @@ class InsertsTest extends \Codeception\Test\Unit
             $case =
             [
                 self::qb()
-                    ->insert(['email'=>self::raw('CURRENT TIMESTAMP')])
+                    ->insert(['email' => self::raw('CURRENT TIMESTAMP')])
                     ->into('users'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `users` (`email`) VALUES (CURRENT TIMESTAMP)',
-                        'bindings'=>[]
+                        'sql'      => 'INSERT INTO `users` (`email`) VALUES (CURRENT TIMESTAMP)',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -223,10 +223,10 @@ class InsertsTest extends \Codeception\Test\Unit
                     ])
                     ->into('table'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `table` (`a`, `b`, `c`) VALUES (?, DEFAULT, DEFAULT), (DEFAULT, ?, DEFAULT), (?, DEFAULT, ?)',
-                        'bindings'=>[1, 2, 2, 3]
+                        'sql'      => 'INSERT INTO `table` (`a`, `b`, `c`) VALUES (?, DEFAULT, DEFAULT), (DEFAULT, ?, DEFAULT), (?, DEFAULT, ?)',
+                        'bindings' => [1, 2, 2, 3]
                     ]
                 ]
             ];
@@ -298,13 +298,13 @@ class InsertsTest extends \Codeception\Test\Unit
             $case =
             [
                 self::qb()
-                    ->insert(['email'=>self::raw('CURRENT TIMESTAMP')])
+                    ->insert(['email' => self::raw('CURRENT TIMESTAMP')])
                     ->into('users'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `users` (`email`) VALUES (CURRENT TIMESTAMP)',
-                        'bindings'=>[]
+                        'sql'      => 'INSERT INTO `users` (`email`) VALUES (CURRENT TIMESTAMP)',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -322,10 +322,10 @@ class InsertsTest extends \Codeception\Test\Unit
                     ->ignore()
                     ->into('users'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT IGNORE INTO `users` (`email`) VALUES (?)',
-                        'bindings'=>['foo']
+                        'sql'      => 'INSERT IGNORE INTO `users` (`email`) VALUES (?)',
+                        'bindings' => ['foo']
                     ]
                 ]
             ];
@@ -343,10 +343,10 @@ class InsertsTest extends \Codeception\Test\Unit
                     ->ignore()
                     ->into('users'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT IGNORE INTO `users` (`email`) VALUES (?), (?)',
-                        'bindings'=>['foo', 'bar']
+                        'sql'      => 'INSERT IGNORE INTO `users` (`email`) VALUES (?), (?)',
+                        'bindings' => ['foo', 'bar']
                     ]
                 ]
             ];
@@ -364,10 +364,10 @@ class InsertsTest extends \Codeception\Test\Unit
                     ->ignore()
                     ->into('users'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT IGNORE INTO `users` (`email`) VALUES (?), (?)',
-                        'bindings'=>['foo', 'bar']
+                        'sql'      => 'INSERT IGNORE INTO `users` (`email`) VALUES (?), (?)',
+                        'bindings' => ['foo', 'bar']
                     ]
                 ]
             ];
@@ -385,10 +385,10 @@ class InsertsTest extends \Codeception\Test\Unit
                     ->ignore()
                     ->into('users'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT IGNORE INTO `users` (`email`, `org`) VALUES (?, ?)',
-                        'bindings'=>['foo', 'acme-inc']
+                        'sql'      => 'INSERT IGNORE INTO `users` (`email`, `org`) VALUES (?, ?)',
+                        'bindings' => ['foo', 'acme-inc']
                     ]
                 ]
             ];
@@ -409,10 +409,10 @@ class InsertsTest extends \Codeception\Test\Unit
                     ->onConflict('email')
                     ->merge([ 'name' => 'overidden' ]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `name` = ?',
-                        'bindings'=>['foo', 'taylor', 'bar', 'dayle', 'overidden']
+                        'sql'      => 'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `name` = ?',
+                        'bindings' => ['foo', 'taylor', 'bar', 'dayle', 'overidden']
                     ]
                 ]
             ];
@@ -433,10 +433,10 @@ class InsertsTest extends \Codeception\Test\Unit
                     ->onConflict('email')
                     ->merge(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `email` = VALUES(`email`), `name` = VALUES(`name`)',
-                        'bindings'=>['foo', 'taylor', 'bar', 'dayle']
+                        'sql'      => 'INSERT INTO `users` (`email`, `name`) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE `email` = VALUES(`email`), `name` = VALUES(`name`)',
+                        'bindings' => ['foo', 'taylor', 'bar', 'dayle']
                     ]
                 ]
             ];
@@ -450,12 +450,12 @@ class InsertsTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->from('users')
-                    ->insert(['email'=>'foo'], ['id']),
+                    ->insert(['email' => 'foo'], ['id']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `users` (`email`) VALUES (?)',
-                        'bindings'=>['foo']
+                        'sql'      => 'INSERT INTO `users` (`email`) VALUES (?)',
+                        'bindings' => ['foo']
                     ]
                 ]
             ];
@@ -470,14 +470,14 @@ class InsertsTest extends \Codeception\Test\Unit
                 self::qb()
                     ->table('entries')
                     ->insert([
-                        'secret'=>123,
-                        'sequence'=>self::qb()->count('*')->from('entries')->where('secret', 123)
+                        'secret'   => 123,
+                        'sequence' => self::qb()->count('*')->from('entries')->where('secret', 123)
                     ]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `entries` (`secret`, `sequence`) VALUES (?, (SELECT COUNT(*) FROM `entries` WHERE `secret` = ?))',
-                        'bindings'=>[123, 123]
+                        'sql'      => 'INSERT INTO `entries` (`secret`, `sequence`) VALUES (?, (SELECT COUNT(*) FROM `entries` WHERE `secret` = ?))',
+                        'bindings' => [123, 123]
                     ]
                 ]
             ];
@@ -500,10 +500,10 @@ class InsertsTest extends \Codeception\Test\Unit
                             })
                     ),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO recipients (recipient_id, email) SELECT ?, ? WHERE NOT EXISTS(SELECT 1 FROM `recipients` WHERE `recipient_id` = ?)',
-                        'bindings'=>[1, 'foo@bar.com', 1]
+                        'sql'      => 'INSERT INTO recipients (recipient_id, email) SELECT ?, ? WHERE NOT EXISTS(SELECT 1 FROM `recipients` WHERE `recipient_id` = ?)',
+                        'bindings' => [1, 'foo@bar.com', 1]
                     ]
                 ]
             ];
@@ -575,10 +575,10 @@ class InsertsTest extends \Codeception\Test\Unit
                         $q->select('*')->from('votes')->where('id', 99);
                     }),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `votes` SELECT * FROM `votes` WHERE `id` = ?',
-                        'bindings'=>[99]
+                        'sql'      => 'INSERT INTO `votes` SELECT * FROM `votes` WHERE `id` = ?',
+                        'bindings' => [99]
                     ]
                 ]
             ];
@@ -594,10 +594,10 @@ class InsertsTest extends \Codeception\Test\Unit
                     ->into('votes')
                     ->insert(self::qb()->select('*')->from('votes')->where('id', 99)),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `votes` SELECT * FROM `votes` WHERE `id` = ?',
-                        'bindings'=>[99]
+                        'sql'      => 'INSERT INTO `votes` SELECT * FROM `votes` WHERE `id` = ?',
+                        'bindings' => [99]
                     ]
                 ]
             ];
@@ -612,14 +612,14 @@ class InsertsTest extends \Codeception\Test\Unit
                 self::qb()
                     ->table('entries')
                     ->insert([
-                        'secret'=>123,
-                        'sequence'=>self::qb()->count('*')->from('entries')->where('secret', 123)
+                        'secret'   => 123,
+                        'sequence' => self::qb()->count('*')->from('entries')->where('secret', 123)
                     ]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'INSERT INTO `entries` (`secret`, `sequence`) VALUES (?, (SELECT COUNT(*) FROM `entries` WHERE `secret` = ?))',
-                        'bindings'=>[123, 123]
+                        'sql'      => 'INSERT INTO `entries` (`secret`, `sequence`) VALUES (?, (SELECT COUNT(*) FROM `entries` WHERE `secret` = ?))',
+                        'bindings' => [123, 123]
                     ]
                 ]
             ];
@@ -649,7 +649,7 @@ class InsertsTest extends \Codeception\Test\Unit
         //     return $case;
         // };
 
-        foreach($cases as $name=>$caseFn)
+        foreach ($cases as $name => $caseFn)
         {
             $cases[$name] = $caseFn();
         }
@@ -657,18 +657,18 @@ class InsertsTest extends \Codeception\Test\Unit
         return $cases;
     }
 
-	/**
-	 * @dataProvider caseProvider
-	 */
+    /**
+     * @dataProvider caseProvider
+     */
     public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery();
+        $iQuery         = $iSharQCompiler->toQuery();
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);

@@ -51,10 +51,10 @@ class OrderByTest extends \Codeception\Test\Unit
                     ->orderBy('email')
                     ->orderBy('age', 'desc'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY `email` ASC, `age` DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY `email` ASC, `age` DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -69,12 +69,12 @@ class OrderByTest extends \Codeception\Test\Unit
                 self::qb()
                     ->select('*')
                     ->from('users')
-                    ->orderBy(['email', 'age'=>'desc']),
+                    ->orderBy(['email', 'age' => 'desc']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY `email` ASC, `age` DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY `email` ASC, `age` DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -88,13 +88,13 @@ class OrderByTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->select('*')
-                ->from('users')
-                ->orderBy([['column'=>'email'], ['column'=>'age', 'order'=>'desc']]),
+                    ->from('users')
+                    ->orderBy([['column' => 'email'], ['column' => 'age', 'order' => 'desc']]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY `email` ASC, `age` DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY `email` ASC, `age` DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -111,16 +111,16 @@ class OrderByTest extends \Codeception\Test\Unit
                     ->from('persons')
                     ->orderBy(
                         self::qb()
-                        ->select()
-                        ->from('persons as p')
-                        ->whereColumn('persons.id', 'p.id')
-                        ->select('p.id')
-                ),
+                            ->select()
+                            ->from('persons as p')
+                            ->whereColumn('persons.id', 'p.id')
+                            ->select('p.id')
+                    ),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `persons` ORDER BY (SELECT `p`.`id` FROM `persons` AS `p` WHERE `persons`.`id` = `p`.`id`) ASC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `persons` ORDER BY (SELECT `p`.`id` FROM `persons` AS `p` WHERE `persons`.`id` = `p`.`id`) ASC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -137,10 +137,10 @@ class OrderByTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->orderBy(self::raw('col NULLS LAST')),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY col NULLS LAST ASC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY col NULLS LAST ASC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -157,10 +157,10 @@ class OrderByTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->orderBy(self::raw('col NULLS LAST'), 'desc'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY col NULLS LAST DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY col NULLS LAST DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -177,10 +177,10 @@ class OrderByTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->orderByRaw('col NULLS LAST DESC'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY col NULLS LAST DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY col NULLS LAST DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -218,10 +218,10 @@ class OrderByTest extends \Codeception\Test\Unit
                     ->orderBy('email')
                     ->orderBy('age', 'desc'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY `email` ASC, `age` DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY `email` ASC, `age` DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -237,10 +237,10 @@ class OrderByTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->orderBy('foo', 'desc', 'first'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY (`foo` IS NOT NULL) DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY (`foo` IS NOT NULL) DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -253,13 +253,13 @@ class OrderByTest extends \Codeception\Test\Unit
             $case =
             [
                 self::qb()
-                     ->select('*')
-                     ->orderBy([ ['column'=>'foo', 'order'=>'desc', 'nulls'=>'first'] ]),
+                    ->select('*')
+                    ->orderBy([ ['column' => 'foo', 'order' => 'desc', 'nulls' => 'first'] ]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * ORDER BY (`foo` IS NOT NULL) DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * ORDER BY (`foo` IS NOT NULL) DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -275,10 +275,10 @@ class OrderByTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->orderBy('foo', 'desc', 'last'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY (`foo` IS NULL) DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY (`foo` IS NULL) DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -292,12 +292,12 @@ class OrderByTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->from('users')
-                    ->orderBy([ ['column'=>'foo', 'order'=>'desc', 'nulls'=>'last'] ]),
+                    ->orderBy([ ['column' => 'foo', 'order' => 'desc', 'nulls' => 'last'] ]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY (`foo` IS NULL) DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY (`foo` IS NULL) DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -314,17 +314,18 @@ class OrderByTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->orderBy('email', 'desc'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY `email` DESC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY `email` DESC',
+                        'bindings' => []
                     ]
                 ]
             ];
 
             return $case;
         };
-        foreach($cases as $name=>$caseFn)
+
+        foreach ($cases as $name => $caseFn)
         {
             $cases[$name] = $caseFn();
         }
@@ -332,18 +333,18 @@ class OrderByTest extends \Codeception\Test\Unit
         return $cases;
     }
 
-	/**
-	 * @dataProvider caseProvider
-	 */
+    /**
+     * @dataProvider caseProvider
+     */
     public function testSharQ(SharQ $iSharQ, array $iExpected): void
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery();
+        $iQuery         = $iSharQCompiler->toQuery();
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);

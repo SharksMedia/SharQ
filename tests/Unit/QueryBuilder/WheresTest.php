@@ -40,11 +40,11 @@ class WheresTest extends \Codeception\Test\Unit
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery('select');
+        $iQuery         = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);
@@ -61,18 +61,18 @@ class WheresTest extends \Codeception\Test\Unit
 
         $iSharQCompiler = new SharQCompiler(self::getClient(), $qb, []);
 
-        $iQuery = $iSharQCompiler->toQuery('select');
+        $iQuery         = $iSharQCompiler->toQuery('select');
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame(
             [
-            'sql'=>'SELECT * FROM `testtable` WHERE `id` IN(?) AND `name` LIKE ?',
-            'bindings'=>[1, '%test%']
-        ],
+                'sql'      => 'SELECT * FROM `testtable` WHERE `id` IN(?) AND `name` LIKE ?',
+                'bindings' => [1, '%test%']
+            ],
             $sqlAndBindings
         );
     }
@@ -86,10 +86,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where('id', '=', 1),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ?',
-                    'bindings'=>[1]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ?',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -106,10 +106,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereLike('name', 'luk%'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `name` LIKE ? COLLATE utf8_bin',
-                    'bindings'=>['luk%']
+                    'sql'      => 'SELECT * FROM `users` WHERE `name` LIKE ? COLLATE utf8_bin',
+                    'bindings' => ['luk%']
                 ]
             ]
         ];
@@ -126,10 +126,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereILike('name', 'luk%'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `name` LIKE ?',
-                    'bindings'=>['luk%']
+                    'sql'      => 'SELECT * FROM `users` WHERE `name` LIKE ?',
+                    'bindings' => ['luk%']
                 ]
             ]
         ];
@@ -148,10 +148,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->andWhereLike('name', 'luk2%')
                 ->orWhereLike('name', 'luk3%'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `name` LIKE ? COLLATE utf8_bin AND `name` LIKE ? COLLATE utf8_bin OR `name` LIKE ? COLLATE utf8_bin',
-                    'bindings'=>['luk1%', 'luk2%', 'luk3%']
+                    'sql'      => 'SELECT * FROM `users` WHERE `name` LIKE ? COLLATE utf8_bin AND `name` LIKE ? COLLATE utf8_bin OR `name` LIKE ? COLLATE utf8_bin',
+                    'bindings' => ['luk1%', 'luk2%', 'luk3%']
                 ]
             ]
         ];
@@ -170,10 +170,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->andWhereILike('name', 'luk2%')
                 ->orWhereILike('name', 'luk3%'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `name` LIKE ? AND `name` LIKE ? OR `name` LIKE ?',
-                    'bindings'=>['luk1%', 'luk2%', 'luk3%']
+                    'sql'      => 'SELECT * FROM `users` WHERE `name` LIKE ? AND `name` LIKE ? OR `name` LIKE ?',
+                    'bindings' => ['luk1%', 'luk2%', 'luk3%']
                 ]
             ]
         ];
@@ -190,10 +190,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereColumn('users.id', '=', 'users.otherId'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `users`.`id` = `users`.`otherId`',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` WHERE `users`.`id` = `users`.`otherId`',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -210,10 +210,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereNot('id', '=', 1),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE NOT `id` = ?',
-                    'bindings'=>[1]
+                    'sql'      => 'SELECT * FROM `users` WHERE NOT `id` = ?',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -228,15 +228,16 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('*')
                 ->from('users')
-                ->whereNot(function ($q) {
+                ->whereNot(function ($q)
+                {
                     $q->where('id', '=', 1)
-                      ->orWhereNot('id', '=', 3);
+                        ->orWhereNot('id', '=', 3);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE NOT (`id` = ? OR NOT `id` = ?)',
-                    'bindings'=>[1, 3]
+                    'sql'      => 'SELECT * FROM `users` WHERE NOT (`id` = ? OR NOT `id` = ?)',
+                    'bindings' => [1, 3]
                 ]
             ]
         ];
@@ -251,15 +252,16 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('*')
                 ->from('users')
-                ->where(function ($q) {
+                ->where(function ($q)
+                {
                     $q->where('id', '=', 1)
-                      ->orWhereNot('id', '=', 3);
+                        ->orWhereNot('id', '=', 3);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE (`id` = ? OR NOT `id` = ?)',
-                    'bindings'=>[1, 3]
+                    'sql'      => 'SELECT * FROM `users` WHERE (`id` = ? OR NOT `id` = ?)',
+                    'bindings' => [1, 3]
                 ]
             ]
         ];
@@ -274,12 +276,12 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('*')
                 ->from('users')
-                ->whereNot(['first_name'=>'Test', 'last_name'=>'User']),
+                ->whereNot(['first_name' => 'Test', 'last_name' => 'User']),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE NOT `first_name` = ? AND NOT `last_name` = ?',
-                    'bindings'=>['Test', 'User']
+                    'sql'      => 'SELECT * FROM `users` WHERE NOT `first_name` = ? AND NOT `last_name` = ?',
+                    'bindings' => ['Test', 'User']
                 ]
             ]
         ];
@@ -296,10 +298,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where(true),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE 1 = 1',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` WHERE 1 = 1',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -317,16 +319,15 @@ class WheresTest extends \Codeception\Test\Unit
                 ->where('id', null)
                 ->andWhere('name', '!=', null),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` IS NULL AND `name` IS NOT NULL',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` IS NULL AND `name` IS NOT NULL',
+                    'bindings' => []
                 ]
             ]
         ];
 
         $this->_testSharQ(...$case);
-
     }
 
     public function testWhereBetweens(): void
@@ -338,10 +339,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereBetween('id', [1, 2]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` BETWEEN ? AND ?',
-                    'bindings'=>[1, 2]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` BETWEEN ? AND ?',
+                    'bindings' => [1, 2]
                 ]
             ]
         ];
@@ -359,10 +360,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->where('name', '=', 'user1')
                 ->andWhereBetween('id', [1, 2]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `name` = ? AND `id` BETWEEN ? AND ?',
-                    'bindings'=>['user1', 1, 2]
+                    'sql'      => 'SELECT * FROM `users` WHERE `name` = ? AND `id` BETWEEN ? AND ?',
+                    'bindings' => ['user1', 1, 2]
                 ]
             ]
         ];
@@ -380,10 +381,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->where('name', '=', 'user1')
                 ->andWhereNotBetween('id', [1, 2]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `name` = ? AND `id` NOT BETWEEN ? AND ?',
-                    'bindings'=>['user1', 1, 2]
+                    'sql'      => 'SELECT * FROM `users` WHERE `name` = ? AND `id` NOT BETWEEN ? AND ?',
+                    'bindings' => ['user1', 1, 2]
                 ]
             ]
         ];
@@ -400,10 +401,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where('id', 'BeTween', [1, 2]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` BETWEEN ? AND ?',
-                    'bindings'=>[1, 2]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` BETWEEN ? AND ?',
+                    'bindings' => [1, 2]
                 ]
             ]
         ];
@@ -420,10 +421,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereNotBetween('id', [1, 2]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` NOT BETWEEN ? AND ?',
-                    'bindings'=>[1, 2]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` NOT BETWEEN ? AND ?',
+                    'bindings' => [1, 2]
                 ]
             ]
         ];
@@ -440,10 +441,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where('id', 'not between ', [1, 2]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` NOT BETWEEN ? AND ?',
-                    'bindings'=>[1, 2]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` NOT BETWEEN ? AND ?',
+                    'bindings' => [1, 2]
                 ]
             ]
         ];
@@ -461,10 +462,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->where('id', '=', 1)
                 ->orWhere('email', '=', 'foo'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR `email` = ?',
-                    'bindings'=>[1, 'foo']
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR `email` = ?',
+                    'bindings' => [1, 'foo']
                 ]
             ]
         ];
@@ -483,10 +484,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->or()
                 ->where('email', '=', 'foo'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR `email` = ?',
-                    'bindings'=>[1, 'foo']
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR `email` = ?',
+                    'bindings' => [1, 'foo']
                 ]
             ]
         ];
@@ -503,10 +504,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where(self::raw('LCASE("name")'), 'foo'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE LCASE("name") = ?',
-                    'bindings'=>['foo']
+                    'sql'      => 'SELECT * FROM `users` WHERE LCASE("name") = ?',
+                    'bindings' => ['foo']
                 ]
             ]
         ];
@@ -523,10 +524,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where(self::raw('id = ? or email = ?', 1, 'foo')),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE id = ? or email = ?',
-                    'bindings'=>[1, 'foo']
+                    'sql'      => 'SELECT * FROM `users` WHERE id = ? or email = ?',
+                    'bindings' => [1, 'foo']
                 ]
             ]
         ];
@@ -544,10 +545,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->where('id', '=', 1)
                 ->orWhere(self::raw('email = ?', 'foo')),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR email = ?',
-                    'bindings'=>[1, 'foo']
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR email = ?',
+                    'bindings' => [1, 'foo']
                 ]
             ]
         ];
@@ -566,10 +567,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->or()
                 ->where(self::raw('email = ?', 'foo')),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR email = ?',
-                    'bindings'=>[1, 'foo']
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR email = ?',
+                    'bindings' => [1, 'foo']
                 ]
             ]
         ];
@@ -586,10 +587,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereIn('id', [1, 2, 3]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` IN(?, ?, ?)',
-                    'bindings'=>[1, 2, 3]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` IN(?, ?, ?)',
+                    'bindings' => [1, 2, 3]
                 ]
             ]
         ];
@@ -613,10 +614,10 @@ class WheresTest extends \Codeception\Test\Unit
                     ]
                 ),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE (`a`, `b`) IN((?, ?), (?, ?), (?, ?))',
-                    'bindings'=>[1, 2, 3, 4, 5, 6],
+                    'sql'      => 'SELECT * FROM `users` WHERE (`a`, `b`) IN((?, ?), (?, ?), (?, ?))',
+                    'bindings' => [1, 2, 3, 4, 5, 6],
                 ]
             ]
         ];
@@ -634,10 +635,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->where('id', '=', 1)
                 ->orWhereIn('id', [1, 2, 3]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR `id` IN(?, ?, ?)',
-                    'bindings'=>[1, 1, 2, 3],
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR `id` IN(?, ?, ?)',
+                    'bindings' => [1, 1, 2, 3],
                 ]
             ]
         ];
@@ -654,10 +655,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereNotIn('id', [1, 2, 3]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` NOT IN(?, ?, ?)',
-                    'bindings'=>[1, 2, 3],
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` NOT IN(?, ?, ?)',
+                    'bindings' => [1, 2, 3],
                 ]
             ]
         ];
@@ -677,10 +678,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->not()
                 ->whereIn('id', [1, 2, 3]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR `id` NOT IN(?, ?, ?)',
-                    'bindings'=>[1, 1, 2, 3],
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR `id` NOT IN(?, ?, ?)',
+                    'bindings' => [1, 1, 2, 3],
                 ]
             ]
         ];
@@ -699,10 +700,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->or()
                 ->whereIn('id', [4, 2, 3]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR `id` IN(?, ?, ?)',
-                    'bindings'=>[1, 4, 2, 3],
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR `id` IN(?, ?, ?)',
+                    'bindings' => [1, 4, 2, 3],
                 ]
             ]
         ];
@@ -720,10 +721,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->not()
                 ->whereIn('id', [1, 2, 3]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` NOT IN(?, ?, ?)',
-                    'bindings'=>[1, 2, 3],
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` NOT IN(?, ?, ?)',
+                    'bindings' => [1, 2, 3],
                 ]
             ]
         ];
@@ -743,10 +744,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->not()
                 ->whereIn('id', [1, 2, 3]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR `id` NOT IN(?, ?, ?)',
-                    'bindings'=>[1, 1, 2, 3],
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR `id` NOT IN(?, ?, ?)',
+                    'bindings' => [1, 1, 2, 3],
                 ]
             ]
         ];
@@ -763,10 +764,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereIn('id', []),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE 0 = 1',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` WHERE 0 = 1',
+                    'bindings' => []
                     // 'sql'=>'SELECT * FROM `users` WHERE 1 = ?',
                     // 'bindings'=>[0]
                 ]
@@ -785,10 +786,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereNotIn('id', []),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE 1 = 1',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` WHERE 1 = 1',
+                    'bindings' => []
                     // 'sql'=>'SELECT * FROM `users` WHERE 1 = ?',
                     // 'bindings'=>[1]
                 ]
@@ -806,19 +807,20 @@ class WheresTest extends \Codeception\Test\Unit
 
         // TODO: Test partial query. mysql: 'select * from `test` where `id` = ?'
 
-        $subWhere = function ($q) {
-            $q->where(['id'=>3])
-              ->orWhere('id', 4);
+        $subWhere = function ($q)
+        {
+            $q->where(['id' => 3])
+                ->orWhere('id', 4);
         };
 
         $case =
         [
             $partial->where($subWhere),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `test` WHERE `id` = ? AND (`id` = ? OR `id` = ?)',
-                    'bindings'=>[1, 3, 4]
+                    'sql'      => 'SELECT * FROM `test` WHERE `id` = ? AND (`id` = ? OR `id` = ?)',
+                    'bindings' => [1, 3, 4]
                 ]
             ]
         ];
@@ -831,20 +833,22 @@ class WheresTest extends \Codeception\Test\Unit
         $case =
         [
             self::qb()
-                ->where('id', '=', function ($q) {
+                ->where('id', '=', function ($q)
+                {
                     $q->select('account_id')
-                      ->from('names')
-                      ->where('names.id', '>', 1)
-                      ->orWhere(function ($q) {
-                          $q->where('names.first_name', 'like', 'Tim%')
-                            ->andWhere('names.id', '>', 10);
-                      });
+                        ->from('names')
+                        ->where('names.id', '>', 1)
+                        ->orWhere(function ($q)
+                        {
+                            $q->where('names.first_name', 'like', 'Tim%')
+                                ->andWhere('names.id', '>', 10);
+                        });
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * WHERE `id` = (SELECT `account_id` FROM `names` WHERE `names`.`id` > ? OR (`names`.`first_name` LIKE ? AND `names`.`id` > ?))',
-                    'bindings'=>[1, 'Tim%', 10]
+                    'sql'      => 'SELECT * WHERE `id` = (SELECT `account_id` FROM `names` WHERE `names`.`id` > ? OR (`names`.`first_name` LIKE ? AND `names`.`id` > ?))',
+                    'bindings' => [1, 'Tim%', 10]
                 ]
             ]
         ];
@@ -857,20 +861,22 @@ class WheresTest extends \Codeception\Test\Unit
         $case =
         [
             self::qb()
-                ->where('id', '=', function ($q) {
+                ->where('id', '=', function ($q)
+                {
                     $q->select('account_id')
-                      ->from('names')
-                      ->where('names.id', '>', 1)
-                      ->orWhere(function ($q) {
-                          $q->where('names.first_name', 'like', 'Tim%')
-                            ->andWhere('names.id', '>', 10);
-                      });
+                        ->from('names')
+                        ->where('names.id', '>', 1)
+                        ->orWhere(function ($q)
+                        {
+                            $q->where('names.first_name', 'like', 'Tim%')
+                                ->andWhere('names.id', '>', 10);
+                        });
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * WHERE `id` = (SELECT `account_id` FROM `names` WHERE `names`.`id` > ? OR (`names`.`first_name` LIKE ? AND `names`.`id` > ?))',
-                    'bindings'=>[1, 'Tim%', 10]
+                    'sql'      => 'SELECT * WHERE `id` = (SELECT `account_id` FROM `names` WHERE `names`.`id` > ? OR (`names`.`first_name` LIKE ? AND `names`.`id` > ?))',
+                    'bindings' => [1, 'Tim%', 10]
                 ]
             ]
         ];
@@ -885,10 +891,10 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->where('foo', '<>', null),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * WHERE `foo` <> NULL',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * WHERE `foo` <> NULL',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -903,10 +909,10 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->where('foo', '!='),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>"SELECT * WHERE `foo` = ?",
-                    'bindings'=>['!=']
+                    'sql'      => "SELECT * WHERE `foo` = ?",
+                    'bindings' => ['!=']
                     // 'sql'=>"SELECT * WHERE `foo` = '!='",
                     // 'bindings'=>[]
                 ]
@@ -923,17 +929,18 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('*')
                 ->from('users')
-                ->whereIn('id', function ($q) {
+                ->whereIn('id', function ($q)
+                {
                     $q->select('id')
-                      ->from('users')
-                      ->where('age', '>', 25)
-                      ->limit(3);
+                        ->from('users')
+                        ->where('age', '>', 25)
+                        ->limit(3);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` IN(SELECT `id` FROM `users` WHERE `age` > ? LIMIT ?)',
-                    'bindings'=>[25, 3]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` IN(SELECT `id` FROM `users` WHERE `age` > ? LIMIT ?)',
+                    'bindings' => [25, 3]
                 ]
             ]
         ];
@@ -948,17 +955,18 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('*')
                 ->from('users')
-                ->whereIn(['id_a', 'id_b'], function ($q) {
+                ->whereIn(['id_a', 'id_b'], function ($q)
+                {
                     $q->select('id_a', 'id_b')
-                      ->from('users')
-                      ->where('age', '>', 25)
-                      ->limit(3);
+                        ->from('users')
+                        ->where('age', '>', 25)
+                        ->limit(3);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE (`id_a`, `id_b`) IN(SELECT `id_a`, `id_b` FROM `users` WHERE `age` > ? LIMIT ?)',
-                    'bindings'=>[25, 3]
+                    'sql'      => 'SELECT * FROM `users` WHERE (`id_a`, `id_b`) IN(SELECT `id_a`, `id_b` FROM `users` WHERE `age` > ? LIMIT ?)',
+                    'bindings' => [25, 3]
                 ]
             ]
         ];
@@ -973,16 +981,17 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('*')
                 ->from('users')
-                ->whereNotIn('id', function ($q) {
+                ->whereNotIn('id', function ($q)
+                {
                     $q->select('id')
-                      ->from('users')
-                      ->where('age', '>', 25);
+                        ->from('users')
+                        ->where('age', '>', 25);
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` NOT IN(SELECT `id` FROM `users` WHERE `age` > ?)',
-                    'bindings'=>[25]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` NOT IN(SELECT `id` FROM `users` WHERE `age` > ?)',
+                    'bindings' => [25]
                 ]
             ]
         ];
@@ -999,10 +1008,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereNull('id'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` IS NULL',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` IS NULL',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -1020,10 +1029,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->where('id', '=', 1)
                 ->orWhereNull('id'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR `id` IS NULL',
-                    'bindings'=>[1]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR `id` IS NULL',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -1040,10 +1049,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereNotNull('id'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` IS NOT NULL',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` IS NOT NULL',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -1061,10 +1070,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->where('id', '>', 1)
                 ->orWhereNotNull('id'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` > ? OR `id` IS NOT NULL',
-                    'bindings'=>[1]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` > ? OR `id` IS NOT NULL',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -1082,10 +1091,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->where('id', 1)
                 ->orWhere('name', 'foo'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR `name` = ?',
-                    'bindings'=>[1, 'foo']
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR `name` = ?',
+                    'bindings' => [1, 'foo']
                 ]
             ]
         ];
@@ -1099,17 +1108,18 @@ class WheresTest extends \Codeception\Test\Unit
         [
             self::qb()
                 ->select('*')
-            ->from('users')
-            ->where('email', '=', 'foo')
-            ->orWhere(function ($q) {
-                $q->where('name', '=', 'bar')
-                  ->where('age', '=', 25);
-            }),
+                ->from('users')
+                ->where('email', '=', 'foo')
+                ->orWhere(function ($q)
+                {
+                    $q->where('name', '=', 'bar')
+                        ->where('age', '=', 25);
+                }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `email` = ? OR (`name` = ? AND `age` = ?)',
-                    'bindings'=>['foo', 'bar', 25]
+                    'sql'      => 'SELECT * FROM `users` WHERE `email` = ? OR (`name` = ? AND `age` = ?)',
+                    'bindings' => ['foo', 'bar', 25]
                 ]
             ]
         ];
@@ -1125,16 +1135,17 @@ class WheresTest extends \Codeception\Test\Unit
                 ->select('*')
                 ->from('users')
                 ->where('email', '=', 'foo')
-                ->orWhere(function ($q) {
+                ->orWhere(function ($q)
+                {
                     $q->where('name', '=', 'bar')
-                      ->where('age', '=', 25)
-                      ->clearWhere();
+                        ->where('age', '=', 25)
+                        ->clearWhere();
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `email` = ?',
-                    'bindings'=>['foo']
+                    'sql'      => 'SELECT * FROM `users` WHERE `email` = ?',
+                    'bindings' => ['foo']
                 ]
             ]
         ];
@@ -1150,16 +1161,17 @@ class WheresTest extends \Codeception\Test\Unit
                 ->select('*')
                 ->from('users')
                 ->where('email', '=', 'foo')
-                ->orWhere(function ($q) {
+                ->orWhere(function ($q)
+                {
                     $q->where('name', '=', 'bar')
-                      ->where('age', '=', 25);
+                        ->where('age', '=', 25);
                 })
                 ->clearWhere(),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users`',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users`',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -1174,16 +1186,17 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('*')
                 ->from('orders')
-                ->whereExists(function ($q) {
+                ->whereExists(function ($q)
+                {
                     $q->select('*')
-                      ->from('products')
-                      ->where('products.id', '=', self::raw('"orders"."id"'));
+                        ->from('products')
+                        ->where('products.id', '=', self::raw('"orders"."id"'));
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `orders` WHERE EXISTS(SELECT * FROM `products` WHERE `products`.`id` = "orders"."id")',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `orders` WHERE EXISTS(SELECT * FROM `products` WHERE `products`.`id` = "orders"."id")',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -1204,10 +1217,10 @@ class WheresTest extends \Codeception\Test\Unit
                         ->whereRaw('products.id = orders.id')
                 ),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `orders` WHERE EXISTS(SELECT * FROM `products` WHERE products.id = orders.id)',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `orders` WHERE EXISTS(SELECT * FROM `products` WHERE products.id = orders.id)',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -1222,16 +1235,17 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('*')
                 ->from('orders')
-                ->whereNotExists(function ($q) {
+                ->whereNotExists(function ($q)
+                {
                     $q->select('*')
-                      ->from('products')
-                      ->where('products.id', '=', self::raw('"orders"."id"'));
+                        ->from('products')
+                        ->where('products.id', '=', self::raw('"orders"."id"'));
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `orders` WHERE NOT EXISTS(SELECT * FROM `products` WHERE `products`.`id` = "orders"."id")',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `orders` WHERE NOT EXISTS(SELECT * FROM `products` WHERE `products`.`id` = "orders"."id")',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -1247,16 +1261,17 @@ class WheresTest extends \Codeception\Test\Unit
                 ->select('*')
                 ->from('orders')
                 ->where('id', '=', 1)
-                ->orWhereExists(function ($q) {
+                ->orWhereExists(function ($q)
+                {
                     $q->select('*')
-                      ->from('products')
-                      ->where('products.id', '=', self::raw('"orders"."id"'));
+                        ->from('products')
+                        ->where('products.id', '=', self::raw('"orders"."id"'));
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `orders` WHERE `id` = ? OR EXISTS(SELECT * FROM `products` WHERE `products`.`id` = "orders"."id")',
-                    'bindings'=>[1]
+                    'sql'      => 'SELECT * FROM `orders` WHERE `id` = ? OR EXISTS(SELECT * FROM `products` WHERE `products`.`id` = "orders"."id")',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -1272,16 +1287,17 @@ class WheresTest extends \Codeception\Test\Unit
                 ->select('*')
                 ->from('orders')
                 ->where('id', '=', 1)
-                ->orWhereNotExists(function ($q) {
+                ->orWhereNotExists(function ($q)
+                {
                     $q->select('*')
-                      ->from('products')
-                      ->where('products.id', '=', self::raw('"orders"."id"'));
+                        ->from('products')
+                        ->where('products.id', '=', self::raw('"orders"."id"'));
                 }),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `orders` WHERE `id` = ? OR NOT EXISTS(SELECT * FROM `products` WHERE `products`.`id` = "orders"."id")',
-                    'bindings'=>[1]
+                    'sql'      => 'SELECT * FROM `orders` WHERE `id` = ? OR NOT EXISTS(SELECT * FROM `products` WHERE `products`.`id` = "orders"."id")',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -1298,10 +1314,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where('foo', null),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `foo` IS NULL',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `users` WHERE `foo` IS NULL',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -1312,18 +1328,18 @@ class WheresTest extends \Codeception\Test\Unit
     public function testOneAllowsPassingBuilderIntoWhereClause162(): void
     {
         $chain = self::qb()->from('chapter')->select('id')->where('book', 1);
-        $page = self::qb()->from('page')->select('id')->whereIn('chapter_id', $chain);
-        $word = self::qb()->from('word')->select('id')->whereIn('page_id', $page);
-        $one = $word->clone()->delete();
+        $page  = self::qb()->from('page')->select('id')->whereIn('chapter_id', $chain);
+        $word  = self::qb()->from('word')->select('id')->whereIn('page_id', $page);
+        $one   = $word->clone()->delete();
 
         $case =
         [
             $one,
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'DELETE FROM `word` WHERE `page_id` IN(SELECT `id` FROM `page` WHERE `chapter_id` IN(SELECT `id` FROM `chapter` WHERE `book` = ?))',
-                    'bindings'=>[1]
+                    'sql'      => 'DELETE FROM `word` WHERE `page_id` IN(SELECT `id` FROM `page` WHERE `chapter_id` IN(SELECT `id` FROM `chapter` WHERE `book` = ?))',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -1334,18 +1350,18 @@ class WheresTest extends \Codeception\Test\Unit
     public function testTwoAllowsPassingBuilderIntoWhereClause162(): void
     {
         $chain = self::qb()->from('chapter')->select('id')->where('book', 1);
-        $page = self::qb()->from('page')->select('id')->whereIn('chapter_id', $chain);
-        $word = self::qb()->from('word')->select('id')->whereIn('page_id', $page);
-        $two = $page->clone()->delete();
+        $page  = self::qb()->from('page')->select('id')->whereIn('chapter_id', $chain);
+        $word  = self::qb()->from('word')->select('id')->whereIn('page_id', $page);
+        $two   = $page->clone()->delete();
 
         $case =
         [
             $two,
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'DELETE FROM `page` WHERE `chapter_id` IN(SELECT `id` FROM `chapter` WHERE `book` = ?)',
-                    'bindings'=>[1]
+                    'sql'      => 'DELETE FROM `page` WHERE `chapter_id` IN(SELECT `id` FROM `chapter` WHERE `book` = ?)',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -1356,18 +1372,18 @@ class WheresTest extends \Codeception\Test\Unit
     public function testThreeAllowsPassingBuilderIntoWhereClause162(): void
     {
         $chain = self::qb()->from('chapter')->select('id')->where('book', 1);
-        $page = self::qb()->from('page')->select('id')->whereIn('chapter_id', $chain);
-        $word = self::qb()->from('word')->select('id')->whereIn('page_id', $page);
+        $page  = self::qb()->from('page')->select('id')->whereIn('chapter_id', $chain);
+        $word  = self::qb()->from('word')->select('id')->whereIn('page_id', $page);
         $three = $chain->clone()->delete();
 
         $case =
         [
             $three,
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'DELETE FROM `chapter` WHERE `book` = ?',
-                    'bindings'=>[1]
+                    'sql'      => 'DELETE FROM `chapter` WHERE `book` = ?',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -1384,10 +1400,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where('name', 'LIKE', '%test%'),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `name` LIKE ?',
-                    'bindings'=>['%test%']
+                    'sql'      => 'SELECT * FROM `users` WHERE `name` LIKE ?',
+                    'bindings' => ['%test%']
                 ]
             ]
         ];
@@ -1402,12 +1418,13 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('foo')
                 ->from('tbl')
-                ->where(function () {}),
+                ->where(function ()
+                {}),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT `foo` FROM `tbl`',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT `foo` FROM `tbl`',
+                    'bindings' => []
                 ]
             ]
         ];
@@ -1425,10 +1442,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where('birthday', '>=', $date),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `birthday` >= ?',
-                    'bindings'=>[$date]
+                    'sql'      => 'SELECT * FROM `users` WHERE `birthday` >= ?',
+                    'bindings' => [$date]
                 ]
             ]
         ];
@@ -1446,10 +1463,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->whereRaw('birthday >= ?', $date),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE birthday >= ?',
-                    'bindings'=>[$date]
+                    'sql'      => 'SELECT * FROM `users` WHERE birthday >= ?',
+                    'bindings' => [$date]
                 ]
             ]
         ];
@@ -1466,10 +1483,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where(self::raw('username = ?', 'knex')),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE username = ?',
-                    'bindings'=>['knex']
+                    'sql'      => 'SELECT * FROM `users` WHERE username = ?',
+                    'bindings' => ['knex']
                 ]
             ]
         ];
@@ -1486,10 +1503,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where(self::raw('isadmin = ?', 0)),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE isadmin = ?',
-                    'bindings'=>[0]
+                    'sql'      => 'SELECT * FROM `users` WHERE isadmin = ?',
+                    'bindings' => [0]
                 ]
             ]
         ];
@@ -1507,10 +1524,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where(self::raw('updtime = ?', $date)),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE updtime = ?',
-                    'bindings'=>[$date]
+                    'sql'      => 'SELECT * FROM `users` WHERE updtime = ?',
+                    'bindings' => [$date]
                 ]
             ]
         ];
@@ -1527,14 +1544,14 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('users')
                 ->where('id', '=', 1)
                 ->orWhere([
-                    'email'=>'foo',
-                    'id'=>2
+                    'email' => 'foo',
+                    'id'    => 2
                 ]),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` = ? OR (`email` = ? AND `id` = ?)',
-                    'bindings'=>[1, 'foo', 2]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` = ? OR (`email` = ? AND `id` = ?)',
+                    'bindings' => [1, 'foo', 2]
                 ]
             ]
         ];
@@ -1549,12 +1566,12 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('*')
                 ->from('users')
-                ->whereIn('id', self::raw('select (:test)', ['test'=>1])),
+                ->whereIn('id', self::raw('select (:test)', ['test' => 1])),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` IN(select (?))',
-                    'bindings'=>[1]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` IN(select (?))',
+                    'bindings' => [1]
                 ]
             ]
         ];
@@ -1569,12 +1586,12 @@ class WheresTest extends \Codeception\Test\Unit
             self::qb()
                 ->select('*')
                 ->from('users')
-                ->whereIn('id', self::raw('select (:test, :test2)', ['test'=>1, 'test2'=>2])),
+                ->whereIn('id', self::raw('select (:test, :test2)', ['test' => 1, 'test2' => 2])),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `users` WHERE `id` IN(select (?, ?))',
-                    'bindings'=>[1, 2]
+                    'sql'      => 'SELECT * FROM `users` WHERE `id` IN(select (?, ?))',
+                    'bindings' => [1, 2]
                 ]
             ]
         ];
@@ -1590,10 +1607,10 @@ class WheresTest extends \Codeception\Test\Unit
                 ->from('testtable')
                 ->whereNot(self::raw('is_active')),
             [
-                'mysql'=>
+                'mysql' =>
                 [
-                    'sql'=>'SELECT * FROM `testtable` WHERE NOT is_active',
-                    'bindings'=>[]
+                    'sql'      => 'SELECT * FROM `testtable` WHERE NOT is_active',
+                    'bindings' => []
                 ]
             ]
         ];

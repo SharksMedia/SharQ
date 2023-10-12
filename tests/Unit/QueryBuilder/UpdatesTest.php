@@ -46,14 +46,14 @@ class UpdatesTest extends \Codeception\Test\Unit
             $case =
             [
                 self::qb()
-                    ->update(['email'=>'foo', 'name'=>'bar'])
+                    ->update(['email' => 'foo', 'name' => 'bar'])
                     ->table('users')
                     ->where('id', '=', 1),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `email` = ?, `name` = ? WHERE `id` = ?',
-                        'bindings'=>['foo', 'bar', 1]
+                        'sql'      => 'UPDATE `users` SET `email` = ?, `name` = ? WHERE `id` = ?',
+                        'bindings' => ['foo', 'bar', 1]
                     ]
                 ]
             ];
@@ -104,14 +104,14 @@ class UpdatesTest extends \Codeception\Test\Unit
             $case =
             [
                 self::qb()
-                    ->update(['email'=>null, 'name'=>'bar'])
+                    ->update(['email' => null, 'name' => 'bar'])
                     ->table('users')
                     ->where('id', '=', 1),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `email` = NULL, `name` = ? WHERE `id` = ?',
-                        'bindings'=>['bar', 1]
+                        'sql'      => 'UPDATE `users` SET `email` = NULL, `name` = ? WHERE `id` = ?',
+                        'bindings' => ['bar', 1]
                         // 'sql'=>'UPDATE `users` SET `email` = ?, `name` = ? WHERE `id` = ?',
                         // 'bindings'=>[null, 'bar', 1]
                     ]
@@ -129,12 +129,12 @@ class UpdatesTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->join('orders', 'users.id', 'orders.user_id')
                     ->where('users.id', '=', 1)
-                    ->update(['email'=>'foo', 'name'=>'bar']),
+                    ->update(['email' => 'foo', 'name' => 'bar']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` INNER JOIN `orders` ON(`users`.`id` = `orders`.`user_id`) SET `email` = ?, `name` = ? WHERE `users`.`id` = ?',
-                        'bindings'=>['foo', 'bar', 1]
+                        'sql'      => 'UPDATE `users` INNER JOIN `orders` ON(`users`.`id` = `orders`.`user_id`) SET `email` = ?, `name` = ? WHERE `users`.`id` = ?',
+                        'bindings' => ['foo', 'bar', 1]
                     ]
                 ]
             ];
@@ -149,13 +149,13 @@ class UpdatesTest extends \Codeception\Test\Unit
                 self::qb()
                     ->from('users')
                     ->where('users.id', '=', 1)
-                    ->update(['email'=>'foo', 'name'=>'bar'])
+                    ->update(['email' => 'foo', 'name' => 'bar'])
                     ->limit(1),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `email` = ?, `name` = ? WHERE `users`.`id` = ? LIMIT ?',
-                        'bindings'=>['foo', 'bar', 1, 1]
+                        'sql'      => 'UPDATE `users` SET `email` = ?, `name` = ? WHERE `users`.`id` = ? LIMIT ?',
+                        'bindings' => ['foo', 'bar', 1, 1]
                     ]
                 ]
             ];
@@ -208,12 +208,12 @@ class UpdatesTest extends \Codeception\Test\Unit
                 self::qb()
                     ->from('users')
                     ->where('id', '=', 1)
-                    ->update(['email'=>self::raw('foo'), 'name'=>'bar']),
+                    ->update(['email' => self::raw('foo'), 'name' => 'bar']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `email` = foo, `name` = ? WHERE `id` = ?',
-                        'bindings'=>['bar', 1]
+                        'sql'      => 'UPDATE `users` SET `email` = foo, `name` = ? WHERE `id` = ?',
+                        'bindings' => ['bar', 1]
                     ]
                 ]
             ];
@@ -230,10 +230,10 @@ class UpdatesTest extends \Codeception\Test\Unit
                     ->where('id', '=', 1)
                     ->increment('balance', 10),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `balance` = `balance` + ? WHERE `id` = ?',
-                        'bindings'=>[10, 1]
+                        'sql'      => 'UPDATE `users` SET `balance` = `balance` + ? WHERE `id` = ?',
+                        'bindings' => [10, 1]
                     ]
                 ]
             ];
@@ -251,10 +251,10 @@ class UpdatesTest extends \Codeception\Test\Unit
                     ->increment('balance', 10)
                     ->increment('balance', 20),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `balance` = `balance` + ? WHERE `id` = ?',
-                        'bindings'=>[20, 1]
+                        'sql'      => 'UPDATE `users` SET `balance` = `balance` + ? WHERE `id` = ?',
+                        'bindings' => [20, 1]
                     ]
                 ]
             ];
@@ -272,10 +272,10 @@ class UpdatesTest extends \Codeception\Test\Unit
                     ->increment('balance', 10)
                     ->decrement('balance', 90),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `balance` = `balance` - ? WHERE `id` = ?',
-                        'bindings'=>[90, 1]
+                        'sql'      => 'UPDATE `users` SET `balance` = `balance` - ? WHERE `id` = ?',
+                        'bindings' => [90, 1]
                     ]
                 ]
             ];
@@ -293,10 +293,10 @@ class UpdatesTest extends \Codeception\Test\Unit
                     ->decrement('balance', 10)
                     ->decrement('balance', 20),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `balance` = `balance` - ? WHERE `id` = ?',
-                        'bindings'=>[20, 1]
+                        'sql'      => 'UPDATE `users` SET `balance` = `balance` - ? WHERE `id` = ?',
+                        'bindings' => [20, 1]
                     ]
                 ]
             ];
@@ -311,14 +311,14 @@ class UpdatesTest extends \Codeception\Test\Unit
                 self::qb()
                     ->into('users')
                     ->where('id', '=', 1)
-                    ->update(['email'=>'foo@bar.com'])
+                    ->update(['email' => 'foo@bar.com'])
                     ->increment('balance', 10)
                     ->decrement('subbalance', 100),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `email` = ?, `balance` = `balance` + ?, `subbalance` = `subbalance` - ? WHERE `id` = ?',
-                        'bindings'=>['foo@bar.com', 10, 100, 1]
+                        'sql'      => 'UPDATE `users` SET `email` = ?, `balance` = `balance` + ?, `subbalance` = `subbalance` - ? WHERE `id` = ?',
+                        'bindings' => ['foo@bar.com', 10, 100, 1]
                     ]
                 ]
             ];
@@ -356,13 +356,13 @@ class UpdatesTest extends \Codeception\Test\Unit
                 self::qb()
                     ->into('users')
                     ->where('id', '=', 1)
-                    ->increment(['balance'=>10, 'times'=>1])
-                    ->decrement(['value'=>50, 'subvalue'=>30]),
+                    ->increment(['balance' => 10, 'times' => 1])
+                    ->decrement(['value' => 50, 'subvalue' => 30]),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `balance` = `balance` + ?, `times` = `times` + ?, `value` = `value` - ?, `subvalue` = `subvalue` - ? WHERE `id` = ?',
-                        'bindings'=>[10, 1, 50, 30, 1]
+                        'sql'      => 'UPDATE `users` SET `balance` = `balance` + ?, `times` = `times` + ?, `value` = `value` - ?, `subvalue` = `subvalue` - ? WHERE `id` = ?',
+                        'bindings' => [10, 1, 50, 30, 1]
                     ]
                 ]
             ];
@@ -377,15 +377,15 @@ class UpdatesTest extends \Codeception\Test\Unit
                 self::qb()
                     ->into('users')
                     ->where('id', '=', 1)
-                    ->update(['email'=>'foo@bar.com'])
-                    ->increment(['balance'=>10])
-                    ->decrement(['value'=>100])
+                    ->update(['email' => 'foo@bar.com'])
+                    ->increment(['balance' => 10])
+                    ->decrement(['value' => 100])
                     ->clearCounters(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `email` = ? WHERE `id` = ?',
-                        'bindings'=>['foo@bar.com', 1]
+                        'sql'      => 'UPDATE `users` SET `email` = ? WHERE `id` = ?',
+                        'bindings' => ['foo@bar.com', 1]
                     ]
                 ]
             ];
@@ -402,10 +402,10 @@ class UpdatesTest extends \Codeception\Test\Unit
                     ->where('id', '=', 1)
                     ->increment('balance', 1.23),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `balance` = `balance` + ? WHERE `id` = ?',
-                        'bindings'=>[1.23, 1]
+                        'sql'      => 'UPDATE `users` SET `balance` = `balance` + ? WHERE `id` = ?',
+                        'bindings' => [1.23, 1]
                     ]
                 ]
             ];
@@ -422,10 +422,10 @@ class UpdatesTest extends \Codeception\Test\Unit
                     ->where('id', '=', 1)
                     ->decrement('balance', 10),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `balance` = `balance` - ? WHERE `id` = ?',
-                        'bindings'=>[10, 1]
+                        'sql'      => 'UPDATE `users` SET `balance` = `balance` - ? WHERE `id` = ?',
+                        'bindings' => [10, 1]
                     ]
                 ]
             ];
@@ -442,10 +442,10 @@ class UpdatesTest extends \Codeception\Test\Unit
                     ->where('id', '=', 1)
                     ->decrement('balance', 1.23),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `balance` = `balance` - ? WHERE `id` = ?',
-                        'bindings'=>[1.23, 1]
+                        'sql'      => 'UPDATE `users` SET `balance` = `balance` - ? WHERE `id` = ?',
+                        'bindings' => [1.23, 1]
                     ]
                 ]
             ];
@@ -459,7 +459,7 @@ class UpdatesTest extends \Codeception\Test\Unit
             [
                 self::qb()
                     ->table('tblPerson')
-                    ->update(['tblPerson.City'=>'Boonesville'])
+                    ->update(['tblPerson.City' => 'Boonesville'])
                     ->join(
                         'tblPersonData',
                         'tblPersonData.PersonId',
@@ -469,10 +469,10 @@ class UpdatesTest extends \Codeception\Test\Unit
                     ->where('tblPersonData.DataId', 1)
                     ->where('tblPerson.PersonId', 5),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `tblPerson` INNER JOIN `tblPersonData` ON(`tblPersonData`.`PersonId` = `tblPerson`.`PersonId`) SET `tblPerson`.`City` = ? WHERE `tblPersonData`.`DataId` = ? AND `tblPerson`.`PersonId` = ?',
-                        'bindings'=>['Boonesville', 1, 5]
+                        'sql'      => 'UPDATE `tblPerson` INNER JOIN `tblPersonData` ON(`tblPersonData`.`PersonId` = `tblPerson`.`PersonId`) SET `tblPerson`.`City` = ? WHERE `tblPersonData`.`DataId` = ? AND `tblPerson`.`PersonId` = ?',
+                        'bindings' => ['Boonesville', 1, 5]
                     ]
                 ]
             ];
@@ -489,12 +489,12 @@ class UpdatesTest extends \Codeception\Test\Unit
                     ->where('id', '=', 1)
                     ->orderBy('foo', 'desc')
                     ->limit(5)
-                    ->update(['email'=>'foo', 'name'=>'bar']),
+                    ->update(['email' => 'foo', 'name' => 'bar']),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `email` = ?, `name` = ? WHERE `id` = ? ORDER BY `foo` DESC LIMIT ?',
-                        'bindings'=>['foo', 'bar', 1, 5]
+                        'sql'      => 'UPDATE `users` SET `email` = ?, `name` = ? WHERE `id` = ? ORDER BY `foo` DESC LIMIT ?',
+                        'bindings' => ['foo', 'bar', 1, 5]
                     ]
                 ]
             ];
@@ -503,7 +503,7 @@ class UpdatesTest extends \Codeception\Test\Unit
         };
 
 
-        foreach($cases as $name=>$caseFn)
+        foreach ($cases as $name => $caseFn)
         {
             $cases[$name] = $caseFn();
         }
@@ -511,18 +511,18 @@ class UpdatesTest extends \Codeception\Test\Unit
         return $cases;
     }
 
-	/**
-	 * @dataProvider caseProvider
-	 */
+    /**
+     * @dataProvider caseProvider
+     */
     public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery('update');
+        $iQuery         = $iSharQCompiler->toQuery('update');
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);

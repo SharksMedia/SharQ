@@ -53,10 +53,10 @@ class ClearingsTest extends \Codeception\Test\Unit
                     ->from('users')
                     ->clearSelect(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -74,10 +74,10 @@ class ClearingsTest extends \Codeception\Test\Unit
                     ->clearSelect()
                     ->select('email'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT `email` FROM `users`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT `email` FROM `users`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -95,10 +95,10 @@ class ClearingsTest extends \Codeception\Test\Unit
                     ->where('id', '=', 1)
                     ->clearWhere(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT `id` FROM `users`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT `id` FROM `users`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -117,10 +117,10 @@ class ClearingsTest extends \Codeception\Test\Unit
                     ->clearWhere()
                     ->where('id', '=', 2),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT `id` FROM `users` WHERE `id` = ?',
-                        'bindings'=>[2]
+                        'sql'      => 'SELECT `id` FROM `users` WHERE `id` = ?',
+                        'bindings' => [2]
                     ]
                 ]
             ];
@@ -137,10 +137,10 @@ class ClearingsTest extends \Codeception\Test\Unit
                     ->groupBy('name')
                     ->clearGroup(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -158,10 +158,10 @@ class ClearingsTest extends \Codeception\Test\Unit
                     ->clearGroup()
                     ->groupBy('id'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` GROUP BY `id`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` GROUP BY `id`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -178,10 +178,10 @@ class ClearingsTest extends \Codeception\Test\Unit
                     ->orderBy('name', 'desc')
                     ->clearOrder(),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -199,10 +199,10 @@ class ClearingsTest extends \Codeception\Test\Unit
                     ->clearOrder()
                     ->orderBy('id', 'asc'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` ORDER BY `id` ASC',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users` ORDER BY `id` ASC',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -220,10 +220,10 @@ class ClearingsTest extends \Codeception\Test\Unit
                     ->clearHaving()
                     ->having('id', '>', 10),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users` HAVING `id` > ?',
-                        'bindings'=>[10]
+                        'sql'      => 'SELECT * FROM `users` HAVING `id` > ?',
+                        'bindings' => [10]
                     ]
                 ]
             ];
@@ -272,10 +272,10 @@ class ClearingsTest extends \Codeception\Test\Unit
                     ->clear('offset')
                     ->clear('having'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'SELECT * FROM `users`',
-                        'bindings'=>[]
+                        'sql'      => 'SELECT * FROM `users`',
+                        'bindings' => []
                     ]
                 ]
             ];
@@ -290,16 +290,16 @@ class ClearingsTest extends \Codeception\Test\Unit
                 self::qb()
                     ->into('users')
                     ->where('id', '=', 1)
-                    ->update(['email'=>'foo@bar.com'])
-                    ->increment(['balance'=>10])
+                    ->update(['email' => 'foo@bar.com'])
+                    ->increment(['balance' => 10])
                     ->clear('counter')
-                    ->decrement(['value'=>50])
+                    ->decrement(['value' => 50])
                     ->clear('counters'),
                 [
-                    'mysql'=>
+                    'mysql' =>
                     [
-                        'sql'=>'UPDATE `users` SET `email` = ? WHERE `id` = ?',
-                        'bindings'=>['foo@bar.com', 1]
+                        'sql'      => 'UPDATE `users` SET `email` = ? WHERE `id` = ?',
+                        'bindings' => ['foo@bar.com', 1]
                     ]
                 ]
             ];
@@ -307,7 +307,7 @@ class ClearingsTest extends \Codeception\Test\Unit
             return $case;
         };
 
-        foreach($cases as $name=>$caseFn)
+        foreach ($cases as $name => $caseFn)
         {
             $cases[$name] = $caseFn();
         }
@@ -315,18 +315,18 @@ class ClearingsTest extends \Codeception\Test\Unit
         return $cases;
     }
 
-	/**
-	 * @dataProvider caseProvider
-	 */
+    /**
+     * @dataProvider caseProvider
+     */
     public function testSharQ(SharQ $iSharQ, array $iExpected)
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 
-        $iQuery = $iSharQCompiler->toQuery();
+        $iQuery         = $iSharQCompiler->toQuery();
         $sqlAndBindings =
         [
-            'sql'=>$iQuery->getSQL(),
-            'bindings'=>$iQuery->getBindings()
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
         ];
 
         $this->assertSame($iExpected['mysql'], $sqlAndBindings);

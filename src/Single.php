@@ -16,7 +16,7 @@ class Single
      * This is the schema property.
      * @var string|Raw|null
      */
-    public               $schema = null;
+    public $schema = null;
 
     /**
      * This is the table property.
@@ -41,7 +41,7 @@ class Single
      * This is the insert property.
      * @var array<int|string, string|Raw>|null
      */
-    public               $insert = null;
+    public $insert = null;
 
     /**
      * This is the ignore property.
@@ -59,7 +59,7 @@ class Single
      * This is the onConflict property.
      * @var array<int|string, string|Raw>|null
      */
-    public               $onConflict = null;
+    public $onConflict = null;
 
     /**
      * This is the returning property.
@@ -78,19 +78,19 @@ class Single
      * This is the counter property.
      * @var array<string, int|float>|null
      */
-    public               $counter = null;
+    public $counter = null;
 
     /**
      * This is the limit property.
      * @var int|Raw|null
      */
-    public               $limit = null;
+    public $limit = null;
 
     /**
      * This is the offset property.
      * @var int|Raw|null
      */
-    public               $offset = null;
+    public $offset = null;
 
     /**
      * This is the lock property.
@@ -116,7 +116,7 @@ class Single
      * This is the alias property.
      * @var string|Raw|null
      */
-    public               $alias = null;
+    public $alias = null;
 
     /**
      * This is the join property.

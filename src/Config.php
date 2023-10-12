@@ -31,7 +31,10 @@ class Config
 
     public function __construct(string $client)
     {// 2023-05-08
-        if(!in_array($client, self::CLIENTS)) throw new \Exception('Invalid client: '.$client);
+        if (!in_array($client, self::CLIENTS))
+        {
+            throw new \Exception('Invalid client: '.$client);
+        }
 
         $this->client = $client;
     }
@@ -87,7 +90,10 @@ class Config
      */
     public function timeout(int $milliSeconds): self
     {// 2023-05-08
-        if($milliSeconds < 0) throw new \UnexpectedValueException('Timeout must be a positive integer');
+        if ($milliSeconds < 0)
+        {
+            throw new \UnexpectedValueException('Timeout must be a positive integer');
+        }
 
         $this->timeout = $milliSeconds;
 
@@ -133,5 +139,4 @@ class Config
     {// 2023-05-08
         return $this->timeout;
     }
-
 }

@@ -15,25 +15,27 @@ abstract class Client
 {
     public const TYPE_MYSQL = 'mysql';
 
-    protected  Config $iConfig;
-    protected  bool $isInitialized = false;
+    protected Config $iConfig;
+    protected bool $isInitialized = false;
 
     public function __construct(Config $iConfig)
     {// 2023-05-08
         $this->iConfig = $iConfig;
     }
 
-    abstract public function query(Query $iQuery, array $options=[]): \PDOStatement; // Execute query
+    abstract public function query(Query $iQuery, array $options = []): \PDOStatement; // Execute query
 
     public static function create(Config $iConfig): Client
     {// 2023-06-14
-        switch ($iConfig->getClient()) {
+        switch ($iConfig->getClient())
+        {
             case self::TYPE_MYSQL:
                 $iClient = new Client\MySQL($iConfig);
+
                 // $iClient->initializeDriver();
                 return $iClient;
             default:
-                throw new \Exception('Unknown client type: ' . $iConfig->getClient());
+                throw new \Exception('Unknown client type: '.$iConfig->getClient());
         }
     }
 
