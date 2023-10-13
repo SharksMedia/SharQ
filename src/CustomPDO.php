@@ -6,12 +6,55 @@ namespace Sharksmedia\SharQ;
 
 // 2023-06-14
 
-class CustomPDO extends \PDO
+class CustomPDO
 {
+    protected \PDO $pdo;
+
     /**
      * @var bool
      */
     private bool $isTransacting = false;
+
+    /**
+     * @param string $dsn
+     * @param string|null $username
+     * @param string|null $password
+     * @param array $options
+     * @return void
+     */
+    public function __construct(string $dsn, string $username = null, string $password = null, array $options = [])
+    {
+        $this->pdo = new \PDO($dsn, $username, $password, $options);
+    }
+
+    /**
+     * @param string $name
+     * @param array $args
+     * @return mixed
+     */
+    public function __call(string $name, array $args)
+    {
+        return $this->pdo->{$name}(...$args);
+    }
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function __get(string $name)
+    {
+        return $this->pdo->{$name};
+    }
+
+    /**
+     * @param string $name
+     * @param mixed $value
+     * @return void
+     */
+    public function __set(string $name, mixed $value)
+    {
+        $this->pdo->{$name} = $value;
+    }
 
     /**
      * 2023-06-14
@@ -30,7 +73,7 @@ class CustomPDO extends \PDO
      */
     public function beginTransaction(): bool
     {
-        $this->isTransacting = parent::beginTransaction();
+        $this->isTransacting = $this->pdo->beginTransaction();
 
         return $this->isTransacting;
     }
@@ -44,7 +87,7 @@ class CustomPDO extends \PDO
     {
         $this->isTransacting = false;
 
-        return parent::commit();
+        return $this->pdo->commit();
     }
     
     /**
@@ -56,8 +99,6 @@ class CustomPDO extends \PDO
     {
         $this->isTransacting = false;
 
-        return parent::rollBack();
+        return $this->pdo->rollBack();
     }
 }
-
-
