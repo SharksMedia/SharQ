@@ -15,16 +15,13 @@ class CustomPDO
      */
     private bool $isTransacting = false;
 
-    /**
-     * @param string $dsn
-     * @param string|null $username
-     * @param string|null $password
-     * @param array $options
-     * @return void
-     */
-    public function __construct(string $dsn, string $username = null, string $password = null, array $options = [])
+    public static function createFromPDO(\PDO $pdo): self
     {
-        $this->pdo = new \PDO($dsn, $username, $password, $options);
+        $iCustomPDO = new self('');
+
+        $iCustomPDO->pdo = $pdo;
+
+        return $iCustomPDO;
     }
 
     /**

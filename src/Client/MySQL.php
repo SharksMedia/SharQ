@@ -69,11 +69,13 @@ class MySQL extends Client
             $this->setPDOAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
         }
 
-        $pdo = new CustomPDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword(), $this->pdoOptions);
+        $pdo = new \PDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword(), $this->pdoOptions);
+
+        $customPDO = CustomPDO::createFromPDO($pdo);
         
-        $pdo->exec('SET sql_auto_is_null = 0');        //to fix horrible bugs: https://www.xaprb.com/blog/2007/05/31/why-is-null-doesnt-always-work-in-mysql/ & http://dev.mysql.com/doc/refman/5.6/en/server-system-variables.html#sysvar_sql_auto_is_null
+        $customPDO->exec('SET sql_auto_is_null = 0');        //to fix horrible bugs: https://www.xaprb.com/blog/2007/05/31/why-is-null-doesnt-always-work-in-mysql/ & http://dev.mysql.com/doc/refman/5.6/en/server-system-variables.html#sysvar_sql_auto_is_null
         
-        $this->driver = $pdo;
+        $this->driver = $customPDO;
 
         $this->isInitialized = true;
     }
@@ -253,4 +255,3 @@ class MySQL extends Client
         return $this->driver->lastInsertId();
     }
 }
-
