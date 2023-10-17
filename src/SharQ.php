@@ -2849,7 +2849,12 @@ class SharQ
 
         $statement = $this->iClient->query($iQuery);
 
-        if (in_array($this->getMethod(), [self::METHOD_INSERT, self::METHOD_UPDATE, self::METHOD_DELETE]))
+        if (in_array($this->getMethod(), [self::METHOD_INSERT]))
+        {
+            return $this->iClient->getLastInsertId();
+        }
+
+        if (in_array($this->getMethod(), [self::METHOD_UPDATE, self::METHOD_DELETE]))
         {
             return $statement->rowCount();
         }
