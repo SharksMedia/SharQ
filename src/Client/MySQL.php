@@ -183,9 +183,9 @@ class MySQL extends Client
      * @param array<int,mixed> $arguments
      * @return mixed
      */
-    public function __call(string $name, array $arguments)
+    public function __call(string $name, array $arguments = [])
     {// 2023-06-12
-        return call_user_func_array([$this->driver, $name], ...$arguments);
+        return call_user_func_array([$this->driver, $name], $arguments);
     }
 
     /**

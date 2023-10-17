@@ -29,7 +29,7 @@ class CustomPDO
      * @param array $args
      * @return mixed
      */
-    public function __call(string $name, array $args)
+    public function __call(string $name, array $args = [])
     {
         return $this->pdo->{$name}(...$args);
     }
