@@ -4,113 +4,145 @@
 namespace Tests\Unit;
 
 // use Tests\Support\;
+
+use PHPUnit\Framework\ExpectationFailedException;
 use Sharksmedia\SharQ\SharQ;
-use Sharksmedia\SharQ\Client\MySQL;
-use Sharksmedia\SharQ\Config;
 
 use Sharksmedia\SharQ\SharQCompiler;
-use Sharksmedia\SharQ\Statement\Raw;
 
 class DeletesTest extends \Codeception\Test\Unit
 {
-    public static function getClient()
-    {// 2023-05-16
-        $iConfig = new Config('mysql');
-        $iClient = new MySQL($iConfig);
+    use \Tests\Support\TQueryBuilderUnitTest;
 
-        return $iClient;
-    }
+    /**
+     * @var \UnitTester
+     */
+    protected $tester;
 
-    public static function raw(string $query, ...$bindings)
+    public function testSimpleDelete(): void
     {
-        $iClient = self::getClient();
+        $qb = self::qb()
+            ->delete()
+            ->from('users')
+            ->where('email', '=', 'foo');
 
-        $iRaw = new Raw($query, ...$bindings);
+        $sqlDialiects =
+        [
+            'mysql' =>
+            [
+                'sql'      => 'DELETE `users` FROM `users` WHERE `email` = ?',
+                'bindings' => ['foo']
+            ]
+        ];
 
-        return $iRaw;
+        $this->_testSharQ($qb, $sqlDialiects);
     }
 
-    private static function qb(): SharQ
-    {// 2023-05-16
-        $iClient = self::getClient();
+    public function testSimpleTruncate(): void
+    {
+        $qb = self::qb()
+            ->table('users')
+            ->truncate();
 
-        return new SharQ($iClient, 'my_schema');
+        $sqlDialiects =
+        [
+            'mysql' =>
+            [
+                'sql'      => 'TRUNCATE `users`',
+                'bindings' => []
+            ]
+        ];
+
+        $this->_testSharQ($qb, $sqlDialiects);
     }
 
-    public function caseProvider()
-    {// 2023-05-16
-        $cases = [];
+    public function testDeleteWithJoin(): void
+    {
+        $qb = self::qb()
+            ->delete()
+            ->from('users')
+            ->join('contacts', 'users.id', '=', 'contacts.id')
+            ->where('email', '=', 'foo');
 
-        $cases['delete method'] = function()
-        {
-            $case =
+        $sqlDialiects =
+        [
+            'mysql' =>
             [
-                self::qb()
-                    ->from('users')
-                    ->where('email', '=', 'foo')
-                    ->delete(),
-                [
-                    'mysql' =>
-                    [
-                        'sql'      => 'DELETE FROM `users` WHERE `email` = ?',
-                        'bindings' => ['foo']
-                    ]
-                ]
-            ];
+                'sql'      => 'DELETE `users` FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id`) WHERE `email` = ?',
+                'bindings' => ['foo']
+            ]
+        ];
 
-            return $case;
-        };
+        $this->_testSharQ($qb, $sqlDialiects);
+    }
 
-        // $cases['delete only method'] = function()
-        // {
-        //     $case =
-        //     [
-        //         self::qb()
-        //             ->select('*')
-        //             ->from('my_table'),
-        //         [
-        //             'mysql'=>
-        //             [
-        //                 'sql'=>'SELECT * FROM `my_schema`.`my_table`',
-        //                 'bindings'=>[]
-        //             ]
-        //         ]
-        //     ];
-        //
-        //     return $case;
-        // };
+    public function testDeleteMultipleWithJoinFail(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('When deleting from multiple tables, a table must be provided');
 
-        $cases['truncate method'] = function()
-        {
-            $case =
+        $qb = self::qb()
+            ->delete(['users', 'contacts'])
+            ->join('contacts', 'users.id', '=', 'contacts.id')
+            ->where('email', '=', 'foo');
+
+        $sqlDialiects =
+        [
+            'mysql' =>
             [
-                self::qb()
-                    ->table('users')
-                    ->truncate(),
-                [
-                    'mysql' =>
-                    [
-                        'sql'      => 'TRUNCATE `users`',
-                        'bindings' => []
-                    ]
-                ]
-            ];
+                'sql'      => 'DELETE `users`, `contacts` FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id`) WHERE `email` = ?',
+                'bindings' => ['foo']
+            ]
+        ];
 
-            return $case;
-        };
+        $this->_testSharQ($qb, $sqlDialiects);
+    }
 
-        foreach ($cases as $name => $caseFn)
-        {
-            $cases[$name] = $caseFn();
-        }
+    public function testDeleteMultipleWithJoin(): void
+    {
+        $qb = self::qb()
+            ->delete(['users', 'contacts'])
+            ->from('users')
+            ->join('contacts', 'users.id', '=', 'contacts.id')
+            ->where('email', '=', 'foo');
 
-        return $cases;
+        $sqlDialiects =
+        [
+            'mysql' =>
+            [
+                'sql'      => 'DELETE `users`, `contacts` FROM `users` INNER JOIN `contacts` ON(`users`.`id` = `contacts`.`id`) WHERE `email` = ?',
+                'bindings' => ['foo']
+            ]
+        ];
+
+        $this->_testSharQ($qb, $sqlDialiects);
+    }
+
+    public function testDeleteAll(): void
+    {
+        $qb = self::qb()
+            ->delete()
+            ->from('users');
+
+        $sqlDialiects =
+        [
+            'mysql' =>
+            [
+                'sql'      => 'DELETE `users` FROM `users`',
+                'bindings' => []
+            ]
+        ];
+
+        $this->_testSharQ($qb, $sqlDialiects);
     }
 
     /**
-     * @dataProvider caseProvider
+     * @param SharQ $iSharQ
+     * @param array $iExpected
+     * @return void
+     * @throws ExpectationFailedException
      */
-    public function testSharQ(SharQ $iSharQ, array $iExpected): void
+    public function _testSharQ(SharQ $iSharQ, array $iExpected): void
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 

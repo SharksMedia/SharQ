@@ -25,6 +25,12 @@ class Single
     public ?array $table = null;
 
     /**
+     * This is the delete property.
+     * @var array<int|string, string|Raw|SharQ|\Closure>|null
+     */
+    public ?array $delete = null;
+
+    /**
      * This is the columnMethod property.
      * @see Columns::TYPE_*
      * @var string|null

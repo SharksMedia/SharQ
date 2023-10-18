@@ -1732,9 +1732,18 @@ class SharQCompiler
      */
     public function delete(): string
     {// 2023-06-06
-        $tableName = $this->tables();
+        if ($this->iSingle->delete !== null)
+        {
+            if (count($this->iSingle->delete) > 1 && $this->iSingle->table === null)
+            {
+                throw new \InvalidArgumentException('When deleting from multiple tables, a table must be provided');
+            }
+        }
 
-        return "DELETE FROM {$tableName}";
+        $fromName     = $this->tables();
+        $deleteTables = $this->tables($this->iSingle->delete ?? null);
+
+        return "DELETE {$deleteTables} FROM {$fromName}";
     }
 
     /**

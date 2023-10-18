@@ -1338,7 +1338,7 @@ class WheresTest extends \Codeception\Test\Unit
             [
                 'mysql' =>
                 [
-                    'sql'      => 'DELETE FROM `word` WHERE `page_id` IN(SELECT `id` FROM `page` WHERE `chapter_id` IN(SELECT `id` FROM `chapter` WHERE `book` = ?))',
+                    'sql'      => 'DELETE `word` FROM `word` WHERE `page_id` IN(SELECT `id` FROM `page` WHERE `chapter_id` IN(SELECT `id` FROM `chapter` WHERE `book` = ?))',
                     'bindings' => [1]
                 ]
             ]
@@ -1360,7 +1360,7 @@ class WheresTest extends \Codeception\Test\Unit
             [
                 'mysql' =>
                 [
-                    'sql'      => 'DELETE FROM `page` WHERE `chapter_id` IN(SELECT `id` FROM `chapter` WHERE `book` = ?)',
+                    'sql'      => 'DELETE `page` FROM `page` WHERE `chapter_id` IN(SELECT `id` FROM `chapter` WHERE `book` = ?)',
                     'bindings' => [1]
                 ]
             ]
@@ -1382,7 +1382,7 @@ class WheresTest extends \Codeception\Test\Unit
             [
                 'mysql' =>
                 [
-                    'sql'      => 'DELETE FROM `chapter` WHERE `book` = ?',
+                    'sql'      => 'DELETE `chapter` FROM `chapter` WHERE `book` = ?',
                     'bindings' => [1]
                 ]
             ]

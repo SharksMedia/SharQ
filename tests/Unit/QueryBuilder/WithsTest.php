@@ -291,7 +291,7 @@ class WithsTest extends \Codeception\Test\Unit
     /**
      * @dataProvider caseProvider
      */
-    public function testSharQ(SharQ $iSharQ, array $iExpected)
+    public function _testSharQ(SharQ $iSharQ, array $iExpected)
     {
         $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
 

@@ -444,36 +444,48 @@ class SharQ
 
         return $this->withWrapped($alias, $statementOrColumnList, $nothingOrStatement);
     }
-
+    /**
+     * @param mixed $args
+     */
     public function withRecursive(string $alias, ...$args): SharQ
     {// 2023-07-31
         return $this->withRecursiveWrapped($alias, ...$args);
     }
-
+    /**
+     * @param mixed $args
+     */
     public function withRecursiveWrapped(string $alias, ...$args): SharQ
     {// 2023-07-31
         $this->validateWithArgs($alias, ...$args);
 
         return $this->_withWrapped(With::TYPE_RECURSIVE_WRAPPED, $alias, ...$args);
     }
-
+    /**
+     * @param mixed $args
+     */
     public function withMaterialized(string $alias, ...$args): SharQ
     {// 2023-07-31
         return $this->withMaterializedWrapped($alias, ...$args);
     }
-
+    /**
+     * @param mixed $args
+     */
     public function withMaterializedWrapped(string $alias, ...$args): SharQ
     {
         $this->validateWithArgs($alias, ...$args);
 
         return $this->_withWrapped(With::TYPE_MATERIALIZED_WRAPPED, $alias, ...$args);
     }
-
+    /**
+     * @param mixed $args
+     */
     public function withNotMaterialized(string $alias, ...$args): SharQ
     {// 2023-07-31
         return $this->withNotMaterializedWrapped($alias, ...$args);
     }
-
+    /**
+     * @param mixed $args
+     */
     public function withNotMaterializedWrapped(string $alias, ...$args): SharQ
     {
         $this->validateWithArgs($alias, ...$args);
@@ -778,7 +790,11 @@ class SharQ
 
         return $this->limit(1);
     }
-
+    /**
+     * @param mixed $table
+     * @param mixed $first
+     * @param mixed $args
+     */
     private function _join(string $joinFlag, $table, $first = null, ...$args): SharQ
     {// 2023-08-18
         $iJoin = null;
@@ -941,7 +957,9 @@ class SharQ
 
         return $this;
     }
-
+    /**
+     * @param mixed $args
+     */
     public function _where(?string $whereFlag, ?string $boolType, ?bool $isNot, ...$args): SharQ
     {
         $boolType ??= $this->boolType;
@@ -1207,7 +1225,9 @@ class SharQ
 
         return $this->_where(Where::TYPE_COLUMN, null, null, ...$args);
     }
-
+    /**
+     * @param mixed $args
+     */
     private function _andWhere(?bool $isNot, ...$args)
     {
         return $this->_where(Where::TYPE_BASIC, self::BOOL_TYPE_AND, $isNot, ...$args);
@@ -1225,7 +1245,9 @@ class SharQ
 
         return $this->_andWhere(null, ...$args);
     }
-
+    /**
+     * @param mixed $args
+     */
     private function _orWhere(?bool $isNot, ...$args)
     {
         return $this->_where(Where::TYPE_BASIC, self::BOOL_TYPE_OR, $isNot, ...$args);
@@ -1272,7 +1294,9 @@ class SharQ
 
         return $this->_where(Where::TYPE_BASIC, self::BOOL_TYPE_OR, true, ...$args);
     }
-
+    /**
+     * @param mixed $bindings
+     */
     private function _whereRaw(?string $boolType, ?bool $isNot, string $sql, ...$bindings): SharQ
     {
         $iRaw   = new Raw($sql, ...$bindings);
@@ -1291,7 +1315,9 @@ class SharQ
     {// 2023-05-09
         return $this->_whereRaw(null, null, $sql, ...$bindings);
     }
-
+    /**
+     * @param Closure(): void $callback
+     */
     public function _whereWrapped(?string $boolType, ?bool $isNot, \Closure $callback): SharQ
     {
         $iSharQ = new SharQ($this->iClient, $this->schema);
@@ -1373,7 +1399,10 @@ class SharQ
 
         return $this->_whereExists($callback);
     }
-
+    /**
+     * @param mixed $column
+     * @param mixed $values
+     */
     private function _whereIn($column, $values, ?string $boolType, ?bool $isNot)
     {
         // if(is_array($values) && count($values) === 0)
@@ -1969,10 +1998,18 @@ class SharQ
     /**
      * Sets method to DELETE
      * @return SharQ
+     * @param mixed $tables
      */
-    public function delete(): SharQ
+    public function delete(...$tables): SharQ
     {// 2023-06-02
         $this->method = self::METHOD_DELETE;
+
+        $tables = $this->_normalizeColumns($tables);
+
+        if (count($tables) !== 0)
+        {
+            $this->iSingle->delete = $tables;
+        }
 
         return $this;
     }
@@ -2306,6 +2343,7 @@ class SharQ
     /**
      * @param string|Raw $column
      * @return SharQ
+     * @param array<int,mixed> $values
      */
     public function havingBetween($column, array $values): SharQ
     {// 2023-06-05
@@ -2318,6 +2356,7 @@ class SharQ
     /**
      * @param string|Raw $column
      * @return SharQ
+     * @param array<int,mixed> $values
      */
     public function orHavingBetween($column, array $values): SharQ
     {// 2023-06-05
@@ -2799,7 +2838,9 @@ class SharQ
 
         return $this;
     }
-
+    /**
+     * @param mixed $bindings
+     */
     public function raw(string $raw, ...$bindings): SharQ
     {// 2023-06-07
         $this->method = self::METHOD_RAW;
@@ -2839,13 +2880,6 @@ class SharQ
     public function run()
     {// 2023-06-12
         $iQuery = $this->toQuery();
-
-        $iTransaction = $this->iSingle->transaction;
-
-        if ($iTransaction)
-        {
-            $iTransaction->start($this->iClient);
-        }
 
         $statement = $this->iClient->query($iQuery);
 
