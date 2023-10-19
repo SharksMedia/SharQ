@@ -677,14 +677,14 @@ class SharQ
      */
     public function distinct(string ...$columns): SharQ
     {// 2023-05-08
-        $columns = $this->_normalizeColumns($columns);
+        $normalizedColumns = $this->_normalizeColumns([]);
 
-        $iColumns = new Columns(null, $columns);
+        $iColumns = new Columns(null, $normalizedColumns);
         $iColumns->distinct(true);
 
         $this->iStatements[] = $iColumns;
 
-        return $this;
+        return $this->_column($columns, COLUMNS::TYPE_PLUCK);
     }
 
     /**

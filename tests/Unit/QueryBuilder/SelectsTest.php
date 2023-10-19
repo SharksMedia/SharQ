@@ -124,6 +124,25 @@ class SelectsTest extends \Codeception\Test\Unit
         $this->_testSharQ(...$case);
     }
 
+    public function testBasicSelectDistinct2()
+    {
+        $case =
+        [
+            self::qb()
+                ->distinct('foo', 'bar')
+                ->from('users'),
+            [
+                'mysql' =>
+                [
+                    'sql'      => 'SELECT DISTINCT `foo`, `bar` FROM `users`',
+                    'bindings' => []
+                ]
+            ]
+        ];
+
+        $this->_testSharQ(...$case);
+    }
+
     public function testBasicSelectWithAliasAsPropertyValuePairs()
     {
         $case =
