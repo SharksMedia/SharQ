@@ -2,7 +2,6 @@
     "name": "sharksmedia/sharq",
     "description": "A query builder for PHP, heavely inspired by KnexJS.",
     "type": "library",
-    "version": "1.0.0",
     "license": "MIT",
     "minimum-stability": "dev",
     "prefer-stable" : true,
