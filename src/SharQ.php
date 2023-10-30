@@ -2933,9 +2933,7 @@ class SharQ
         }
         else if ($this->fetchMethod === self::FETCH_METHOD_GENERATOR)
         {
-            $generator = new SharQResultGenerator($statement, $this->fetchMode);
-
-            $statement->closeCursor();
+            $generator = new SharQResultGenerator($statement, $this->fetchMode, false);
 
             return $generator;
         }
