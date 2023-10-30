@@ -2939,6 +2939,8 @@ class SharQ
                 {
                     yield $row;
                 }
+
+                $statement->closeCursor();
             };
         }
     }
