@@ -2933,15 +2933,12 @@ class SharQ
         }
         else if ($this->fetchMethod === self::FETCH_METHOD_GENERATOR)
         {
-            return function() use ($statement)
+            while ($row = $statement->fetch($this->fetchMode))
             {
-                while ($row = $statement->fetch($this->fetchMode))
-                {
-                    yield $row;
-                }
+                yield $row;
+            }
 
-                $statement->closeCursor();
-            };
+            $statement->closeCursor();
         }
     }
 
