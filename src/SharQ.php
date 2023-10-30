@@ -76,6 +76,9 @@ class SharQ
      */
     public const FETCH_MODE_COLUMN = \PDO::FETCH_COLUMN;
 
+    public const FETCH_METHOD_ALL       = 'FETCH_METHOD_ALL';
+    public const FETCH_METHOD_GENERATOR = 'FETCH_METHOD_GENERATOR';
+
     public const CLEARABLE_STATEMENTS =
     [
         'with',
@@ -113,6 +116,8 @@ class SharQ
      * @var int
      */
     protected int $fetchMode = self::FETCH_MODE_ASSOCIATIVE;
+
+    protected string $fetchMethod = self::FETCH_METHOD_ALL;
 
     /**
      * This is the method attribute.
@@ -2873,6 +2878,24 @@ class SharQ
         return $this;
     }
 
+    public function fetchMethod(string $fetchMethod): SharQ
+    {// 2023-08-03
+        static $validFetchMethods =
+        [
+            self::FETCH_METHOD_ALL,
+            self::FETCH_METHOD_GENERATOR,
+        ];
+
+        if (!in_array($fetchMethod, $validFetchMethods))
+        {
+            Throw new \LogicException('invalid fetch method provided.');
+        }
+
+        $this->fetchMethod = $fetchMethod;
+
+        return $this;
+    }
+
     /**
      * @return array<int, mixed>|mixed
      * @throws \PDOException
@@ -2893,18 +2916,31 @@ class SharQ
             return $statement->rowCount();
         }
 
-        $result = ($this->getMethod() === self::METHOD_FIRST)
-            ? $statement->fetch($this->fetchMode)
-            : $statement->fetchAll($this->fetchMode);
-
-        $statement->closeCursor();
-
-        if ($result === false)
+        if ($this->fetchMethod === self::FETCH_METHOD_ALL)
         {
-            return null;
-        }
+            $result = ($this->getMethod() === self::METHOD_FIRST)
+                ? $statement->fetch($this->fetchMode)
+                : $statement->fetchAll($this->fetchMode);
 
-        return $result;
+            $statement->closeCursor();
+
+            if ($result === false)
+            {
+                return null;
+            }
+
+            return $result;
+        }
+        else if ($this->fetchMethod === self::FETCH_METHOD_ALL)
+        {
+            return function() use ($statement)
+            {
+                while ($row = $statement->fetch($this->fetchMode))
+                {
+                    yield $row;
+                }
+            };
+        }
     }
 
     public function toQuery(): Query
