@@ -10,13 +10,11 @@ class SharQResultGenerator implements \Iterator, \Countable
     protected $rowType;
     protected $currentKey = null;
     protected $currentValue;
-    protected $queryBuffering;
     
-    public function __construct(\PDOStatement $statement, int $rowType, bool $queryBuffering)
+    public function __construct(\PDOStatement $statement, int $rowType)
     {	//2018-06-07
         $this->statement      = $statement;
         $this->rowType        = $rowType;
-        $this->queryBuffering = $queryBuffering;
     }
     
     protected function fetchNextRow(): void
@@ -68,11 +66,6 @@ class SharQResultGenerator implements \Iterator, \Countable
     //Countable
     public function count(): int
     {	//2018-06-07
-        if (!$this->queryBuffering)
-        {
-            return -1;
-        }
-        
         return $this->statement->rowCount();
     }
 }
