@@ -2,17 +2,21 @@
 
 declare(strict_types=1);
 
-class SharQResultGenerator implements Iterator, Countable
+namespace Sharksmedia\SharQ;
+
+class SharQResultGenerator implements \Iterator, \Countable
 {
     private $stmt;
+    private $fetchMode;
     private $count;
     private $currentRow;
     private $currentIndex = 0;
 
-    public function __construct(PDOStatement $stmt)
+    public function __construct(\PDOStatement $stmt, int $fetchMode)
     {
-        $this->stmt  = $stmt;
-        $this->count = $this->stmt->rowCount();
+        $this->stmt      = $stmt;
+        $this->fetchMode = $fetchMode;
+        $this->count     = $this->stmt->rowCount();
     }
 
     public function count(): int
@@ -33,12 +37,12 @@ class SharQResultGenerator implements Iterator, Countable
     public function next(): void
     {
         $this->currentIndex++;
-        $this->currentRow = $this->stmt->fetch(PDO::FETCH_ASSOC);
+        $this->currentRow = $this->stmt->fetch($this->fetchMode);
     }
 
     public function rewind(): void
     {
-        throw new BadMethodCallException("Cannot rewind a PDOStatement");
+        throw new \BadMethodCallException("Cannot rewind a PDOStatement");
     }
 
     public function valid(): bool

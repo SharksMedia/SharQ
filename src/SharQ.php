@@ -28,7 +28,6 @@ use Sharksmedia\SharQ\Statement\Group;
 use Sharksmedia\SharQ\Statement\Order;
 use Sharksmedia\SharQ\Statement\Union;
 use Sharksmedia\SharQ\Statement\Raw;
-use SharQResultGenerator;
 
 class SharQ
 {
@@ -2934,7 +2933,7 @@ class SharQ
         }
         else if ($this->fetchMethod === self::FETCH_METHOD_GENERATOR)
         {
-            $generator = new SharQResultGenerator($statement);
+            $generator = new SharQResultGenerator($statement, $this->fetchMode);
 
             $statement->closeCursor();
 
