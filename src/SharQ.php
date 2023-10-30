@@ -2931,7 +2931,7 @@ class SharQ
 
             return $result;
         }
-        else if ($this->fetchMethod === self::FETCH_METHOD_ALL)
+        else if ($this->fetchMethod === self::FETCH_METHOD_GENERATOR)
         {
             return function() use ($statement)
             {
