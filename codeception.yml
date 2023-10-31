@@ -14,8 +14,7 @@ settings:
     shuffle: true
     lint: true
 paths:
-    tests: tests
-    output: tests/_output
-    support: tests/Support
-    data: tests/Support/Data
-     
+    tests: Tests
+    output: Tests/_output
+    support: Tests/Support
+    data: Tests/Support/Data

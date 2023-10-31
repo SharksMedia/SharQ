@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\Support;
+namespace Tests;
 
 use Sharksmedia\SharQ\Client\MySQL;
 use Sharksmedia\SharQ\Config;
 use Sharksmedia\SharQ\SharQ;
+use Sharksmedia\SharQ\SharQCompiler;
 use Sharksmedia\SharQ\Statement\Raw;
 
 trait TQueryBuilderUnitTest
@@ -38,5 +39,19 @@ trait TQueryBuilderUnitTest
         $iClient = self::getClient();
 
         return new SharQ($iClient, 'my_schema');
+    }
+
+    public function _testSharQ(SharQ $iSharQ, array $iExpected): void
+    {
+        $iSharQCompiler = new SharQCompiler(self::getClient(), $iSharQ, []);
+
+        $iQuery         = $iSharQCompiler->toQuery();
+        $sqlAndBindings =
+        [
+            'sql'      => $iQuery->getSQL(),
+            'bindings' => $iQuery->getBindings()
+        ];
+
+        $this->assertSame($iExpected['mysql'], $sqlAndBindings);
     }
 }

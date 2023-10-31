@@ -5,13 +5,12 @@ namespace Tests\Unit;
 
 // use Tests\Support\;
 use Sharksmedia\SharQ\SharQ;
-use Sharksmedia\SharQ\Client\MySQL;
 use Sharksmedia\SharQ\Config;
 use Sharksmedia\SharQ\Query;
 use Sharksmedia\SharQ\SharQCompiler;
 use Sharksmedia\SharQ\Statement\Raw;
-use Tests\Support\MockMySQLClient;
-use Tests\Support\MockPDOStatement;
+use Tests\MockMySQLClient;
+use Tests\MockPDOStatement;
 
 class SelectsTest extends \Codeception\Test\Unit
 {

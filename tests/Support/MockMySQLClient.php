@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Support;
+namespace Tests;
 
 use Sharksmedia\SharQ\Client\MySQL;
 use Sharksmedia\SharQ\Config;

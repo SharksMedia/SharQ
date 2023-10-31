@@ -12,7 +12,7 @@ use Sharksmedia\SharQ\SharQCompiler;
 
 class DeletesTest extends \Codeception\Test\Unit
 {
-    use \Tests\Support\TQueryBuilderUnitTest;
+    use \Tests\TQueryBuilderUnitTest;
 
     /**
      * @var \UnitTester
