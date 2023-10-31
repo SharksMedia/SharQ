@@ -69,6 +69,11 @@ class MySQL extends Client
             $this->setPDOAttribute(\PDO::ATTR_TIMEOUT, $iConfig->getTimeout());
         }
 
+        if (!isset($this->pdoOptions[\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY]))
+        {
+            $this->setPDOAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        }
+
         $pdo = new \PDO($this->createDSN(), $iConfig->getUser(), $iConfig->getPassword(), $this->pdoOptions);
 
         $customPDO = CustomPDO::createFromPDO($pdo);
