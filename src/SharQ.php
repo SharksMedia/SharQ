@@ -172,6 +172,14 @@ class SharQ
         $this->iSingle = new Single();
     }
 
+    public function __sleep()
+    {
+        $allProps = array_keys(get_object_vars($this));
+
+        // Exclude non serializeable properties
+        return array_diff($allProps, ['iClient']);
+    }
+
     /**
      * 2023-06-12
      * @return Client
@@ -179,6 +187,15 @@ class SharQ
     public function getClient(): Client
     {
         return $this->iClient;
+    }
+
+    /**
+     * @param Client $iClient
+     * @return void
+     */
+    public function setClient(Client $iClient): void
+    {
+        $this->iClient = $iClient;
     }
 
     /**

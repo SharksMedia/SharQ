@@ -340,4 +340,20 @@ class MiscTest extends \Codeception\Test\Unit
 
         $this->_testSharQ(...$case);
     }
+
+    public function testSerialize()
+    {
+        $query = self::qb()
+            ->select('*')
+            ->from('users')
+            ->as('t');
+
+        $serialized = serialize($query);
+
+        $unserializedQuery = unserialize($serialized);
+
+        $unserializedQuery->setClient($query->getClient());
+
+        $this->assertEquals($query, $unserializedQuery);
+    }
 }
