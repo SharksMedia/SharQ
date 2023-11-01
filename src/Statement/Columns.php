@@ -21,6 +21,8 @@ use Sharksmedia\SharQ\Statement\IAliasable;
  */
 class Columns implements IStatement, IAliasable
 {
+    use TStatement;
+
     public const TYPE_PLUCK         = 'COLUMNS_PLUCK';
     public const TYPE_FIRST         = 'COLUMNS_FIRST';
     public const TYPE_RAW           = 'COLUMNS_RAW';

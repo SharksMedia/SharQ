@@ -24,6 +24,8 @@ use Sharksmedia\SharQ\Statement\IAliasable;
  */
 class Where implements IStatement, IAliasable
 {
+    use TStatement;
+
     public const TYPE_BASIC         = 'WHERE_BASIC';
     public const TYPE_COLUMN        = 'WHERE_COLUMN';
     public const TYPE_LIKE          = 'WHERE_LIKE';

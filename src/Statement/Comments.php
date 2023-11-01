@@ -13,6 +13,8 @@ use Sharksmedia\SharQ\Statement\IStatement;
 
 class Comments implements IStatement
 {
+    use TStatement;
+
     public const TYPE_BASIC = 'BASIC';
 
     /**

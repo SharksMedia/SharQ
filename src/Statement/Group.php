@@ -13,6 +13,8 @@ use Sharksmedia\SharQ\Statement\IStatement;
 
 class Group implements IStatement
 {
+    use TStatement;
+
     public const TYPE_BASIC = 'GROUP_BY_BASIC';
     public const TYPE_RAW   = 'GROUP_BY_RAW';
 

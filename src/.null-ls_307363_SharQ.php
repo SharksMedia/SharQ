@@ -396,16 +396,6 @@ class SharQ
         return $this;
     }
 
-    public function clearWithIdentifier(string $identifier): self
-    {// 2023-06-07
-        $this->iStatements = array_filter($this->iStatements, function($statement) use ($identifier)
-        {
-            return $statement->getIdentifier() !== $identifier;
-        });
-
-        return $this;
-    }
-
     /**
      * 2023-05-08
      * Get single options
@@ -632,33 +622,11 @@ class SharQ
         return $this;
     }
 
-    public function identify(string $identifier): SharQ
+    public function identifier(string $identifier): SharQ
     {
-        $iLastStatement = end($this->iStatements);
-
-        $iLastStatement->identify($identifier);
+        $this->identifiers[$identifier] = end($this->iStatements);
 
         return $this;
-    }
-
-    public function hasIdentifier(string $identifier): bool
-    {
-        $hasIdentifier = array_reduce($this->iStatements, function($carry, $statement) use ($identifier)
-        {
-            return $carry || $statement->getIdentifier() === $identifier && $identifier !== null;
-        }, false);
-
-        return $hasIdentifier;
-    }
-
-    public function getStatement(string $identifier): ?IStatement
-    {
-        $iStatement = array_reduce($this->iStatements, function($carry, $statement) use ($identifier)
-        {
-            return $carry ?? ($statement->getIdentifier() === $identifier ? $statement : null);
-        }, null);
-
-        return $iStatement;
     }
 
     /**

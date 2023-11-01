@@ -13,6 +13,8 @@ use Sharksmedia\SharQ\Statement\IStatement;
 
 class Order implements IStatement
 {
+    use TStatement;
+
     public const TYPE_BASIC = 'ORDER_BY_BASIC';
     public const TYPE_RAW   = 'ORDER_BY_RAW';
 

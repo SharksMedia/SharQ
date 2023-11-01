@@ -13,6 +13,8 @@ use Sharksmedia\SharQ\Statement\IStatement;
 
 class HintComments implements IStatement
 {
+    use TStatement;
+
     public const TYPE_RAW = 'HINT_COMMENT_RAW';
 
     /**

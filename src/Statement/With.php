@@ -13,6 +13,8 @@ use Sharksmedia\SharQ\Statement\IStatement;
 
 class With implements IStatement, IAliasable
 {
+    use TStatement;
+
     public const TYPE_WRAPPED                  = 'WITH_WRAPPED';
     public const TYPE_RECURSIVE_WRAPPED        = 'WITH_RECURSIVE_WRAPPED';
     public const TYPE_MATERIALIZED_WRAPPED     = 'WITH_MATERIALIZED_WRAPPED';

@@ -18,6 +18,8 @@ use Sharksmedia\SharQ\Statement\IStatement;
  */
 class Raw implements IStatement
 {
+    use TStatement;
+
     public const TYPE_RAW = 'RAW_RAW';
 
     private string $type;

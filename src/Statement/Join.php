@@ -13,6 +13,8 @@ use Sharksmedia\SharQ\Statement\Clause;
 
 class Join implements IStatement, IAliasable
 {
+    use TStatement;
+
     public const TYPE_RAW               = 'JOIN_RAW';
     public const TYPE_INNER             = 'JOIN_INNER';
     public const TYPE_OUTER             = 'JOIN_OUTER';

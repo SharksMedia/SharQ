@@ -13,6 +13,8 @@ use Sharksmedia\SharQ\Statement\IStatement;
 
 class Union implements IStatement
 {
+    use TStatement;
+
     public const TYPE_BASIC             = 'UNION_BASIC';
     public const TYPE_INTERSECT         = 'UNION_INTERSECT';
     public const TYPE_ALL               = 'UNION_ALL';

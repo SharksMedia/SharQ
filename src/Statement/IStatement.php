@@ -60,5 +60,12 @@ interface IStatement
      * @return string
      */
     public function getType(): string;
+
+    /**
+     * @param string $class 
+     * @return void 
+     */
+    public function identify(string $class): void;
+    public function getIdentifier(): ?string;
 }
 

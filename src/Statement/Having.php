@@ -14,6 +14,8 @@ use Sharksmedia\SharQ\Statement\IStatement;
 
 class Having implements IStatement
 {
+    use TStatement;
+
     public const TYPE_BASIC   = 'HAVING_BASIC';
     public const TYPE_WRAPPED = 'HAVING_WRAPPED';
     public const TYPE_NULL    = 'HAVING_NULL';

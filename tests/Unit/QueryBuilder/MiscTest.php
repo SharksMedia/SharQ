@@ -356,4 +356,55 @@ class MiscTest extends \Codeception\Test\Unit
 
         $this->assertEquals($query, $unserializedQuery);
     }
+
+    public function testIdentifier()
+    {
+        $query = self::qb()
+            ->select('*')
+            ->from('users')
+            ->leftJoin('a', 'a.id', '=', 'p.userID')->identify('a')
+            ->join('p', 'users.userID', '=', 'p.userID');
+
+        $this->assertTrue($query->hasIdentifier('a'));
+        $this->assertFalse($query->hasIdentifier('b'));
+
+        $case =
+        [
+            $query,
+            [
+                'mysql' =>
+                [
+                    'sql'      => 'SELECT * FROM `users` LEFT JOIN `a` ON(`a`.`id` = `p`.`userID`) INNER JOIN `p` ON(`users`.`userID` = `p`.`userID`)',
+                    'bindings' => []
+                ]
+            ]
+        ];
+
+        $this->_testSharQ(...$case);
+    }
+
+    public function testClearingWithIdentifier()
+    {
+        $query = self::qb()
+            ->select('*')
+            ->from('users')
+            ->leftJoin('a', 'a.id', '=', 'p.userID')->identify('a')
+            ->join('p', 'users.userID', '=', 'p.userID');
+
+        $query->clearWithIdentifier('a');
+
+        $case =
+        [
+            $query,
+            [
+                'mysql' =>
+                [
+                    'sql'      => 'SELECT * FROM `users` INNER JOIN `p` ON(`users`.`userID` = `p`.`userID`)',
+                    'bindings' => []
+                ]
+            ]
+        ];
+
+        $this->_testSharQ(...$case);
+    }
 }
