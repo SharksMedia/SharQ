@@ -2983,10 +2983,7 @@ class SharQ
 
             $statement->closeCursor();
 
-            if ($result === false)
-            {
-                return null;
-            }
+            if ($result === false) return null;
 
             return $result;
         }

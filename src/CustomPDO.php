@@ -6,6 +6,10 @@ namespace Sharksmedia\SharQ;
 
 // 2023-06-14
 
+/** 
+ * PDO Decorator
+ *  @package Sharksmedia\SharQ
+ */
 class CustomPDO
 {
     protected \PDO $pdo;
@@ -62,7 +66,7 @@ class CustomPDO
     {
         return $this->isTransacting;
     }
-    
+
     /**
      * 2023-06-14
      * Initiates a transaction
@@ -74,7 +78,7 @@ class CustomPDO
 
         return $this->isTransacting;
     }
-    
+
     /**
      * 2023-06-14
      * Commits a transaction
@@ -86,7 +90,7 @@ class CustomPDO
 
         return $this->pdo->commit();
     }
-    
+
     /**
      * 2023-06-14
      * Rolls back a transaction
