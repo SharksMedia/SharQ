@@ -29,7 +29,7 @@
         "codeception/module-db": "^2.0"
     },
     "require": {
-        "php": "^7.4.33"
+        "php": ">=7.4.33"
     }
 
 }
